@@ -1,0 +1,2863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeptNotes Hub — 5-Year Department Archive & Operations</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Top Toast Notification -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+          DN
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="font-bold text-base sm:text-lg text-slate-900 tracking-tight">DeptNotes Hub</h1>
+            <span id="connectionBadge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+              Not connected
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 hidden sm:block">Zero-Jargon Department Archive • Years 1–5 • Notes, PYQs, Syllabus & Class Videos</p>
+        </div>
+      </div>
+
+      <!-- Main View Switcher Tabs -->
+      <nav class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 overflow-x-auto max-w-full">
+        <button id="tabBtnBrowse" type="button" onclick="window.switchTab && window.switchTab('viewBrowse')" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-white text-indigo-700 shadow-sm flex items-center gap-1.5" data-target="viewBrowse">
+          📚 Browse Archive
+        </button>
+        <button id="tabBtnUpload" type="button" onclick="window.switchTab && window.switchTab('viewUpload')" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5" data-target="viewUpload">
+          ⬆️ Share Notes
+        </button>
+        <button id="tabBtnFeed" type="button" onclick="window.switchTab && window.switchTab('viewFeed')" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5" data-target="viewFeed">
+          <span>🏆 Feed & Points</span>
+          <span id="feedCountBadge" class="px-1.5 py-0.2 bg-indigo-100 text-indigo-700 rounded-full text-[10px] font-semibold">4</span>
+        </button>
+        <button id="tabBtnEditor" type="button" onclick="window.switchTab && window.switchTab('viewEditor')" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5" data-target="viewEditor">
+          <span>🛡️ Editor</span>
+          <span id="pendingCountBadge" class="px-1.5 py-0.2 bg-rose-100 text-rose-700 rounded-full text-[10px] font-semibold">3</span>
+        </button>
+        <button id="tabBtnSetup" type="button" onclick="window.switchTab && window.switchTab('viewSetup')" class="hidden nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5" data-target="viewSetup">
+          ⚙️ 0-File Drive Setup & Code
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Workspace Container -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1">
+
+    <!-- ==================== VIEW 1: BROWSE ARCHIVE (STUDENT / JUNIOR / SENIOR) ==================== -->
+    <section id="viewBrowse" class="space-y-5">
+      <div id="notConnectedBanner" class="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl px-4 py-3 text-xs sm:text-sm">
+        <strong>Not connected to the department Drive yet.</strong> Ask your Editor for the join link. (Editor: open <strong>⚙️ 0-File Drive Setup &amp; Code</strong> to connect.)
+      </div>
+      <!-- Quick Student Profile / My Course Filter Bar -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">My View Filter</span>
+            <span class="text-xs text-slate-500">Pick your Semester & Course once — remembered on this device, or switch anytime to check Senior/Junior years.</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnSyncNow" type="button" class="hidden text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition">
+              🔄 Sync Live Drive
+            </button>
+            <button id="btnResetFilters" type="button" class="text-xs font-medium text-slate-600 hover:text-indigo-600 px-2.5 py-1 rounded-lg border border-slate-200 hover:border-indigo-200 transition">
+              Show All Years/Courses
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <!-- Year / Semester Selector -->
+          <div>
+            <label for="filterSem" class="block text-xs font-medium text-slate-600 mb-1">Year & Semester</label>
+            <select id="filterSem" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:bg-white focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Years (Sem 1–10)</option>
+              <option value="SEM1" selected>Year 1 — SEM 1</option>
+              <option value="SEM2">Year 1 — SEM 2</option>
+              <option value="SEM3">Year 2 — SEM 3</option>
+              <option value="SEM4">Year 2 — SEM 4</option>
+              <option value="SEM5">Year 3 — SEM 5</option>
+              <option value="SEM6">Year 3 — SEM 6</option>
+              <option value="SEM7">Year 4 — SEM 7</option>
+              <option value="SEM8">Year 4 — SEM 8</option>
+              <option value="SEM9">Year 5 — SEM 9</option>
+              <option value="SEM10">Year 5 — SEM 10</option>
+            </select>
+          </div>
+
+          <!-- Subject Selector -->
+          <div>
+            <label for="filterSubject" class="block text-xs font-medium text-slate-600 mb-1">Subject</label>
+            <select id="filterSubject" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:bg-white focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Subjects</option>
+              <option value="CS" selected>CS (Computer Science)</option>
+              <option value="ECO">ECO (Economics)</option>
+              <option value="MATHS">MATHS</option>
+              <option value="PHYSICS">PHYSICS</option>
+              <option value="STATI">STATI (Statistics)</option>
+              <option value="CHEM">CHEM</option>
+              <option value="BIO">BIO</option>
+              <option value="EVS">EVS</option>
+              <option value="ENG">ENG (Common — No Course Layer)</option>
+              <option value="FRENCH">FRENCH (Common — No Course Layer)</option>
+            </select>
+          </div>
+
+          <!-- Course Code Selector (Auto-dims for ENG / FRENCH) -->
+          <div id="courseFilterWrapper">
+            <label for="filterCourse" class="block text-xs font-medium text-slate-600 mb-1">Course Stream</label>
+            <select id="filterCourse" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:bg-white focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Courses (DSC / MDC)</option>
+              <option value="DSC-A">DSC-A (Eco Core)</option>
+              <option value="DSC-B" selected>DSC-B</option>
+              <option value="DSC-C">DSC-C</option>
+              <option value="MDC">MDC</option>
+            </select>
+          </div>
+
+          <!-- Content Type Selector -->
+          <div>
+            <label for="filterType" class="block text-xs font-medium text-slate-600 mb-1">Material Type</label>
+            <select id="filterType" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:bg-white focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Types (Notes, PYQs, Videos)</option>
+              <option value="NOTES">NOTES (PDFs & Daily Snaps)</option>
+              <option value="Q.PAPERS">Q.PAPERS (Previous Year Papers)</option>
+              <option value="SYLLABUS BREAKDOWN">SYLLABUS BREAKDOWN</option>
+              <option value="CLASS VIDEOS">CLASS VIDEOS (Module Lectures)</option>
+            </select>
+          </div>
+
+          <!-- Module / Catch-All Selector -->
+          <div>
+            <label for="filterModule" class="block text-xs font-medium text-slate-600 mb-1">Module / Folder</label>
+            <select id="filterModule" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:bg-white focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Modules</option>
+              <option value="MODULE 1">Module 1</option>
+              <option value="MODULE 2">Module 2</option>
+              <option value="MODULE 3">Module 3</option>
+              <option value="MODULE 4">Module 4</option>
+              <option value="MODULE">Module (Unsorted / Time-Based)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Dynamic Search Bar (Topics / Video Properties / Month / Contributor) -->
+        <div class="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div class="relative flex-1">
+            <input id="searchInput" type="text" placeholder="Search by Topic property (e.g. 'Pointers', 'Mid-Sem 2025', 'Recursion'), Month ('.SEP', '.AUG'), or Contributor ('Devaki')..." class="w-full rounded-xl border border-slate-300 pl-9 pr-4 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+            <span class="absolute left-3 top-2.5 text-slate-400 text-sm">🔍</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-medium text-slate-600 whitespace-nowrap">Month Filter:</label>
+            <select id="filterMonth" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Months</option>
+              <option value="AUG">.AUG</option>
+              <option value="SEP">.SEP</option>
+              <option value="OCT">.OCT</option>
+              <option value="NOV">.NOV</option>
+              <option value="DEC">.DEC</option>
+              <option value="JAN">.JAN</option>
+              <option value="FEB">.FEB</option>
+              <option value="MAR">.MAR</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Drive Breadcrumb Path & Top-5 Likes Rule Banner -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-indigo-950 text-white px-4 py-3 rounded-2xl shadow-sm">
+        <div class="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto">
+          <span class="text-indigo-300 font-medium">Drive Mirror Path:</span>
+          <code id="liveDrivePath" class="bg-indigo-900/80 text-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-700 text-xs">Year 1 / SEM 1 / CS / DSC-B</code>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-indigo-200">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Sorted by 👍 Likes • Max 5 per Module (Ties kept • 🆕 7-Day Shield protects new uploads)</span>
+        </div>
+      </div>
+
+      <!-- Results Count -->
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <p id="resultsSummaryText" class="text-sm font-medium text-slate-700">Showing files</p>
+      </div>
+
+      <!-- File Cards Grid -->
+      <div id="filesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- ==================== VIEW 2: UPLOAD / SHARE NOTES (STUDENT & SENIOR) ==================== -->
+    <section id="viewUpload" class="hidden max-w-2xl mx-auto">
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Share Notes, PYQs, Syllabus or Class Videos</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Files stay cleanly named <code class="bg-slate-100 px-1.5 py-0.5 rounded">Name.Month</code> in Drive, while your Topics power instant search.</p>
+          </div>
+          <span class="text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg whitespace-nowrap">
+            +1 to +2 Points
+          </span>
+        </div>
+
+        <form id="uploadForm" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="upName" class="block text-xs font-semibold text-slate-700 mb-1">Your Name (for <code class="text-indigo-600">Name.Month</code> & Points)</label>
+              <input id="upName" type="text" required placeholder="e.g. Devaki (saved as DEVAKI — blank becomes ANON)" class="uppercase w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+            </div>
+            <div>
+              <label for="upMonth" class="block text-xs font-semibold text-slate-700 mb-1">Month Taught / Exam Month</label>
+              <select id="upMonth" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="AUG">AUG (.AUG)</option>
+                <option value="SEP">SEP (.SEP)</option>
+                <option value="OCT" selected>OCT (.OCT)</option>
+                <option value="NOV">NOV (.NOV)</option>
+                <option value="DEC">DEC (.DEC)</option>
+                <option value="JAN">JAN (.JAN)</option>
+                <option value="FEB">FEB (.FEB)</option>
+                <option value="MAR">MAR (.MAR)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="upSem" class="block text-xs font-semibold text-slate-700 mb-1">Semester (Routes to Year 1–5)</label>
+              <select id="upSem" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="SEM1">SEM 1 (Year 1)</option>
+                <option value="SEM2">SEM 2 (Year 1)</option>
+                <option value="SEM3">SEM 3 (Year 2)</option>
+                <option value="SEM4">SEM 4 (Year 2)</option>
+                <option value="SEM5">SEM 5 (Year 3)</option>
+                <option value="SEM6">SEM 6 (Year 3)</option>
+                <option value="SEM7">SEM 7 (Year 4)</option>
+                <option value="SEM8">SEM 8 (Year 4)</option>
+                <option value="SEM9">SEM 9 (Year 5)</option>
+                <option value="SEM10">SEM 10 (Year 5)</option>
+              </select>
+            </div>
+            <div>
+              <label for="upSubject" class="block text-xs font-semibold text-slate-700 mb-1">Subject</label>
+              <select id="upSubject" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="CS">CS</option>
+                <option value="ECO">ECO</option>
+                <option value="MATHS">MATHS</option>
+                <option value="PHYSICS">PHYSICS</option>
+                <option value="STATI">STATI (Statistics)</option>
+                <option value="CHEM">CHEM</option>
+                <option value="BIO">BIO</option>
+                <option value="EVS">EVS</option>
+                <option value="ENG">ENG (No Course Layer)</option>
+                <option value="FRENCH">FRENCH (No Course Layer)</option>
+              </select>
+            </div>
+            <div id="upCourseWrapper">
+              <label for="upCourse" class="block text-xs font-semibold text-slate-700 mb-1">Course Code</label>
+              <select id="upCourse" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="DSC-B">DSC-B</option>
+                <option value="DSC-C">DSC-C</option>
+                <option value="MDC">MDC</option>
+                <option value="DSC-A">DSC-A (Eco)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="upType" class="block text-xs font-semibold text-slate-700 mb-1">Content Type</label>
+              <select id="upType" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="NOTES">NOTES (+1 pt)</option>
+                <option value="Q.PAPERS">Q.PAPERS (+2 pts)</option>
+                <option value="SYLLABUS BREAKDOWN">SYLLABUS BREAKDOWN (+1 pt)</option>
+                <option value="CLASS VIDEOS">CLASS VIDEOS (+2 pts)</option>
+              </select>
+            </div>
+            <div id="upModuleWrapper">
+              <label for="upModule" class="block text-xs font-semibold text-slate-700 mb-1">Module Number</label>
+              <select id="upModule" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="1">Module 1</option>
+                <option value="2">Module 2</option>
+                <option value="3">Module 3</option>
+                <option value="4">Module 4</option>
+                <option value="">Not Sure -> Use Unnumbered 'MODULE' Folder</option>
+              </select>
+            </div>
+            <div>
+              <label for="upScope" class="block text-xs font-semibold text-slate-700 mb-1">Upload Scope</label>
+              <select id="upScope" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="COMPLETE">Complete Module / Exam</option>
+                <option value="DAILY">Daily Class Note (Mergeable at Month-End)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Video-style Properties / Topics Input -->
+          <div>
+            <label for="upTopics" class="block text-xs font-semibold text-slate-700 mb-1">
+              Properties / Topics Covered <span class="text-slate-400 font-normal">(Searchable like video tags; written to Drive file description)</span>
+            </label>
+            <input id="upTopics" type="text" required placeholder="e.g. Linked Lists, Stack & Queue, or '2025 End-Sem PYQ with Solutions'" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+          </div>
+
+          <!-- File Dropzone + Live Auto-Name Preview -->
+          <div class="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center">
+            <input id="upFileInput" type="file" multiple accept=".pdf,image/*,video/*" class="hidden" />
+            <button id="btnTriggerFileSelect" type="button" class="px-4 py-2 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 hover:border-indigo-400 shadow-sm transition">
+              📎 Choose PDF, Class Photos, or Class Video
+            </button>
+            <p id="selectedFileLabel" class="text-xs text-slate-500 mt-2">No file chosen yet (When connected to Live Drive, your selected file uploads directly to 🕓 Pending Review)</p>
+          </div>
+
+          <div class="bg-slate-100 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div>
+              <span class="text-slate-500">Drive Filename Preview:</span>
+              <code id="previewFileName" class="ml-1 font-semibold text-indigo-700">Anon.OCT</code>
+            </div>
+            <div>
+              <span class="text-slate-500">Destination After Approval:</span>
+              <code id="previewDestPath" class="ml-1 font-semibold text-slate-800">Year 1 / SEM 1 / CS / DSC-B / NOTES / Module 1</code>
+            </div>
+          </div>
+
+          <div id="uploadHealthBanner" class="hidden rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900"></div>
+          <div class="flex items-center justify-between gap-3 pt-2">
+            <p class="text-xs text-slate-500">Goes to <code class="bg-slate-100 px-1 py-0.5 rounded">🕓 Pending Review</code> first for 1-tap Editor approval.</p>
+            <button id="btnSubmitUpload" type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm transition">
+              Submit to Pending Review
+            </button>
+          </div>
+        </form>
+      </div>
+      <div id="myUploadsBox" class="hidden mt-4 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <h3 class="text-sm font-bold text-slate-900">📮 My recent uploads (this device)</h3>
+          <button id="btnClearMyUploads" type="button" class="text-[11px] text-slate-500 hover:text-slate-800 underline">Clear</button>
+        </div>
+        <p class="text-[11px] text-slate-500 mb-2">Your file is safe in Drive. It waits in Pending Review until the Editor approves it, then it appears under Browse.</p>
+        <div id="myUploadsList" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: IN-APP ANNOUNCEMENTS & POINTS LEADERBOARD ==================== -->
+    <section id="viewFeed" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left 2 Cols: In-App Announcements & Newly Approved Stream -->
+        <div class="lg:col-span-2 space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div class="flex items-center justify-between gap-2 mb-4">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">📢 Department Announcements & New Uploads</h2>
+                <p class="text-xs text-slate-500">Zero WhatsApp clutter — every newly approved note, PYQ, or editor update appears right here.</p>
+              </div>
+            </div>
+            <div id="announcementsList" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- Right Col: Contributor Points Leaderboard -->
+        <div class="space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-1">
+              <h2 class="text-base font-bold text-slate-900">🏆 Top Contributors</h2>
+              <span class="text-[11px] font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Points Table</span>
+            </div>
+            <p class="text-xs text-slate-500 mb-4">Notes = 1 pt • Syllabus = 1 pt • Q.Papers = 2 pts • Videos = 2 pts</p>
+            <div id="leaderboardList" class="space-y-2.5"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 4: EDITOR 1-TAP WORKSPACE ==================== -->
+    <section id="viewEditor" class="hidden space-y-6">
+      <!-- Editor PIN Lock Bar -->
+      <div id="editorLockBanner" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">🛡️ Editor Operations Console</h2>
+          <p class="text-xs text-slate-500">1-Tap mobile approval, property/folder reorganization, and month-end daily note merging. The Editor PIN is set in the Sheet's <code class="bg-slate-100 px-1.5 py-0.5 rounded font-semibold">Config</code> tab (<code class="bg-slate-100 px-1.5 py-0.5 rounded">EDITOR_PIN</code>).</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <input id="editorPinInput" type="password" value="" placeholder="Editor PIN" class="w-36 rounded-xl border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none" />
+          <button id="btnUnlockEditor" type="button" class="px-4 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition">
+            Unlock Console
+          </button>
+          <button id="btnDisconnectLiveQuick" type="button" class="hidden px-3 py-1.5 rounded-xl bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs font-semibold border border-amber-200 transition" title="Clear saved Live Web App URL if an old deployment URL is failing">
+            🔌 Disconnect Live URL
+          </button>
+        </div>
+      </div>
+
+      <div id="editorMainContent" class="hidden space-y-6">
+        <!-- Pending Review Queue (1-Tap Approve / Fix Properties / Reject) -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">🕓 Pending Review Queue (File-ID Safe Lookup)</h3>
+              <p class="text-xs text-slate-500">Approving moves the file by its exact Google Drive File ID (fixing the duplicate <code class="bg-slate-100 px-1 rounded">Name.Month(2)</code> bug) and activates its 7-day grace shield.</p>
+            </div>
+            <button id="btnApproveAllPending" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">
+              ✅ Approve All Pending
+            </button>
+          </div>
+          <div id="pendingQueueList" class="space-y-3"></div>
+        </div>
+
+        <!-- Month-End Daily Notes Merger (Approach B) & Post-Approval Post Announcement -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Month-End Daily Notes Merger -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-1">
+                <h3 class="text-base font-bold text-slate-900">🔗 Month-End Daily Notes Merger (Approach B)</h3>
+                <span class="text-[11px] font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">Editor Controlled</span>
+              </div>
+              <p class="text-xs text-slate-500 mb-4">Select approved <code class="bg-slate-100 px-1 rounded">Daily</code> uploads from the same module, uncheck any bad/duplicate snaps, and combine them into one clean monthly file.</p>
+              <div id="dailyMergeList" class="space-y-2 mb-4 max-h-60 overflow-y-auto custom-scroll"></div>
+            </div>
+            <div class="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+              <input id="mergedMonthTitle" type="text" value="Combined_Daily_SEP" class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs flex-1" placeholder="Merged Base Name" />
+              <button id="btnMergeSelectedDaily" type="button" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">
+                🔗 Combine Selected into 1 File
+              </button>
+            </div>
+          </div>
+
+          <!-- Post Custom Announcement -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
+            <div>
+              <h3 class="text-base font-bold text-slate-900 mb-1">📣 Post In-App Department Notice</h3>
+              <p class="text-xs text-slate-500 mb-4">Need to tell juniors which modules are in the internal exam or request missing notes? Post directly to the in-app feed.</p>
+              <div class="space-y-3">
+                <input id="annTitleInput" type="text" placeholder="Headline (e.g. 'Sem 1 CS DSC-B Module 3 Notes Needed')" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+                <textarea id="annBodyInput" rows="3" placeholder="Details for classmates, juniors, or seniors..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"></textarea>
+              </div>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex justify-end">
+              <button id="btnPostAnnouncement" type="button" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition">
+                Post to In-App Feed
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 5: 0-FILE BLANK TEST DRIVE SETUP & APPS SCRIPT ==================== -->
+    <section id="viewSetup" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">Safe 0-File Test Drive Rollout</span>
+            <h2 class="text-lg font-bold text-slate-900 mt-2">Initialize Your Brand-New "0-File" Test Google Drive</h2>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+              Because your test Google Drive starts with <strong>0 files</strong>, this complete script includes <code class="bg-slate-100 px-1.5 py-0.5 rounded font-semibold">setup()</code> (to create <code class="bg-slate-100 px-1.5 py-0.5 rounded">Year 1–5</code>, <code class="bg-slate-100 px-1.5 py-0.5 rounded">SEM 1–10</code>, <code class="bg-slate-100 px-1.5 py-0.5 rounded">🕓 Pending Review</code>, and the <code class="bg-slate-100 px-1.5 py-0.5 rounded">Config</code> tab from scratch), plus <code class="bg-slate-100 px-1.5 py-0.5 rounded font-semibold">doGet(e)</code> and <code class="bg-slate-100 px-1.5 py-0.5 rounded font-semibold">doPost(e)</code> so this Web App talks directly to your new Drive!
+            </p>
+          </div>
+        </div>
+
+        <!-- 4-Step Quick Setup Guide -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="font-bold text-indigo-700 mb-1">Step 1: Create 1 Blank Folder</div>
+            <p class="text-slate-600">In your new test Google Drive, create one empty folder (e.g., <code class="bg-white px-1 rounded">Dept_Archive_Test</code>) and copy its Folder ID from the URL.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="font-bold text-indigo-700 mb-1">Step 2: Paste Folder ID Below</div>
+            <p class="text-slate-600">Paste that Folder ID into Box 1 below and click <strong>Update Script</strong>—it injects directly into <code class="bg-white px-1 rounded">ROOT_FOLDER_ID</code>.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="font-bold text-indigo-700 mb-1">Step 3: Run <code class="bg-white px-1 rounded">setup()</code> Once</div>
+            <p class="text-slate-600">Create a blank Google Sheet in that test Drive, open <strong>Extensions → Apps Script</strong>, paste the code, and click <strong>Run → setup</strong>. This makes a separate <code class="bg-white px-1 rounded">CONFIG</code> tab for the PIN. Already have a cluttered sheet? Run <strong>setup</strong> again (or <strong>Archive Tools → Repair Sheets</strong>) and the config rows move over automatically.</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="font-bold text-indigo-700 mb-1">Step 4: Deploy Web App & Connect</div>
+            <p class="text-slate-600">Click <strong>Deploy → New Deployment → Web App</strong> (Execute as: <em>Me</em>, Access: <em>Anyone</em>) and paste the URL in Box 2 and click <strong>Apply to Everyone</strong> so every device connects to it!</p>
+          </div>
+        </div>
+
+        <!-- Interactive Folder ID Injector & Live Web App Connector -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div>
+            <label for="inputTestFolderId" class="block text-xs font-semibold text-slate-700 mb-1">1. Root Folder ID <span class="font-normal text-slate-500">(only used to edit the code below)</span>:</label>
+            <div class="flex gap-2">
+              <input id="inputTestFolderId" type="text" value="PASTE_YOUR_NEW_TEST_FOLDER_ID_HERE" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:border-indigo-500 focus:outline-none" />
+              <button id="btnInjectFolderId" type="button" class="px-3 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition whitespace-nowrap">
+                Update Script
+              </button>
+            </div>
+          </div>
+          <div>
+            <label for="inputWebAppUrl" class="block text-xs font-semibold text-slate-700 mb-1">2. Deployed Web App URL <span class="font-normal text-slate-500">(decides which script every device connects to — locked; press Change to switch it)</span>:</label>
+            <div class="flex gap-2">
+              <input id="inputWebAppUrl" type="url" readonly value="https://script.google.com/macros/s/AKfycbwUVbW6ERtKmEF-rZJD-ssO1IPQmyNcsyF6zzUJJOmLd11ZKohOHOjXW7GHVISU4Nlh/exec" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:border-indigo-500 focus:outline-none" />
+              <button id="btnConnectLiveUrl" type="button" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition whitespace-nowrap">
+                Change
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4 space-y-3 text-xs">
+          <div class="font-bold text-emerald-900">🌐 Shared Settings (applied to every device)</div>
+          <p id="liveConfigStatus" class="text-slate-700">Not connected to a live Web App yet — refresh the page to reconnect.</p>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Student Join Link (always uses notesgng.github.io/NOTES — opens straight into this Drive on any device)</label>
+            <div class="flex gap-2">
+              <input id="inputShareLink" type="text" readonly class="flex-1 rounded-xl border border-slate-300 px-3 py-2 font-mono bg-white" />
+              <button id="btnCopyShareLink" type="button" class="px-3 py-2 rounded-xl bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition whitespace-nowrap">Copy Link</button>
+            </div>
+            <p class="text-slate-500 mt-1">Optional shortcut: a link that carries the Web App URL inside it, so it works even before the GitHub line below is set.</p>
+          </div>
+          <div class="rounded-xl border-2 border-emerald-300 bg-emerald-50 p-3">
+            <label class="block font-bold text-emerald-900 mb-1">✅ Make it work for EVERYONE (the real fix)</label>
+            <p class="text-slate-700 mb-2">"Apply to Everyone" can only save the link inside <em>your</em> browser — a web page cannot reach other people's phones. For other devices, the link has to be inside the file you host. This button builds that file for you: it is this exact app with your Web App URL already written in. Upload it to GitHub (replace <code class="bg-white px-1 rounded">index.html</code>) and every device that opens your site connects on its own.</p>
+            <div class="flex flex-wrap gap-2">
+              <button id="btnDownloadEveryoneFile" type="button" class="px-3 py-2 rounded-xl bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition">⬇ Download everyone-ready index.html</button>
+              <button id="btnTestEveryone" type="button" class="px-3 py-2 rounded-xl bg-white border border-emerald-400 text-emerald-900 font-semibold hover:bg-emerald-100 transition">🔍 Test uploads end-to-end</button>
+            </div>
+            <p id="everyoneStatus" class="mt-2 text-slate-600"></p>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">Permanent GitHub line (do this once, then the plain GitHub link works for everyone)</label>
+            <div class="flex gap-2">
+              <input id="inputPermanentLine" type="text" readonly class="flex-1 rounded-xl border border-slate-300 px-3 py-2 font-mono bg-white" />
+              <button id="btnCopyPermanentLine" type="button" class="px-3 py-2 rounded-xl bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition whitespace-nowrap">Copy Line</button>
+            </div>
+            <p class="text-slate-500 mt-1">A web page cannot learn your Drive link by itself. In the app's HTML file on GitHub, find the one line near the top of the script that starts with <code class="bg-white px-1 rounded">const DEFAULT_WEBAPP_URL</code> and replace that whole line with the line above (one time). After that, anyone opening the plain GitHub link connects automatically, and any later Web App you apply here is followed on its own.</p>
+          </div>
+        </div>
+
+        <!-- Code Header & Copy Button -->
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Complete <code class="text-indigo-600">Code.gs</code> (Includes <code class="text-emerald-700">setup()</code> + <code class="text-emerald-700">onFormSubmit</code> + <code class="text-emerald-700">onSheetEdit</code> + <code class="text-emerald-700">doGet/doPost</code> Web App API)</h3>
+            <p class="text-xs text-slate-500">Works from 0 files, supports both your Google Form fail-safe AND this Web App simultaneously.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnCopyScript" type="button" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">
+              📋 Copy Full Apps Script Code
+            </button>
+          </div>
+        </div>
+
+        <pre id="appsScriptCodeBlock" class="bg-slate-900 text-slate-100 p-4 rounded-2xl text-xs overflow-x-auto max-h-[460px] custom-scroll leading-relaxed select-all"></pre>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODAL: PREVIEW PDF / VIDEO & EDIT PROPERTIES ==================== -->
+  <div id="fileModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="modalFileTypeBadge" class="text-[11px] font-bold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">NOTES</span>
+            <h3 id="modalFileName" class="font-bold text-base text-slate-900">Devaki.SEP</h3>
+          </div>
+          <p id="modalFilePath" class="text-xs text-slate-500 mt-0.5 font-mono">Year 1 / SEM 1 / CS / DSC-B / NOTES / Module 1</p>
+        </div>
+        <button id="btnCloseModal" type="button" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center font-bold">
+          ✕
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-4 flex-1">
+        <!-- Embedded PDF / Class Video Viewer Box -->
+        <div id="modalPreviewBox" class="rounded-xl bg-slate-900 text-white p-6 flex flex-col items-center justify-center text-center min-h-[190px]"></div>
+
+        <!-- Video-Style Properties Sheet -->
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-2 text-xs">
+          <div class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">File Properties (Synced with Google Sheet & Drive Description)</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            <div><span class="text-slate-500">Contributor:</span> <span id="modalContributor" class="font-semibold text-slate-800"></span></div>
+            <div><span class="text-slate-500">Time Period / Month:</span> <span id="modalMonth" class="font-semibold text-slate-800"></span></div>
+            <div><span class="text-slate-500">Likes & Rank:</span> <span id="modalLikes" class="font-semibold text-indigo-700"></span></div>
+            <div><span class="text-slate-500">7-Day Grace Shield:</span> <span id="modalShield" class="font-semibold"></span></div>
+          </div>
+          <div class="pt-1 border-t border-slate-200/70">
+            <span class="text-slate-500">Searchable Topics / Tags:</span>
+            <p id="modalTopics" class="font-medium text-slate-900 mt-0.5"></p>
+          </div>
+        </div>
+
+        <!-- Editor Quick-Reorganize / Property Editor inside Modal -->
+        <div id="modalEditorBlock" class="hidden bg-indigo-50/60 rounded-xl p-4 border border-indigo-200/80 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-indigo-900">✏️ Editor Quick Reorganize / Edit Properties</span>
+            <span class="text-[11px] text-indigo-700">Updates Drive Folder & Sheet Row Instantly</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+            <div>
+              <label class="block text-slate-600 mb-1 font-medium">Move Course</label>
+              <select id="editModalCourse" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5">
+                <option value="DSC-A">DSC-A</option>
+                <option value="DSC-B">DSC-B</option>
+                <option value="DSC-C">DSC-C</option>
+                <option value="MDC">MDC</option>
+                <option value="NONE">NONE (Eng/French)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-600 mb-1 font-medium">Move Module</label>
+              <select id="editModalModule" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5">
+                <option value="MODULE 1">Module 1</option>
+                <option value="MODULE 2">Module 2</option>
+                <option value="MODULE 3">Module 3</option>
+                <option value="MODULE 4">Module 4</option>
+                <option value="MODULE">Module (Unsorted)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-600 mb-1 font-medium">Change Month</label>
+              <select id="editModalMonth" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5">
+                <option value="AUG">AUG</option>
+                <option value="SEP">SEP</option>
+                <option value="OCT">OCT</option>
+                <option value="NOV">NOV</option>
+                <option value="DEC">DEC</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-600 mb-1 text-xs font-medium">Update Searchable Topics / PYQ Year Info</label>
+            <input id="editModalTopics" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs" />
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <button id="btnDeleteFileModal" type="button" class="px-3 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-semibold transition">
+              🗑️ Move to _Overflow / Delete
+            </button>
+            <button id="btnSaveFilePropsModal" type="button" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition">
+              💾 Save & Move in Drive
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== STATE & DEMO / 0-FILE DATA ====================
+    const SITE_URL = 'https://notesgng.github.io/NOTES/';   // the permanent public address of this app (used for join links and for building the everyone-ready file)
+    const DEFAULT_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwUVbW6ERtKmEF-rZJD-ssO1IPQmyNcsyF6zzUJJOmLd11ZKohOHOjXW7GHVISU4Nlh/exec';        // the live Web App every device connects to by default (the Editor can change it from the Setup tab)
+    const SUBJECTS_NO_COURSE = ['ENG', 'FRENCH'];
+    const POINTS_MAP = {
+      'NOTES': 1,
+      'Q.PAPERS': 2,
+      'SYLLABUS BREAKDOWN': 1,
+      'CLASS VIDEOS': 2
+    };
+
+    function isValidWebAppUrl(u) {
+      const s = String(u || '').trim();
+      return s.indexOf('https://script.google.com/') === 0 && s.slice(-5) === '/exec';
+    }
+
+    // ---- Auto-CAPS layer: everything except Topics is normalised so typing style never matters ----
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function safeUrl(u) { return String(u || '').toLowerCase().indexOf('https://') === 0 ? String(u) : ''; }
+    function UP(s) { return String(s == null ? '' : s).trim().replace(/\s+/g, ' ').toUpperCase(); }
+    function extractDigits(s) {
+      let out = '';
+      const str = String(s == null ? '' : s);
+      for (let i = 0; i < str.length; i++) {
+        const ch = str.charAt(i);
+        if (ch >= '0' && ch <= '9') out += ch;
+      }
+      return out;
+    }
+
+    function canonItem(it) {
+      const o = Object.assign({}, it);
+      o.name = UP(o.name) || 'ANON';
+      o.month = UP(o.month);
+      o.subject = UP(o.subject);
+      o.course = SUBJECTS_NO_COURSE.includes(o.subject) ? 'NONE' : (UP(o.course) || 'DSC-B');
+      o.contentType = UP(o.contentType) || 'NOTES';
+      o.module = UP(o.module) || 'MODULE';
+      o.scope = UP(o.scope) === 'DAILY' ? 'DAILY' : 'COMPLETE';
+      o.sem = 'SEM' + (extractDigits(o.sem) || '1');
+      o.displayName = UP(o.displayName || (o.name + '.' + o.month));
+      o.topics = String(o.topics == null ? '' : o.topics);
+      o.size = o.size || '';
+      o.fileUrl = o.fileUrl || '';
+      return o;
+    }
+
+    const state = {
+      activeTab: 'viewBrowse',
+      liveWebAppUrl: '',
+      testFolderId: 'PASTE_YOUR_NEW_TEST_FOLDER_ID_HERE',
+      activeModalFileId: null,
+      editorUnlocked: false,
+      editorPin: '',
+      bootstrapSession: false,
+      likedIds: {},
+      files: [],
+      pending: [],
+      announcements: []
+    };
+
+    // Which Web App a device starts from: #hub= join link > DEFAULT_WEBAPP_URL (set once in this file on GitHub) > last one used on this device.
+    // From that starting point the app follows any "forward" the Editor applied, so a plain GitHub link always ends up on the current Drive.
+    let savedWebAppUrl = '';
+    let fallbackWebAppUrl = '';
+    try {
+      const savedLikes = localStorage.getItem('deptnotes_liked_ids');
+      if (savedLikes) state.likedIds = JSON.parse(savedLikes);
+      const savedUrl = localStorage.getItem('deptnotes_live_url');
+      if (savedUrl && isValidWebAppUrl(savedUrl)) savedWebAppUrl = savedUrl;
+    } catch (e) {}
+
+    try {
+      let startUrl = '';
+      const hashStr = String(location.hash || '');
+      const hubIdx = hashStr.indexOf('hub=');
+      if (hubIdx > -1) {
+        const hu = decodeURIComponent(hashStr.slice(hubIdx + 4).split('&')[0]);
+        if (isValidWebAppUrl(hu)) startUrl = hu;
+      }
+      if (!startUrl && isValidWebAppUrl(DEFAULT_WEBAPP_URL)) startUrl = DEFAULT_WEBAPP_URL;
+      if (!startUrl) startUrl = savedWebAppUrl;
+      state.liveWebAppUrl = startUrl;
+      if (savedWebAppUrl && savedWebAppUrl !== startUrl) fallbackWebAppUrl = savedWebAppUrl;
+    } catch (e) {}
+
+    // ==================== HELPER FUNCTIONS ====================
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const colors = {
+        info: 'bg-slate-900 text-white border-slate-700',
+        success: 'bg-emerald-700 text-white border-emerald-600',
+        warn: 'bg-amber-600 text-white border-amber-500'
+      };
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-lg text-xs font-medium transition-all ${colors[type] || colors.info}`;
+      el.textContent = msg;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 3600);
+    }
+
+    function semToYearFolder(sem) {
+      const num = parseInt(extractDigits(sem), 10) || 1;
+      const yearNum = Math.ceil(num / 2);
+      return `YEAR ${Math.min(Math.max(yearNum, 1), 5)}`;
+    }
+
+    function buildDrivePath(item) {
+      const yr = semToYearFolder(item.sem);
+      const semLabel = item.sem.toUpperCase().replace('SEM', 'SEM ');
+      const noCourse = SUBJECTS_NO_COURSE.includes(item.subject);
+      let parts = [yr, semLabel, item.subject];
+      if (!noCourse && item.course && item.course !== 'NONE') {
+        parts.push(item.course);
+      }
+      parts.push(item.contentType);
+      if (item.contentType === 'NOTES' || item.contentType === 'CLASS VIDEOS') {
+        parts.push(noCourse ? item.month : (item.module || 'MODULE'));
+      }
+      return parts.join(' / ');
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result || '');
+          const base64 = result.includes(',') ? result.split(',')[1] : result;
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ==================== MY UPLOADS RECEIPT + HEALTH CHECK ====================
+    function loadMyUploads() {
+      try { return JSON.parse(localStorage.getItem('deptnotes_my_uploads') || '[]'); } catch (e) { return []; }
+    }
+    function saveMyUploads(list) {
+      try { localStorage.setItem('deptnotes_my_uploads', JSON.stringify(list.slice(0, 12))); } catch (e) {}
+    }
+    function addMyUpload(item) {
+      const list = loadMyUploads();
+      list.unshift(item);
+      saveMyUploads(list);
+    }
+    function renderMyUploads() {
+      const box = document.getElementById('myUploadsBox');
+      const listEl = document.getElementById('myUploadsList');
+      if (!box || !listEl) return;
+      const list = loadMyUploads();
+      box.classList.toggle('hidden', list.length === 0);
+      const synced = state.liveWebAppUrl && (state.files.length + state.pending.length) > 0;
+      listEl.innerHTML = list.map(u => {
+        let status = '⏳ Saved — waiting for Editor approval';
+        let cls = 'bg-amber-50 text-amber-800 border-amber-200';
+        const rid = 'row_' + u.rowId;
+        if (state.files.some(f => f.id === rid)) { status = '✅ Approved — live in Browse'; cls = 'bg-emerald-50 text-emerald-800 border-emerald-200'; }
+        else if (synced && !state.pending.some(p => p.id === rid)) { status = '🗑️ No longer pending (rejected or removed by the Editor)'; cls = 'bg-slate-100 text-slate-700 border-slate-200'; }
+        return '<div class="rounded-xl border px-3 py-2 text-xs ' + cls + '"><div class="font-semibold">' + escapeHtmlSafe(u.label) + '</div><div>' + status + '</div><div class="opacity-70">Saved in: ' + escapeHtmlSafe(u.savedIn || '') + '</div></div>';
+      }).join('');
+    }
+    function escapeHtmlSafe(t) {
+      return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Asks the Web App if uploads can really work, and tells the person plainly if not (instead of files vanishing).
+    async function checkUploadHealth() {
+      const banner = document.getElementById('uploadHealthBanner');
+      if (!banner) return;
+      if (!state.liveWebAppUrl) { banner.classList.add('hidden'); return; }
+      try {
+        const res = await fetch(state.liveWebAppUrl + '?action=health', { redirect: 'follow' });
+        const h = await res.json();
+        if (h && h.problems) {
+          if (h.ok) { banner.classList.add('hidden'); return; }
+          banner.innerHTML = '⚠️ Uploads may not work yet: ' + h.problems.map(escapeHtmlSafe).join(' • ');
+          banner.classList.remove('hidden');
+        } else {
+          banner.innerHTML = '⚠️ This Web App is running an old script. The Editor must paste the latest code and deploy a <strong>New version</strong> (Deploy → Manage deployments → pencil → New version).';
+          banner.classList.remove('hidden');
+        }
+      } catch (err) {
+        banner.innerHTML = '⚠️ Cannot reach the Drive script. The Editor must deploy it as <strong>Execute as: Me</strong> and <strong>Who has access: Anyone</strong>.';
+        banner.classList.remove('hidden');
+      }
+    }
+
+    // ==================== LIVE GOOGLE DRIVE API SYNC (doGet / doPost) ====================
+    let lastSyncSig = '';
+    let hubHops = 0;
+    async function syncFromLiveDrive(quiet) {
+      if (!state.liveWebAppUrl) return;
+      try {
+        if (!quiet) showToast('Syncing with your Google Drive & Sheet...', 'info');
+        const res = await fetch(state.liveWebAppUrl + '?action=listAll', { redirect: 'follow' });
+        const data = await res.json();
+        if (data && data.ok) {
+          if (data.forwardUrl && data.forwardUrl !== state.liveWebAppUrl && isValidWebAppUrl(data.forwardUrl) && hubHops < 8) {
+            hubHops++;
+            applyLiveUrl(data.forwardUrl);
+            lastSyncSig = '';
+            showToast('The Editor connected a new Drive — reconnected automatically.', 'info');
+            return syncFromLiveDrive(true);
+          }
+          hubHops = 0;
+          fallbackWebAppUrl = '';
+          const sig = JSON.stringify([data.files, data.pending, data.announcements]);
+          if (quiet && sig === lastSyncSig) return;
+          lastSyncSig = sig;
+          state.files = (data.files || []).map(canonItem);
+          state.pending = (data.pending || []).map(canonItem);
+          state.announcements = data.announcements || [];
+          renderBrowse();
+          renderEditor();
+          renderFeedAndLeaderboard();
+          renderMyUploads();
+          if (!quiet) showToast(`Synced! ${state.files.length} approved file(s), ${state.pending.length} pending in Drive.`, 'success');
+        }
+      } catch (err) {
+        if (fallbackWebAppUrl && fallbackWebAppUrl !== state.liveWebAppUrl) {
+          const f = fallbackWebAppUrl;
+          fallbackWebAppUrl = '';
+          applyLiveUrl(f);
+          lastSyncSig = '';
+          return syncFromLiveDrive(quiet);
+        }
+        if (!quiet) showToast('Could not reach Web App URL — check that deployment access is set to "Anyone".', 'warn');
+      }
+    }
+
+    function canSeeSetup() {
+      // The Setup tab is only for the Editor — or for whoever is connecting this app for the very first time.
+      return state.editorUnlocked || !state.liveWebAppUrl || state.bootstrapSession;
+    }
+
+    function applyLiveUrl(url) {
+      state.liveWebAppUrl = url || '';
+      try { if (url) localStorage.setItem('deptnotes_live_url', url); else localStorage.removeItem('deptnotes_live_url'); } catch (e) {}
+      const badge = document.getElementById('connectionBadge');
+      document.getElementById('btnSyncNow').classList.toggle('hidden', !url);
+      const quickDisc = document.getElementById('btnDisconnectLiveQuick');
+      if (quickDisc) quickDisc.classList.toggle('hidden', !url);
+      const banner = document.getElementById('notConnectedBanner');
+      if (banner) banner.classList.toggle('hidden', !!url);
+      badge.textContent = url ? 'Live Drive Connected' : 'Not connected';
+      badge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full border ' + (url
+        ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200');
+      document.getElementById('inputWebAppUrl').value = url || DEFAULT_WEBAPP_URL;
+      const sl = document.getElementById('inputShareLink');
+      if (sl) sl.value = url ? SITE_URL + '#hub=' + encodeURIComponent(url) : 'Connect a Web App URL first';
+      const pl = document.getElementById('inputPermanentLine');
+      if (pl) pl.value = url ? "const DEFAULT_WEBAPP_URL = '" + url + "';" : 'Connect a Web App URL first';
+      if (!url) {
+        state.files = [];
+        state.pending = [];
+        state.announcements = [];
+        lastSyncSig = '';
+        lockEditor();
+        renderBrowse();
+        renderEditor();
+        renderFeedAndLeaderboard();
+      }
+      applySetupGate();
+      if (state.activeTab === 'viewSetup' && !canSeeSetup()) switchTab('viewBrowse');
+    }
+
+    function cleanFolderId(raw) {
+      const s = String(raw || '').trim();
+      const idx = s.indexOf('folders/');
+      if (idx > -1) {
+        return s.slice(idx + 8).split('?')[0].split('/')[0].trim();
+      }
+      return s;
+    }
+
+    let setupGateShown = false;
+    function applySetupGate() {
+      const on = canSeeSetup();
+      document.getElementById('tabBtnSetup').classList.toggle('hidden', !on);
+      if (on !== setupGateShown) {
+        setupGateShown = on;
+        document.getElementById('appsScriptCodeBlock').textContent = on ? generateAppsScriptCode(state.testFolderId) : '';
+      }
+    }
+
+    async function refreshLiveConfig() {
+      const el = document.getElementById('liveConfigStatus');
+      if (!state.liveWebAppUrl) { el.textContent = 'Not connected to a live Web App yet — refresh the page to reconnect.'; return; }
+      const res = await postToLiveDrive({ action: 'getConfig' }, true);
+      if (res && res.ok) {
+        el.textContent = 'The connected script uses Root Folder: ' + (res.rootFolderName || '(unknown)') + ' — ID ' + res.rootFolderId + (res.forwardUrl ? ' • it forwards everyone to a newer Web App' : '');
+        const box = document.getElementById('inputTestFolderId');
+        if (res.rootFolderId && !String(res.rootFolderId).startsWith('PASTE_') && (!box.value.trim() || box.value.startsWith('PASTE_'))) {
+          state.testFolderId = res.rootFolderId;
+          box.value = res.rootFolderId;
+          document.getElementById('appsScriptCodeBlock').textContent = generateAppsScriptCode(state.testFolderId);
+        }
+      } else {
+        el.textContent = 'Connected URL did not respond to getConfig — in Apps Script, click Deploy > Manage deployments > Edit (pencil) > Version: New version > Deploy.';
+      }
+    }
+
+    const EDITOR_ACTIONS = ['approve', 'reject', 'editProps', 'delete', 'verifyPin', 'getConfig', 'setForwardUrl', 'postNotice', 'deleteNotice'];
+
+    function lockEditor() {
+      state.editorUnlocked = false;
+      state.editorPin = '';
+      document.getElementById('editorMainContent').classList.add('hidden');
+      document.getElementById('modalEditorBlock').classList.add('hidden');
+      document.getElementById('editorPinInput').value = '';
+      document.getElementById('btnUnlockEditor').textContent = 'Unlock Console';
+      applySetupGate();
+      renderFeedAndLeaderboard();
+      if (state.activeTab === 'viewSetup' && !canSeeSetup()) switchTab('viewBrowse');
+    }
+
+    async function postToLiveDrive(payload, silentError) {
+      if (!state.liveWebAppUrl) return null;
+      if (EDITOR_ACTIONS.includes(payload.action)) {
+        payload = Object.assign({}, payload, { pin: payload.pin || state.editorPin });
+      }
+      try {
+        const res = await fetch(state.liveWebAppUrl, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const out = await res.json();
+        if (out && out.ok === false && out.error === 'Wrong editor PIN' && payload.action !== 'verifyPin') {
+          lockEditor();
+          showToast('Wrong Editor PIN — console locked again.', 'warn');
+        }
+        return out;
+      } catch (err) {
+        if (!silentError) {
+          showToast('Live Drive request failed — verify Web App deployment URL.', 'warn');
+        }
+        return null;
+      }
+    }
+
+    // ==================== RENDER: STUDENT ARCHIVE BROWSER ====================
+    function renderBrowse() {
+      const sem = document.getElementById('filterSem').value;
+      const subject = document.getElementById('filterSubject').value;
+      const course = document.getElementById('filterCourse').value;
+      const type = document.getElementById('filterType').value;
+      const mod = document.getElementById('filterModule').value;
+      const month = document.getElementById('filterMonth').value;
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      const noCourse = SUBJECTS_NO_COURSE.includes(subject);
+      document.getElementById('courseFilterWrapper').style.opacity = noCourse ? '0.45' : '1';
+
+      const yr = sem === 'ALL' ? 'Years 1–5' : semToYearFolder(sem);
+      const semText = sem === 'ALL' ? 'All Sems' : sem.toUpperCase().replace('SEM', 'SEM ');
+      const subText = subject === 'ALL' ? 'All Subjects' : subject;
+      const courseText = noCourse ? '(No Course Layer)' : (course === 'ALL' ? 'All Courses' : course);
+      document.getElementById('liveDrivePath').textContent = `${yr} / ${semText} / ${subText} / ${courseText}`;
+
+      let filtered = state.files.filter(f => f.approved);
+      if (sem !== 'ALL') filtered = filtered.filter(f => f.sem === sem);
+      if (subject !== 'ALL') filtered = filtered.filter(f => f.subject === subject);
+      if (!noCourse && course !== 'ALL') filtered = filtered.filter(f => f.course === course);
+      if (type !== 'ALL') filtered = filtered.filter(f => f.contentType === type);
+      if (mod !== 'ALL') filtered = filtered.filter(f => f.module === mod);
+      if (month !== 'ALL') filtered = filtered.filter(f => f.month === month);
+
+      if (query) {
+        filtered = filtered.filter(f =>
+          f.displayName.toLowerCase().includes(query) ||
+          f.topics.toLowerCase().includes(query) ||
+          f.name.toLowerCase().includes(query) ||
+          f.month.toLowerCase().includes(query) ||
+          f.course.toLowerCase().includes(query)
+        );
+      }
+
+      filtered.sort((a, b) => (b.likes - a.likes) || (a.daysOld - b.daysOld));
+
+      document.getElementById('resultsSummaryText').textContent =
+        `Showing ${filtered.length} approved item${filtered.length === 1 ? '' : 's'} (Sorted by 👍 Likes)`;
+
+      const grid = document.getElementById('filesGrid');
+      grid.innerHTML = '';
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-3">
+            <div class="text-2xl">📂</div>
+            <p class="text-base font-bold text-slate-800">0 files in this folder right now</p>
+            <p class="text-xs text-slate-500 max-w-md mx-auto">
+              ${state.liveWebAppUrl
+                ? 'Try switching "Year & Semester" or "Course Stream" to "All", or upload the first note for this module to earn contributor points!'
+                : 'This app is not connected to the department Drive yet. Ask your Editor for the join link.'}
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach((f, idx) => {
+        const isShielded = f.daysOld <= 7;
+        const isLiked = !!state.likedIds[f.id];
+        const isVideo = f.contentType === 'CLASS VIDEOS';
+        const isPYQ = f.contentType === 'Q.PAPERS';
+
+        const badgeColor = isVideo
+          ? 'bg-purple-100 text-purple-800 border-purple-200'
+          : isPYQ
+          ? 'bg-amber-100 text-amber-800 border-amber-200'
+          : 'bg-indigo-50 text-indigo-700 border-indigo-200';
+
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl border border-slate-200 p-4 shadow-xs hover:shadow-md hover:border-indigo-200 transition flex flex-col justify-between gap-3';
+        card.innerHTML = `
+          <div class="space-y-2.5">
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border ${badgeColor}">
+                  ${isVideo ? '🎬 VIDEO' : f.contentType}
+                </span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                  ${f.sem.toUpperCase()} • ${esc(f.subject)}${f.course !== 'NONE' ? ' (' + f.course + ')' : ''}
+                </span>
+                ${f.scope === 'DAILY' ? '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200">📅 Daily Note</span>' : ''}
+              </div>
+              <span class="text-[11px] font-mono text-slate-400">#${idx + 1}</span>
+            </div>
+
+            <div class="flex items-center justify-between gap-2">
+              <h3 class="font-bold text-base text-slate-900 font-mono">${esc(f.displayName)}</h3>
+              ${isShielded
+                ? `<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" title="Uploaded ${f.daysOld}d ago — protected from Top-5 pruning for ${7 - f.daysOld} more days">🛡️ 🆕 ${7 - f.daysOld}d Shield</span>`
+                : `<span class="text-[10px] text-slate-400">${f.daysOld}d ago</span>`
+              }
+            </div>
+
+            <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100 text-xs space-y-1">
+              <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Properties / Topics Covered:</div>
+              <p class="text-slate-700 font-medium line-clamp-2">${esc(f.topics)}</p>
+            </div>
+
+            <div class="text-[11px] text-slate-500 font-mono truncate" title="${esc(buildDrivePath(f))}">
+              📁 ${esc(buildDrivePath(f))}
+            </div>
+          </div>
+
+          <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+            <button type="button" data-like-id="${esc(f.id)}" class="btn-like flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition ${
+              isLiked
+                ? 'bg-indigo-600 text-white border-indigo-600'
+                : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-indigo-300'
+            }">
+              <span>👍</span>
+              <span>${f.likes}</span>
+            </button>
+
+            <div class="flex items-center gap-1.5">
+              <button type="button" data-open-id="${esc(f.id)}" class="btn-open-modal px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition">
+                ${isVideo ? '▶️ Watch / Properties' : '📄 Open / Properties'}
+              </button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      grid.querySelectorAll('.btn-like').forEach(btn => {
+        btn.addEventListener('click', () => toggleLike(btn.getAttribute('data-like-id')));
+      });
+      grid.querySelectorAll('.btn-open-modal').forEach(btn => {
+        btn.addEventListener('click', () => openFileModal(btn.getAttribute('data-open-id')));
+      });
+    }
+
+    // ==================== LIKE SYSTEM + TOP-5 PRUNING WITH 7-DAY SHIELD ====================
+    async function toggleLike(fileId) {
+      const file = state.files.find(f => f.id === fileId);
+      if (!file) return;
+
+      let delta = 1;
+      if (state.likedIds[fileId]) {
+        file.likes = Math.max(0, file.likes - 1);
+        delete state.likedIds[fileId];
+        delta = -1;
+        showToast(`Removed like from ${file.displayName}`, 'info');
+      } else {
+        file.likes += 1;
+        state.likedIds[fileId] = true;
+        delta = 1;
+        showToast(`👍 Liked ${file.displayName}! Higher likes keep notes in the Top 5.`, 'success');
+      }
+
+      try {
+        localStorage.setItem('deptnotes_liked_ids', JSON.stringify(state.likedIds));
+      } catch (e) {}
+
+      renderBrowse();
+      renderFeedAndLeaderboard();
+
+      if (state.liveWebAppUrl) {
+        await postToLiveDrive({ action: 'like', rowId: file.rowId || file.id, fileId: file.id, delta });
+      }
+    }
+
+    // ==================== UPLOAD FORM LOGIC ====================
+    function updateUploadPreview() {
+      const rawName = UP(document.getElementById('upName').value) || 'ANON';
+      const month = document.getElementById('upMonth').value;
+      const sem = document.getElementById('upSem').value;
+      const subject = document.getElementById('upSubject').value;
+      const noCourse = SUBJECTS_NO_COURSE.includes(subject);
+      document.getElementById('upCourseWrapper').style.opacity = noCourse ? '0.4' : '1';
+
+      const allowedCourses = subject === 'ECO' ? ['DSC-A', 'DSC-B'] : ['DSC-B', 'DSC-C', 'MDC'];
+      const courseSel = document.getElementById('upCourse');
+      Array.from(courseSel.options).forEach(o => { o.disabled = !allowedCourses.includes(o.value); o.hidden = o.disabled; });
+      if (!allowedCourses.includes(courseSel.value)) courseSel.value = allowedCourses[0];
+
+      const course = noCourse ? 'NONE' : document.getElementById('upCourse').value;
+      const contentType = document.getElementById('upType').value;
+      const modRaw = document.getElementById('upModule').value;
+      const modFolder = modRaw ? `MODULE ${modRaw}` : 'MODULE';
+
+      document.getElementById('previewFileName').textContent = `${rawName}.${month}`;
+      document.getElementById('previewDestPath').textContent = buildDrivePath({
+        sem, subject, course, contentType, module: modFolder, month
+      });
+    }
+
+    // ==================== RENDER: ANNOUNCEMENTS & POINTS LEADERBOARD ====================
+    function buildFeed() {
+      // Editor notices (stored in the Sheet's script, same for every device) + recently approved files (derived from the synced archive)
+      const notices = (state.announcements || []).slice();
+      const recent = state.files
+        .filter(f => f.approved && f.daysOld <= 14)
+        .sort((a, b) => a.daysOld - b.daysOld)
+        .slice(0, 30)
+        .map(f => {
+          const pts = POINTS_MAP[f.contentType] || 1;
+          return {
+            id: 'ap_' + f.id,
+            title: `✅ Approved: ${f.displayName} (${f.sem} ${f.subject}${f.course !== 'NONE' ? ' ' + f.course : ''})`,
+            body: `Topics: ${f.topics} (+${pts} Contributor Point${pts > 1 ? 's' : ''} awarded to ${f.name}).`,
+            time: (f.daysOld === 0 ? 'Today' : f.daysOld + 'd ago') + ' • New Upload'
+          };
+        });
+      return notices.concat(recent);
+    }
+
+    function renderFeedAndLeaderboard() {
+      const feed = buildFeed();
+      document.getElementById('feedCountBadge').textContent = feed.length;
+      const annList = document.getElementById('announcementsList');
+      annList.innerHTML = '';
+
+      if (feed.length === 0) {
+        annList.innerHTML = `<p class="text-xs text-slate-400 italic p-3">No announcements yet. Approved files and Editor notices appear here.</p>`;
+      } else {
+        feed.forEach(a => {
+          const canDelete = state.editorUnlocked && /^n\d+$/.test(String(a.id));
+          const item = document.createElement('div');
+          item.className = 'p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1';
+          item.innerHTML = `
+            <div class="flex items-center justify-between gap-2">
+              <h4 class="font-bold text-sm text-slate-900">${esc(a.title)}</h4>
+              <span class="flex items-center gap-2">
+                <span class="text-[11px] text-slate-400 whitespace-nowrap">${esc(a.time)}</span>
+                ${canDelete ? `<button type="button" data-del-notice="${esc(a.id)}" class="btn-del-notice text-[11px] font-semibold text-rose-600 hover:text-rose-800">✕ Remove</button>` : ''}
+              </span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">${esc(a.body)}</p>
+          `;
+          annList.appendChild(item);
+        });
+        annList.querySelectorAll('.btn-del-notice').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const res = await postToLiveDrive({ action: 'deleteNotice', id: btn.getAttribute('data-del-notice') });
+            if (res && res.ok) {
+              await syncFromLiveDrive(true);
+              showToast('Notice removed', 'info');
+            }
+          });
+        });
+      }
+
+      const scores = {};
+      state.files.filter(f => f.approved).forEach(f => {
+        const pts = POINTS_MAP[f.contentType] || 1;
+        if (!scores[f.name]) {
+          scores[f.name] = { name: f.name, points: 0, uploads: 0, likes: 0 };
+        }
+        scores[f.name].points += pts;
+        scores[f.name].uploads += 1;
+        scores[f.name].likes += f.likes;
+      });
+
+      const sortedContributors = Object.values(scores).sort((a, b) => (b.points - a.points) || (b.likes - a.likes));
+      const lbList = document.getElementById('leaderboardList');
+      lbList.innerHTML = '';
+
+      if (sortedContributors.length === 0) {
+        lbList.innerHTML = `<p class="text-xs text-slate-400 italic p-2">0 contributors yet — points appear automatically as files are approved!</p>`;
+        return;
+      }
+
+      sortedContributors.forEach((c, idx) => {
+        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs';
+        row.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <span class="font-bold text-sm w-6 text-center">${medal}</span>
+            <div>
+              <div class="font-bold text-slate-900">${esc(c.name)}</div>
+              <div class="text-[11px] text-slate-500">${c.uploads} file(s) • 👍 ${c.likes} likes</div>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">
+            ${c.points} pts
+          </span>
+        `;
+        lbList.appendChild(row);
+      });
+    }
+
+    // ==================== RENDER: EDITOR CONSOLE (PENDING + DAILY MERGER) ====================
+    function renderEditor() {
+      document.getElementById('pendingCountBadge').textContent = state.pending.length;
+      const pList = document.getElementById('pendingQueueList');
+      pList.innerHTML = '';
+
+      if (state.pending.length === 0) {
+        pList.innerHTML = `
+          <div class="p-6 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
+            🎉 Pending Review is completely clear! Upload a file in "⬆️ Share Notes" to test 1-tap approval.
+          </div>
+        `;
+      } else {
+        state.pending.forEach(p => {
+          const destPath = buildDrivePath(p);
+          const row = document.createElement('div');
+          row.className = 'p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3';
+          row.innerHTML = `
+            <div class="space-y-1 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="font-mono font-bold text-sm text-indigo-700">${esc(p.displayName)}</span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800">${esc(p.contentType)}</span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700">${esc(p.scope)}</span>
+                <span class="text-[11px] text-slate-400">${esc(p.size || '2.1 MB')}</span>
+              </div>
+              <p class="text-xs text-slate-700 font-medium">Topics: ${esc(p.topics)}</p>
+              ${p.note ? `<p class="text-[11px] text-rose-600 font-medium">⚠ ${esc(p.note)}</p>` : ''}
+              <p class="text-[11px] font-mono text-slate-500">Target Path: ${destPath}</p>
+            </div>
+            <div class="flex items-center gap-2 self-end md:self-center">
+              <button type="button" data-approve-id="${esc(p.id)}" class="btn-approve-item px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition">
+                ✅ 1-Tap Approve
+              </button>
+              <button type="button" data-reject-id="${esc(p.id)}" class="btn-reject-item px-3 py-1.5 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-semibold transition">
+                ✕ Reject
+              </button>
+            </div>
+          `;
+          pList.appendChild(row);
+        });
+
+        pList.querySelectorAll('.btn-approve-item').forEach(btn => {
+          btn.addEventListener('click', () => approvePendingItem(btn.getAttribute('data-approve-id')));
+        });
+        pList.querySelectorAll('.btn-reject-item').forEach(btn => {
+          btn.addEventListener('click', () => rejectPendingItem(btn.getAttribute('data-reject-id')));
+        });
+      }
+
+      const dailyFiles = state.files.filter(f => f.approved && f.scope === 'DAILY');
+      const dList = document.getElementById('dailyMergeList');
+      dList.innerHTML = '';
+
+      if (dailyFiles.length === 0) {
+        dList.innerHTML = `<p class="text-xs text-slate-400 italic p-2">No unmerged Daily notes currently in archive.</p>`;
+      } else {
+        dailyFiles.forEach(df => {
+          const item = document.createElement('label');
+          item.className = 'flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-indigo-300 text-xs';
+          item.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <input type="checkbox" value="${esc(df.id)}" checked class="daily-merge-check rounded text-indigo-600" />
+              <div>
+                <span class="font-mono font-bold text-slate-800">${esc(df.displayName)}</span>
+                <span class="text-slate-500 ml-1">(${esc(df.subject)} ${esc(df.course)} • ${esc(df.module)})</span>
+                <div class="text-[11px] text-slate-500">${esc(df.topics)}</div>
+              </div>
+            </div>
+            <span class="text-[11px] font-mono text-slate-400">${esc(df.size)}</span>
+          `;
+          dList.appendChild(item);
+        });
+      }
+    }
+
+    async function approvePendingItem(pendId, skipSync) {
+      const idx = state.pending.findIndex(p => p.id === pendId);
+      if (idx === -1) return;
+      if (!state.liveWebAppUrl) { showToast('Not connected to a Drive.', 'warn'); return; }
+
+      const pItem = state.pending[idx];
+      const res = await postToLiveDrive({ action: 'approve', rowId: pItem.rowId || pItem.id });
+      if (!res || !res.ok) {
+        if (res && res.error && res.error !== 'Wrong editor PIN') showToast('Approval failed: ' + res.error, 'warn');
+        return;
+      }
+      showToast(`Approved "${pItem.displayName}" — moved in Drive`, 'success');
+      if (!skipSync) await syncFromLiveDrive(true);
+    }
+
+    async function rejectPendingItem(pendId) {
+      const idx = state.pending.findIndex(p => p.id === pendId);
+      if (idx === -1) return;
+      if (!state.liveWebAppUrl) { showToast('Not connected to a Drive.', 'warn'); return; }
+
+      const target = state.pending[idx];
+      const res = await postToLiveDrive({ action: 'reject', rowId: target.rowId || target.id });
+      if (!res || !res.ok) {
+        if (res && res.error && res.error !== 'Wrong editor PIN') showToast('Reject failed: ' + res.error, 'warn');
+        return;
+      }
+      state.pending.splice(idx, 1);
+      showToast(`Rejected & removed ${target.displayName} from Pending Review`, 'warn');
+      renderEditor();
+    }
+
+    // ==================== MODAL: PREVIEW & QUICK REORGANIZE ====================
+    function openFileModal(fileId) {
+      const f = state.files.find(x => x.id === fileId);
+      if (!f) return;
+      state.activeModalFileId = fileId;
+
+      document.getElementById('modalFileTypeBadge').textContent = f.contentType;
+      document.getElementById('modalFileName').textContent = f.displayName;
+      document.getElementById('modalFilePath').textContent = buildDrivePath(f);
+      document.getElementById('modalContributor').textContent = `${f.name} (+${POINTS_MAP[f.contentType] || 1} pts)`;
+      document.getElementById('modalMonth').textContent = `.${f.month} (${f.sem.toUpperCase()})`;
+      document.getElementById('modalLikes').textContent = `👍 ${f.likes} Likes`;
+      document.getElementById('modalShield').textContent = f.daysOld <= 7
+        ? `🛡️ Active (${7 - f.daysOld} days remaining)`
+        : `Standard Pool (${f.daysOld} days old)`;
+      document.getElementById('modalTopics').textContent = f.topics;
+
+      const previewBox = document.getElementById('modalPreviewBox');
+      if (safeUrl(f.fileUrl)) {
+        previewBox.innerHTML = `
+          <p class="font-bold text-sm mb-2">Live Google Drive File (${esc(f.displayName)})</p>
+          <a href="${esc(safeUrl(f.fileUrl))}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
+            🔗 Open File Directly in Google Drive
+          </a>
+        `;
+      } else if (f.contentType === 'CLASS VIDEOS') {
+        previewBox.innerHTML = `
+          <div class="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-xl mb-2">▶️</div>
+          <p class="font-bold text-sm">Google Drive Native Video Stream (${esc(f.displayName)})</p>
+          <p class="text-xs text-slate-400 mt-1 max-w-md">Streams directly from <code class="text-purple-300">${esc(buildDrivePath(f))}</code> using Google Drive's built-in player without eating phone storage.</p>
+        `;
+      } else {
+        previewBox.innerHTML = `
+          <div class="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-xl mb-2">📄</div>
+          <p class="font-bold text-sm">Google Drive Embedded PDF Viewer (${esc(f.displayName)} • ${esc(f.size)})</p>
+          <p class="text-xs text-slate-400 mt-1 max-w-md">In live Drive mode, this opens the exact Google Drive file from <code class="text-indigo-300">${esc(buildDrivePath(f))}</code>.</p>
+        `;
+      }
+
+      document.getElementById('editModalCourse').value = f.course || 'DSC-B';
+      document.getElementById('editModalModule').value = f.module || 'MODULE';
+      document.getElementById('editModalMonth').value = f.month || 'SEP';
+      document.getElementById('editModalTopics').value = f.topics || '';
+
+      document.getElementById('modalEditorBlock').classList.toggle('hidden', !state.editorUnlocked);
+
+      const modal = document.getElementById('fileModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeFileModal() {
+      const modal = document.getElementById('fileModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      state.activeModalFileId = null;
+    }
+
+    // ==================== UPGRADED GOOGLE APPS SCRIPT GENERATOR (ZERO REGEX ESCAPE HAZARDS) ====================
+    function generateAppsScriptCode(rootFolderId) {
+      const cleanId = (rootFolderId || 'PASTE_YOUR_NEW_TEST_FOLDER_ID_HERE').trim();
+      const lines = [
+        '// After pasting new code: Deploy > Manage deployments > pencil icon > Version: New version > Deploy (keeps the SAME URL).',
+        'const ROOT_FOLDER_ID = "' + cleanId + '";',
+        'const PENDING_FOLDER_NAME = "🕓 PENDING REVIEW";',
+        'const OVERFLOW_FOLDER_NAME = "_OVERFLOW";',
+        'const CONFIG_SHEET_NAME = "CONFIG";',
+        '// Two SEPARATE tabs: (1) the upload/form-responses tab and (2) the CONFIG tab (PIN + settings).',
+        '// Leave UPLOADS_SHEET_NAME empty to auto-detect the form tab. Only fill it if you have several form tabs, e.g. "Form Responses 1".',
+        'const UPLOADS_SHEET_NAME = "";',
+        'const CONFIG_KEYS = ["EDITOR_PIN", "MAX_FILES_PER_MODULE", "NEW_FILE_GRACE_DAYS", "SUBJECTS", "COURSES"];',
+        '',
+        'const SUBJECTS_NO_COURSE_LAYER = ["ENG", "FRENCH"];',
+        'const ECO_COURSES = ["DSC-A", "DSC-B"];',
+        'const DEFAULT_COURSES = ["DSC-B", "DSC-C", "MDC"];',
+        'const ALL_SUBJECTS = ["BIO", "CHEM", "CS", "ECO", "ENG", "EVS", "FRENCH", "MATHS", "PHYSICS", "STATI"];',
+        'const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];',
+        '',
+        'const SUBJECT_ALIASES = {',
+        '  "math": "MATHS", "maths": "MATHS", "mathematics": "MATHS",',
+        '  "stat": "STATI", "stats": "STATI", "stati": "STATI", "statistics": "STATI",',
+        '  "english": "ENG", "eng": "ENG",',
+        '  "economics": "ECO", "eco": "ECO",',
+        '  "cs": "CS", "computerscience": "CS",',
+        '  "biology": "BIO", "bio": "BIO",',
+        '  "chemistry": "CHEM", "chem": "CHEM",',
+        '  "environmentalscience": "EVS", "evs": "EVS"',
+        '};',
+        '',
+        'const CONTENT_ALIASES = {',
+        '  "notes": "NOTES", "note": "NOTES",',
+        '  "qpaper": "Q.PAPERS", "qpapers": "Q.PAPERS", "questionpaper": "Q.PAPERS", "questionpapers": "Q.PAPERS",',
+        '  "pyq": "Q.PAPERS", "pyqs": "Q.PAPERS",',
+        '  "syllabusbreakdown": "SYLLABUS BREAKDOWN", "syllabus": "SYLLABUS BREAKDOWN",',
+        '  "classvideos": "CLASS VIDEOS", "classvideo": "CLASS VIDEOS", "videos": "CLASS VIDEOS", "video": "CLASS VIDEOS"',
+        '};',
+        '',
+        'const POINTS_TABLE = {',
+        '  "NOTES": 1,',
+        '  "Q.PAPERS": 2,',
+        '  "SYLLABUS BREAKDOWN": 1,',
+        '  "CLASS VIDEOS": 2',
+        '};',
+        '',
+        'const COL = {',
+        '  TIMESTAMP: 0,',
+        '  NAME: 1,',
+        '  SEM: 2,',
+        '  SUBJECT: 3,',
+        '  COURSE: 4,',
+        '  CONTENT_TYPE: 5,',
+        '  MODULE: 6,',
+        '  MONTH: 7,',
+        '  FILE: 8',
+        '};',
+        '',
+        'const FORM_COL_HEADERS = ["Timestamp", "Name", "Sem", "Subject", "Course", "Content Type", "Module", "Month", "File"];',
+        'const EXTRA_COL_HEADERS = [',
+        '  "Status",',
+        '  "File Link",',
+        '  "Approved",',
+        '  "Processed",',
+        '  "Points",',
+        '  "Public Path",',
+        '  "Likes",',
+        '  "Topics",',
+        '  "Approved Timestamp",',
+        '  "Upload Scope"',
+        '];',
+        '',
+        'const EDITOR_ACTIONS = ["approve", "reject", "editProps", "delete", "verifyPin", "getConfig", "setForwardUrl", "postNotice", "deleteNotice"];',
+        '',
+        '// ================= SETUP =================',
+        'function setup() {',
+        '  ensureFolderStructure(getRootFolder());',
+        '  const ss = SpreadsheetApp.getActiveSpreadsheet();',
+        '  const sheet = getMainSheet();',
+        '',
+        '  // Lock Columns A-I (1-9) for the 9 base/form columns and Columns J-S (10-19) for the 10 helper columns',
+        '  const currentLastCol = sheet.getLastColumn();',
+        '  const currentHeaders = currentLastCol > 0 ? sheet.getRange(1, 1, 1, currentLastCol).getValues()[0] : [];',
+        '  for (let i = 0; i < FORM_COL_HEADERS.length; i++) {',
+        '    const cellVal = currentHeaders[i] || "";',
+        '    if (!clean(cellVal) || findCol(EXTRA_COL_HEADERS, cellVal) > -1) {',
+        '      sheet.getRange(1, i + 1).setValue(FORM_COL_HEADERS[i]);',
+        '    }',
+        '  }',
+        '',
+        '  const lastCol = Math.max(sheet.getLastColumn(), FORM_COL_HEADERS.length);',
+        '  const headerRow = sheet.getRange(1, 1, 1, lastCol).getValues()[0];',
+        '  const helperSlice = headerRow.slice(FORM_COL_HEADERS.length);',
+        '',
+        '  let nextCol = lastCol + 1;',
+        '  EXTRA_COL_HEADERS.forEach(function(header) {',
+        '    if (findCol(helperSlice, header) === -1) {',
+        '      sheet.getRange(1, nextCol).setValue(header);',
+        '      nextCol++;',
+        '    }',
+        '  });',
+        '',
+        '  const newLastCol = sheet.getLastColumn();',
+        '  const newHeaderRow = sheet.getRange(1, 1, 1, newLastCol).getValues()[0];',
+        '  const approvedColIndex = findCol(newHeaderRow, "Approved") + 1;',
+        '',
+        '  const rule = SpreadsheetApp.newDataValidation()',
+        '    .requireValueInList(["YES", "NO"], true)',
+        '    .setAllowInvalid(false)',
+        '    .build();',
+        '  const validationRows = Math.max(1, sheet.getMaxRows() - 1);',
+        '  sheet.getRange(2, approvedColIndex, validationRows, 1).setDataValidation(rule);',
+        '',
+        '  ["Approved", "Processed"].forEach(function(h) {',
+        '    const col = findCol(newHeaderRow, h) + 1;',
+        '    if (col > 0 && sheet.getLastRow() > 1) {',
+        '      const rng = sheet.getRange(2, col, sheet.getLastRow() - 1, 1);',
+        '      rng.setValues(rng.getValues().map(function(r) { return [up(r[0])]; }));',
+        '    }',
+        '  });',
+        '',
+        '  // CONFIG lives on its OWN tab. This also moves any stray config rows out of the upload tab.',
+        '  ensureConfigSheet(sheet);',
+        '  ss.setActiveSheet(sheet);',
+        '',
+        '  const triggers = ScriptApp.getProjectTriggers();',
+        '  if (!triggers.some(function(t) { return t.getHandlerFunction() === "onFormSubmit"; })) {',
+        '    ScriptApp.newTrigger("onFormSubmit").forSpreadsheet(ss).onFormSubmit().create();',
+        '  }',
+        '  if (!triggers.some(function(t) { return t.getHandlerFunction() === "onSheetEdit"; })) {',
+        '    ScriptApp.newTrigger("onSheetEdit").forSpreadsheet(ss).onEdit().create();',
+        '  }',
+        '',
+        '  try { SpreadsheetApp.getUi().alert("Setup complete! Upload tab and CONFIG tab are now separate, Year 1-5 folders ready, and triggers installed."); } catch (e) {}',
+        '}',
+        '',
+        'function onOpen() {',
+        '  SpreadsheetApp.getUi()',
+        '    .createMenu("Archive Tools")',
+        '    .addItem("Process Approved Files", "processApprovedFilesMenu")',
+        '    .addItem("Repair Sheets (separate CONFIG tab)", "repairSheets")',
+        '    .addToUi();',
+        '}',
+        '',
+        'function processApprovedFilesMenu() {',
+        '  withLock(function() { processApprovedFiles(false); });',
+        '}',
+        '',
+        'function onSheetEdit(e) {',
+        '  if (!e || !e.range) return;',
+        '  const sheet = e.range.getSheet();',
+        '  if (sheet.getSheetId() !== getMainSheet().getSheetId() || e.range.getRow() < 2) return;',
+        '  const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];',
+        '  const approvedCol = findCol(headerRow, "Approved") + 1;',
+        '  if (approvedCol < 1) return;',
+        '  const firstCol = e.range.getColumn();',
+        '  const lastCol = firstCol + e.range.getNumColumns() - 1;',
+        '  if (approvedCol >= firstCol && approvedCol <= lastCol) {',
+        '    withLock(function() { processApprovedFiles(true); });',
+        '  }',
+        '}',
+        '',
+        'function onFormSubmit(e) {',
+        '  if (!e || !e.range) return;',
+        '  // Only the upload form\'s tab (the FIRST tab) is handled. Responses from any other form or tab are left untouched.',
+        '  if (e.range.getSheet().getSheetId() !== getMainSheet().getSheetId()) return;',
+        '  withLock(function() {',
+        '    const sheet = e.range.getSheet();',
+        '    const row = e.range.getRow();',
+        '    const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];',
+        '    const col = function(name) { return findCol(headerRow, name) + 1; };',
+        '    if (col("Status") < 1 || col("File Link") < 1 || col("Approved") < 1) return; // setup() has not been run on this tab',
+        '    try {',
+        '      const values = sheet.getRange(row, 1, 1, COL.FILE + 1).getValues()[0];',
+        '      const fileUrlOrId = values[COL.FILE];',
+        '      if (!fileUrlOrId) {',
+        '        throw new Error("No file value received from the form — check that the File Upload question is question #8.");',
+        '      }',
+        '      const c = canonRow(values[COL.NAME], values[COL.SEM], values[COL.SUBJECT], values[COL.COURSE],',
+        '        values[COL.CONTENT_TYPE], values[COL.MODULE], values[COL.MONTH]);',
+        '      const root = getRootFolder();',
+        '      const pendingFolder = getOrCreateFolder(root, PENDING_FOLDER_NAME);',
+        '      const file = getFileFromFormUpload(fileUrlOrId);',
+        '      file.setName(getUniqueFileName(pendingFolder, c.name + "." + c.month, file.getId()));',
+        '      moveFileTo(file, pendingFolder);',
+        '      writeCanonToRow(sheet, row, c);',
+        '      sheet.getRange(row, col("Status")).setValue("Uploaded OK — pending approval");',
+        '      sheet.getRange(row, col("File Link")).setValue(file.getUrl());',
+        '      sheet.getRange(row, col("Approved")).setValue("NO");',
+        '      sheet.getRange(row, col("Processed")).setValue("");',
+        '      sheet.getRange(row, col("Points")).setValue(getPoints(c.contentType));',
+        '      sheet.getRange(row, col("Public Path")).setValue("");',
+        '      if (col("Likes") > 0) sheet.getRange(row, col("Likes")).setValue(0);',
+        '      if (col("Upload Scope") > 0) sheet.getRange(row, col("Upload Scope")).setValue("COMPLETE");',
+        '    } catch (err) {',
+        '      sheet.getRange(row, col("Status")).setValue("ERROR: " + err.message);',
+        '    }',
+        '  });',
+        '}',
+        '',
+        'function processApprovedFiles(silentMode) {',
+        '  const sheet = getMainSheet();',
+        '  const data = sheet.getDataRange().getValues();',
+        '  if (data.length < 2) return 0;',
+        '  const headerRow = data[0];',
+        '',
+        '  const statusCol = findCol(headerRow, "Status");',
+        '  const fileLinkCol = findCol(headerRow, "File Link");',
+        '  const approvedCol = findCol(headerRow, "Approved");',
+        '  const processedCol = findCol(headerRow, "Processed");',
+        '  const pointsCol = findCol(headerRow, "Points");',
+        '  const publicPathCol = findCol(headerRow, "Public Path");',
+        '  const likesCol = findCol(headerRow, "Likes");',
+        '  const topicsCol = findCol(headerRow, "Topics");',
+        '  const approvedTsCol = findCol(headerRow, "Approved Timestamp");',
+        '',
+        '  if (approvedCol === -1 || processedCol === -1 || statusCol === -1) {',
+        '    if (!silentMode) {',
+        '      try { SpreadsheetApp.getUi().alert("Run setup() first - the helper columns are missing."); } catch (x) {}',
+        '    }',
+        '    return 0;',
+        '  }',
+        '',
+        '  const cfg = getConfig();',
+        '  const root = getRootFolder();',
+        '  const pendingFolder = getOrCreateFolder(root, PENDING_FOLDER_NAME);',
+        '  let processedCount = 0;',
+        '',
+        '  for (let r = 1; r < data.length; r++) {',
+        '    const rowData = data[r];',
+        '    if (isConfigKeyRow(rowData)) continue;',
+        '    const approved = up(rowData[approvedCol]);',
+        '    const processedState = up(rowData[processedCol]);',
+        '',
+        '    if (approved !== "YES" || ["YES", "OVERFLOW", "REJECTED"].indexOf(processedState) > -1) continue;',
+        '',
+        '    try {',
+        '      const c = canonRow(rowData[COL.NAME], rowData[COL.SEM], rowData[COL.SUBJECT], rowData[COL.COURSE],',
+        '        rowData[COL.CONTENT_TYPE], rowData[COL.MODULE], rowData[COL.MONTH]);',
+        '      const fileUrl = (fileLinkCol > -1 && rowData[fileLinkCol]) || rowData[COL.FILE];',
+        '      const topics = topicsCol > -1 ? String(rowData[topicsCol] || "").trim() : "";',
+        '',
+        '      let file = null;',
+        '      try {',
+        '        file = getFileFromFormUpload(fileUrl);',
+        '      } catch (err) {',
+        '        file = findFileCaseInsensitive(pendingFolder, c.name + "." + c.month);',
+        '      }',
+        '      if (!file) {',
+        '        sheet.getRange(r + 1, statusCol + 1).setValue("ERROR: file not found in Pending Review");',
+        '        continue;',
+        '      }',
+        '',
+        '      let baseFolder = root;',
+        '      const rootNorm = normalizeText(root.getName());',
+        '      if (rootNorm.indexOf("year") !== 0) {',
+        '        baseFolder = getOrCreateFolder(root, c.year);',
+        '      }',
+        '',
+        '      let destFolder = getOrCreateFolder(baseFolder, c.sem);',
+        '      destFolder = getOrCreateFolder(destFolder, c.subject);',
+        '      if (c.hasCourse) destFolder = getOrCreateFolder(destFolder, c.course);',
+        '      destFolder = getOrCreateFolder(destFolder, c.contentType);',
+        '',
+        '      if (c.contentType === "NOTES" || c.contentType === "CLASS VIDEOS") {',
+        '        destFolder = c.hasCourse',
+        '          ? getOrCreateFolder(destFolder, c.moduleLabel)',
+        '          : getOrCreateFolder(destFolder, c.month);',
+        '      }',
+        '',
+        '      file.setName(getUniqueFileName(destFolder, c.name + "." + c.month, file.getId()));',
+        '      if (topics) {',
+        '        file.setDescription("Topics: " + topics + " | Sem: " + c.sem + " | Month: " + c.month);',
+        '      }',
+        '      moveFileTo(file, destFolder);',
+        '',
+        '      const nowIso = new Date().toISOString();',
+        '      const fullPath = getFullPath(destFolder);',
+        '',
+        '      writeCanonToRow(sheet, r + 1, c);',
+        '      sheet.getRange(r + 1, processedCol + 1).setValue("YES");',
+        '      sheet.getRange(r + 1, publicPathCol + 1).setValue(fullPath);',
+        '      sheet.getRange(r + 1, statusCol + 1).setValue("Moved to Public");',
+        '      if (pointsCol > -1) sheet.getRange(r + 1, pointsCol + 1).setValue(getPoints(c.contentType));',
+        '      if (likesCol > -1 && rowData[likesCol] === "") sheet.getRange(r + 1, likesCol + 1).setValue(0);',
+        '      if (approvedTsCol > -1) sheet.getRange(r + 1, approvedTsCol + 1).setValue(nowIso);',
+        '',
+        '      data[r][processedCol] = "YES";',
+        '      data[r][publicPathCol] = fullPath;',
+        '      if (approvedTsCol > -1) data[r][approvedTsCol] = nowIso;',
+        '      if (likesCol > -1 && data[r][likesCol] === "") data[r][likesCol] = 0;',
+        '',
+        '      enforceTopFiveInFolder(sheet, data, fullPath, destFolder, root, cfg);',
+        '      processedCount++;',
+        '    } catch (err) {',
+        '      sheet.getRange(r + 1, statusCol + 1).setValue("ERROR: " + err.message);',
+        '    }',
+        '  }',
+        '',
+        '  if (!silentMode) {',
+        '    try { SpreadsheetApp.getUi().alert(processedCount + " file(s) moved out of Pending Review."); } catch (e) {}',
+        '  }',
+        '  return processedCount;',
+        '}',
+        '',
+        'function enforceTopFiveInFolder(sheet, data, targetPublicPath, destFolder, root, cfg) {',
+        '  const headerRow = data[0];',
+        '  const processedCol = findCol(headerRow, "Processed");',
+        '  const publicPathCol = findCol(headerRow, "Public Path");',
+        '  const likesCol = findCol(headerRow, "Likes");',
+        '  const approvedTsCol = findCol(headerRow, "Approved Timestamp");',
+        '  const fileLinkCol = findCol(headerRow, "File Link");',
+        '  const statusCol = findCol(headerRow, "Status");',
+        '',
+        '  if (likesCol === -1 || approvedTsCol === -1) return;',
+        '',
+        '  const MAX_FILES = cfg ? cfg.MAX_FILES_PER_MODULE : 5;',
+        '  const GRACE_MS = (cfg ? cfg.NEW_FILE_GRACE_DAYS : 7) * 24 * 60 * 60 * 1000;',
+        '  const now = new Date().getTime();',
+        '',
+        '  const activeRows = [];',
+        '  for (let r = 1; r < data.length; r++) {',
+        '    if (up(data[r][processedCol]) === "YES" &&',
+        '        up(data[r][publicPathCol]) === up(targetPublicPath)) {',
+        '      const approvedTime = data[r][approvedTsCol] ? new Date(data[r][approvedTsCol]).getTime() : 0;',
+        '      const isShielded = (now - approvedTime) <= GRACE_MS;',
+        '      activeRows.push({',
+        '        dataIndex: r,',
+        '        rowIndex: r + 1,',
+        '        likes: Number(data[r][likesCol] || 0),',
+        '        isShielded: isShielded,',
+        '        fileUrl: data[r][fileLinkCol]',
+        '      });',
+        '    }',
+        '  }',
+        '',
+        '  if (activeRows.length <= MAX_FILES) return;',
+        '',
+        '  const eligible = activeRows.filter(function(item) { return !item.isShielded; }).sort(function(a, b) { return b.likes - a.likes; });',
+        '  const shieldedCount = activeRows.length - eligible.length;',
+        '  const allowedEligibleSlots = Math.max(0, MAX_FILES - shieldedCount);',
+        '',
+        '  if (eligible.length <= allowedEligibleSlots) return;',
+        '',
+        '  const cutoffLikes = allowedEligibleSlots > 0 ? eligible[allowedEligibleSlots - 1].likes : Infinity;',
+        '  const overflowFolder = getOrCreateFolder(root, OVERFLOW_FOLDER_NAME);',
+        '',
+        '  eligible.forEach(function(item, idx) {',
+        '    if (idx >= allowedEligibleSlots && item.likes < cutoffLikes) {',
+        '      try {',
+        '        const f = getFileFromFormUpload(item.fileUrl);',
+        '        moveFileTo(f, overflowFolder);',
+        '        sheet.getRange(item.rowIndex, processedCol + 1).setValue("OVERFLOW");',
+        '        sheet.getRange(item.rowIndex, statusCol + 1).setValue("Popped off to _Overflow (Lowest Likes)");',
+        '        data[item.dataIndex][processedCol] = "OVERFLOW";',
+        '      } catch (err) {}',
+        '    }',
+        '  });',
+        '}',
+        '',
+        'function doGet(e) {',
+        '  if (e && e.parameter && e.parameter.action === "health") {',
+        '    return jsonResponse(getHealth());',
+        '  }',
+        '  if (e && e.parameter && e.parameter.action === "verifyPin") {',
+        '    const ok = clean(e.parameter.pin) === clean(getConfig().EDITOR_PIN);',
+        '    return jsonResponse({ ok: ok, error: ok ? "" : "Wrong editor PIN" });',
+        '  }',
+        '',
+        '  const sheet = getMainSheet();',
+        '  const data = sheet.getDataRange().getValues();',
+        '  if (data.length <= 1) {',
+        '    return jsonResponse({ ok: true, files: [], pending: [], announcements: getNotices(), forwardUrl: getForwardUrl() });',
+        '  }',
+        '',
+        '  const h = data[0];',
+        '  const idx = function(name) { return findCol(h, name); };',
+        '  const files = [];',
+        '  const pending = [];',
+        '  const nowMs = new Date().getTime();',
+        '',
+        '  for (let r = 1; r < data.length; r++) {',
+        '    const row = data[r];',
+        '    if (isConfigKeyRow(row)) continue;',
+        '    if (!row[COL.NAME] && !row[COL.SUBJECT] && !row[COL.FILE]) continue;',
+        '',
+        '    const processed = up(row[idx("Processed")] || "");',
+        '    if (processed === "OVERFLOW" || processed === "REJECTED") continue;',
+        '',
+        '    const c = canonRow(row[COL.NAME], row[COL.SEM], row[COL.SUBJECT], row[COL.COURSE],',
+        '      row[COL.CONTENT_TYPE], row[COL.MODULE], row[COL.MONTH]);',
+        '',
+        '    const approvedRaw = idx("Approved Timestamp") > -1 ? row[idx("Approved Timestamp")] : "";',
+        '    const approvedMs = approvedRaw ? new Date(approvedRaw).getTime() : nowMs;',
+        '    const daysOld = Math.max(0, Math.floor((nowMs - approvedMs) / 86400000));',
+        '',
+        '    const item = {',
+        '      id: "row_" + (r + 1),',
+        '      rowId: r + 1,',
+        '      name: c.name,',
+        '      month: c.month,',
+        '      displayName: c.name + "." + c.month,',
+        '      sem: "SEM" + c.semNum,',
+        '      subject: c.subject,',
+        '      course: c.course,',
+        '      contentType: c.contentType,',
+        '      module: c.moduleLabel,',
+        '      scope: normalizeScope(idx("Upload Scope") > -1 ? row[idx("Upload Scope")] : ""),',
+        '      topics: idx("Topics") > -1 ? (clean(row[idx("Topics")]) || "General Notes") : "General Notes",',
+        '      likes: idx("Likes") > -1 ? Number(row[idx("Likes")] || 0) : 0,',
+        '      daysOld: daysOld,',
+        '      points: Number(row[idx("Points")] || getPoints(c.contentType)),',
+        '      publicPath: String(row[idx("Public Path")] || ""),',
+        '      fileUrl: String(row[idx("File Link")] || row[COL.FILE] || "")',
+        '    };',
+        '',
+        '    if (processed === "YES") {',
+        '      item.approved = true;',
+        '      files.push(item);',
+        '    } else {',
+        '      item.approved = false;',
+        '      const statusText = idx("Status") > -1 ? clean(row[idx("Status")]) : "";',
+        '      if (up(statusText).indexOf("ERROR") === 0) item.note = statusText;',
+        '      pending.push(item);',
+        '    }',
+        '  }',
+        '',
+        '  return jsonResponse({ ok: true, files: files, pending: pending, announcements: getNotices(), forwardUrl: getForwardUrl() });',
+        '}',
+        '',
+        'function doPost(e) {',
+        '  const lock = LockService.getScriptLock();',
+        '  try {',
+        '    lock.waitLock(30000);',
+        '    const body = JSON.parse(e.postData.contents);',
+        '    const sheet = getMainSheet();',
+        '    const h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];',
+        '    const idx = function(name) { return findCol(h, name) + 1; };',
+        '    const targetRow = Number(onlyDigits(body.rowId || body.fileId || ""));',
+        '',
+        '    if (EDITOR_ACTIONS.indexOf(body.action) > -1) {',
+        '      if (clean(body.pin) !== clean(getConfig().EDITOR_PIN)) {',
+        '        return jsonResponse({ ok: false, error: "Wrong editor PIN" });',
+        '      }',
+        '    }',
+        '',
+        '    if (body.action === "verifyPin") {',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '',
+        '    if (body.action === "getConfig") {',
+        '      let rootName = "";',
+        '      try { rootName = getRootFolder().getName(); } catch (x) {}',
+        '      return jsonResponse({ ok: true, rootFolderId: getRootFolderId(), rootFolderName: rootName, forwardUrl: getForwardUrl() });',
+        '    }',
+        '',
+        '    if (body.action === "setForwardUrl") {',
+        '      const fwd = clean(body.forwardUrl);',
+        '      if (fwd && (fwd.indexOf("https://script.google.com/") !== 0 || fwd.slice(-5) !== "/exec")) {',
+        '        return jsonResponse({ ok: false, error: "Not a valid Web App URL" });',
+        '      }',
+        '      PropertiesService.getScriptProperties().setProperty("FORWARD_URL", fwd);',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '',
+        '    if (body.action === "postNotice") {',
+        '      const noticeTitle = clean(body.title).substring(0, 100);',
+        '      const noticeBody = clean(body.body).substring(0, 300);',
+        '      if (!noticeTitle || !noticeBody) {',
+        '        return jsonResponse({ ok: false, error: "A notice needs a headline and details" });',
+        '      }',
+        '      const noticeList = readNotices();',
+        '      noticeList.unshift({ id: "n" + new Date().getTime(), title: noticeTitle, body: noticeBody, ts: new Date().getTime() });',
+        '      saveNotices(noticeList.slice(0, 12));',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '',
+        '    if (body.action === "deleteNotice") {',
+        '      saveNotices(readNotices().filter(function(n) { return n.id !== String(body.id); }));',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '',
+        '    if (body.action === "upload") {',
+        '      if (!body.base64Data) {',
+        '        return jsonResponse({ ok: false, error: "No file attached" });',
+        '      }',
+        '      if (idx("Approved") < 1 || idx("Status") < 1 || idx("File Link") < 1) {',
+        '        return jsonResponse({ ok: false, error: "The Sheet is not set up yet - the Editor must run setup() once in Apps Script" });',
+        '      }',
+        '      const c = canonRow(body.name, body.sem, body.subject, body.course, body.contentType, body.module, body.month);',
+        '      const root = getRootFolder();',
+        '      const pendingFolder = getOrCreateFolder(root, PENDING_FOLDER_NAME);',
+        '',
+        '      const bytes = Utilities.base64Decode(body.base64Data);',
+        '      const blob = Utilities.newBlob(bytes, body.mimeType || "application/pdf", body.fileName || "upload.pdf");',
+        '      const driveFile = pendingFolder.createFile(blob);',
+        '      driveFile.setName(getUniqueFileName(pendingFolder, c.name + "." + c.month, driveFile.getId()));',
+        '',
+        '      const newRow = new Array(h.length).fill("");',
+        '      newRow[COL.TIMESTAMP] = new Date();',
+        '      newRow[COL.NAME] = c.name;',
+        '      newRow[COL.SEM] = c.sem;',
+        '      newRow[COL.SUBJECT] = c.subject;',
+        '      newRow[COL.COURSE] = c.course;',
+        '      newRow[COL.CONTENT_TYPE] = c.contentType;',
+        '      newRow[COL.MODULE] = c.modNum ? c.moduleLabel : "";',
+        '      newRow[COL.MONTH] = c.month;',
+        '      newRow[COL.FILE] = driveFile.getUrl();',
+        '      if (idx("Status") > 0) newRow[idx("Status") - 1] = "Uploaded via Web App — pending approval";',
+        '      if (idx("File Link") > 0) newRow[idx("File Link") - 1] = driveFile.getUrl();',
+        '      if (idx("Approved") > 0) newRow[idx("Approved") - 1] = "NO";',
+        '      if (idx("Points") > 0) newRow[idx("Points") - 1] = getPoints(c.contentType);',
+        '      if (idx("Likes") > 0) newRow[idx("Likes") - 1] = 0;',
+        '      if (idx("Topics") > 0) newRow[idx("Topics") - 1] = clean(body.topics);',
+        '      if (idx("Upload Scope") > 0) newRow[idx("Upload Scope") - 1] = normalizeScope(body.scope);',
+        '',
+        '      sheet.appendRow(newRow);',
+        '      SpreadsheetApp.flush();',
+        '      let savedInPath = PENDING_FOLDER_NAME;',
+        '      try { savedInPath = getFullPath(pendingFolder); } catch (pathErr) {}',
+        '      return jsonResponse({ ok: true, rowId: sheet.getLastRow(), fileUrl: driveFile.getUrl(), savedIn: savedInPath, sheetName: sheet.getName(), savedName: driveFile.getName() });',
+        '    }',
+        '',
+        '    if (body.action === "approve" && targetRow >= 2) {',
+        '      sheet.getRange(targetRow, idx("Approved")).setValue("YES");',
+        '      processApprovedFiles(true);',
+        '      if (up(sheet.getRange(targetRow, idx("Processed")).getValue()) !== "YES") {',
+        '        const why = clean(sheet.getRange(targetRow, idx("Status")).getValue());',
+        '        sheet.getRange(targetRow, idx("Approved")).setValue("NO");',
+        '        return jsonResponse({ ok: false, error: why || "File could not be moved - see the Status column in the Sheet" });',
+        '      }',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '',
+        '    if (body.action === "reject" && targetRow >= 2) {',
+        '      sheet.getRange(targetRow, idx("Status")).setValue("Rejected by Editor");',
+        '      sheet.getRange(targetRow, idx("Processed")).setValue("REJECTED");',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '',
+        '    if (body.action === "like" && targetRow >= 2 && idx("Likes") > 0) {',
+        '      const cell = sheet.getRange(targetRow, idx("Likes"));',
+        '      const step = Number(body.delta) < 0 ? -1 : 1;',
+        '      const nextLikes = Math.max(0, Number(cell.getValue() || 0) + step);',
+        '      cell.setValue(nextLikes);',
+        '      return jsonResponse({ ok: true, likes: nextLikes });',
+        '    }',
+        '',
+        '    if (body.action === "editProps" && targetRow >= 2) {',
+        '      if (body.course) sheet.getRange(targetRow, COL.COURSE + 1).setValue(body.course);',
+        '      if (body.module) sheet.getRange(targetRow, COL.MODULE + 1).setValue(body.module);',
+        '      if (body.month) sheet.getRange(targetRow, COL.MONTH + 1).setValue(body.month);',
+        '      if (body.topics !== undefined && idx("Topics") > 0) {',
+        '        sheet.getRange(targetRow, idx("Topics")).setValue(clean(body.topics));',
+        '      }',
+        '      sheet.getRange(targetRow, idx("Processed")).setValue("");',
+        '      processApprovedFiles(true);',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '',
+        '    if (body.action === "delete" && targetRow >= 2) {',
+        '      const link = sheet.getRange(targetRow, idx("File Link")).getValue();',
+        '      if (link) {',
+        '        const root = getRootFolder();',
+        '        const overflow = getOrCreateFolder(root, OVERFLOW_FOLDER_NAME);',
+        '        moveFileTo(getFileFromFormUpload(link), overflow);',
+        '      }',
+        '      sheet.getRange(targetRow, idx("Processed")).setValue("OVERFLOW");',
+        '      sheet.getRange(targetRow, idx("Status")).setValue("Moved to _Overflow (Deleted by Editor)");',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '',
+        '    return jsonResponse({ ok: false, error: "Unknown action" });',
+        '  } catch (err) {',
+        '    return jsonResponse({ ok: false, error: err.message });',
+        '  } finally {',
+        '    try { lock.releaseLock(); } catch (x) {}',
+        '  }',
+        '}',
+        '',
+        '// Public, read-only self-check. Tells every device whether uploads can really work (no private data returned).',
+        'function getHealth() {',
+        '  const out = { ok: true, folderOk: false, uploadsSheet: "", configSheet: false, setupDone: false, pendingFolder: PENDING_FOLDER_NAME, rootFolderName: "", problems: [] };',
+        '  try {',
+        '    const root = getRootFolder();',
+        '    out.rootFolderName = root.getName();',
+        '    getOrCreateFolder(root, PENDING_FOLDER_NAME);',
+        '    out.folderOk = true;',
+        '  } catch (err) {',
+        '    out.problems.push("Script cannot open the Drive folder: " + err.message + " (redeploy as Execute as: Me, and check ROOT_FOLDER_ID)");',
+        '  }',
+        '  try {',
+        '    const sh = getMainSheet();',
+        '    out.uploadsSheet = sh.getName();',
+        '    const lc = sh.getLastColumn();',
+        '    const hdr = lc > 0 ? sh.getRange(1, 1, 1, lc).getValues()[0] : [];',
+        '    out.setupDone = findCol(hdr, "Approved") > -1 && findCol(hdr, "Status") > -1 && findCol(hdr, "File Link") > -1;',
+        '    if (!out.setupDone) out.problems.push("Run setup() once - the helper columns (Status, File Link, Approved...) are missing");',
+        '  } catch (err) {',
+        '    out.problems.push("Upload sheet problem: " + err.message);',
+        '  }',
+        '  out.configSheet = !!getConfigSheet();',
+        '  if (!out.configSheet) out.problems.push("CONFIG tab missing - run setup()");',
+        '  out.ok = out.problems.length === 0;',
+        '  return out;',
+        '}',
+        'function jsonResponse(obj) {',
+        '  return ContentService.createTextOutput(JSON.stringify(obj))',
+        '    .setMimeType(ContentService.MimeType.JSON);',
+        '}',
+        '',
+        '// ================= CHARACTER-SAFE HELPERS (NO REGEX ESCAPE ISSUES) =================',
+        'function clean(raw) {',
+        '  const s = String(raw == null ? "" : raw).trim();',
+        '  return s.split(" ").filter(Boolean).join(" ");',
+        '}',
+        '',
+        'function up(raw) {',
+        '  return clean(raw).toUpperCase();',
+        '}',
+        '',
+        'function onlyDigits(raw) {',
+        '  const s = String(raw == null ? "" : raw);',
+        '  let out = "";',
+        '  for (let i = 0; i < s.length; i++) {',
+        '    const ch = s.charAt(i);',
+        '    if (ch >= "0" && ch <= "9") out += ch;',
+        '  }',
+        '  return out;',
+        '}',
+        '',
+        'function normalizeText(raw) {',
+        '  const s = String(raw == null ? "" : raw).toLowerCase();',
+        '  let out = "";',
+        '  for (let i = 0; i < s.length; i++) {',
+        '    const ch = s.charAt(i);',
+        '    if ((ch >= "a" && ch <= "z") || (ch >= "0" && ch <= "9")) out += ch;',
+        '  }',
+        '  return out;',
+        '}',
+        '',
+        'function normalizeName(raw) {',
+        '  return up(raw) || "ANON";',
+        '}',
+        '',
+        'function normalizeSubject(raw) {',
+        '  return SUBJECT_ALIASES[normalizeText(raw)] || up(raw) || "CS";',
+        '}',
+        '',
+        'function hasCourseLayer(subject) {',
+        '  return SUBJECTS_NO_COURSE_LAYER.indexOf(subject) === -1;',
+        '}',
+        '',
+        'function resolveCourse(subject, courseRaw) {',
+        '  if (!hasCourseLayer(subject)) return "NONE";',
+        '  const allowed = subject === "ECO" ? ECO_COURSES : DEFAULT_COURSES;',
+        '  const key = normalizeText(courseRaw);',
+        '  for (let i = 0; i < allowed.length; i++) {',
+        '    if (normalizeText(allowed[i]) === key) return allowed[i];',
+        '  }',
+        '  return allowed[0];',
+        '}',
+        '',
+        'function normalizeContentType(raw) {',
+        '  return CONTENT_ALIASES[normalizeText(raw)] || "NOTES";',
+        '}',
+        '',
+        'function normalizeMonth(raw) {',
+        '  const s = up(raw);',
+        '  let letters = "";',
+        '  for (let i = 0; i < s.length; i++) {',
+        '    const ch = s.charAt(i);',
+        '    if (ch >= "A" && ch <= "Z") letters += ch;',
+        '  }',
+        '  letters = letters.substring(0, 3);',
+        '  if (MONTHS.indexOf(letters) > -1) return letters;',
+        '  return s || "GEN";',
+        '}',
+        '',
+        'function normalizeModuleNumber(raw) {',
+        '  return onlyDigits(raw);',
+        '}',
+        '',
+        'function normalizeSemesterNumber(raw) {',
+        '  const d = onlyDigits(raw);',
+        '  return d ? parseInt(d, 10) : 1;',
+        '}',
+        '',
+        'function canonRow(name, sem, subject, course, contentType, module, month) {',
+        '  const subj = normalizeSubject(subject);',
+        '  const semNum = normalizeSemesterNumber(sem);',
+        '  const yearNum = Math.min(5, Math.max(1, Math.ceil(semNum / 2)));',
+        '  const modNum = normalizeModuleNumber(module);',
+        '  return {',
+        '    name: normalizeName(name),',
+        '    semNum: semNum,',
+        '    sem: "SEM " + semNum,',
+        '    year: "YEAR " + yearNum,',
+        '    subject: subj,',
+        '    hasCourse: hasCourseLayer(subj),',
+        '    course: resolveCourse(subj, course),',
+        '    contentType: normalizeContentType(contentType),',
+        '    modNum: modNum,',
+        '    moduleLabel: modNum ? "MODULE " + modNum : "MODULE",',
+        '    month: normalizeMonth(month)',
+        '  };',
+        '}',
+        '',
+        'function writeCanonToRow(sheet, rowNum, c) {',
+        '  sheet.getRange(rowNum, COL.NAME + 1, 1, 7).setValues([[',
+        '    c.name, c.sem, c.subject, c.course, c.contentType, c.modNum ? c.moduleLabel : "", c.month',
+        '  ]]);',
+        '}',
+        '',
+        'function getPoints(contentType) {',
+        '  return POINTS_TABLE[normalizeContentType(contentType)] || 1;',
+        '}',
+        '',
+        'function getMainSheet() {',
+        '  const all = SpreadsheetApp.getActiveSpreadsheet().getSheets();',
+        '  const cfgKey = up(CONFIG_SHEET_NAME);',
+        '  const candidates = all.filter(function(s) { return up(s.getName()) !== cfgKey; });',
+        '  if (!candidates.length) throw new Error("No upload tab found - the spreadsheet only has the CONFIG tab");',
+        '  let i;',
+        '  // 1) explicit name set at the top of the script',
+        '  const wanted = up(UPLOADS_SHEET_NAME);',
+        '  if (wanted) {',
+        '    for (i = 0; i < candidates.length; i++) {',
+        '      if (up(candidates[i].getName()) === wanted) return candidates[i];',
+        '    }',
+        '  }',
+        '  // 2) the Google Form responses tab',
+        '  for (i = 0; i < candidates.length; i++) {',
+        '    if (normalizeText(candidates[i].getName()).indexOf("formresponses") === 0) return candidates[i];',
+        '  }',
+        '  // 3) any non-CONFIG tab whose header row looks like the upload form',
+        '  for (i = 0; i < candidates.length; i++) {',
+        '    const lc = candidates[i].getLastColumn();',
+        '    if (lc < 1) continue;',
+        '    const hdr = candidates[i].getRange(1, 1, 1, lc).getValues()[0];',
+        '    if (findCol(hdr, "Timestamp") > -1 && findCol(hdr, "File") > -1) return candidates[i];',
+        '  }',
+        '  // 4) first tab that is not CONFIG',
+        '  return candidates[0];',
+        '}',
+        '',
+        'function isConfigKeyRow(row) {',
+        '  return CONFIG_KEYS.indexOf(up(row[0])) > -1;',
+        '}',
+        '',
+        'function ensureConfigSheet(mainSheet) {',
+        '  const ss = SpreadsheetApp.getActiveSpreadsheet();',
+        '  let cfg = getConfigSheet();',
+        '  if (!cfg) {',
+        '    cfg = ss.insertSheet(CONFIG_SHEET_NAME);',
+        '    cfg.getRange(1, 1, 1, 2).setValues([["Setting", "Value"]]);',
+        '  }',
+        '  const existing = {};',
+        '  if (cfg.getLastRow() > 0) {',
+        '    cfg.getRange(1, 1, cfg.getLastRow(), 2).getValues().forEach(function(r) {',
+        '      const k = up(r[0]);',
+        '      if (CONFIG_KEYS.indexOf(k) > -1) existing[k] = true;',
+        '    });',
+        '  }',
+        '  // Move stray config rows out of the upload tab (bottom-up so row numbers stay valid)',
+        '  if (mainSheet && mainSheet.getSheetId() !== cfg.getSheetId() && mainSheet.getLastRow() > 1) {',
+        '    const rows = mainSheet.getRange(1, 1, mainSheet.getLastRow(), 2).getValues();',
+        '    for (let r = rows.length - 1; r >= 1; r--) {',
+        '      const k = up(rows[r][0]);',
+        '      if (CONFIG_KEYS.indexOf(k) === -1) continue;',
+        '      if (!existing[k]) {',
+        '        cfg.appendRow([k, rows[r][1]]);',
+        '        existing[k] = true;',
+        '      }',
+        '      mainSheet.deleteRow(r + 1);',
+        '    }',
+        '  }',
+        '  const defaults = [',
+        '    ["EDITOR_PIN", "2026"],',
+        '    ["MAX_FILES_PER_MODULE", "5"],',
+        '    ["NEW_FILE_GRACE_DAYS", "7"],',
+        '    ["SUBJECTS", ALL_SUBJECTS.join(", ")],',
+        '    ["COURSES", "DSC-A, DSC-B, DSC-C, MDC"]',
+        '  ];',
+        '  defaults.forEach(function(pair) {',
+        '    if (!existing[pair[0]]) cfg.appendRow(pair);',
+        '  });',
+        '  return cfg;',
+        '}',
+        '',
+        'function repairSheets() {',
+        '  withLock(function() {',
+        '    const main = getMainSheet();',
+        '    ensureConfigSheet(main);',
+        '    SpreadsheetApp.getActiveSpreadsheet().setActiveSheet(main);',
+        '    try { SpreadsheetApp.getUi().alert("Done. Upload tab: " + main.getName() + " | Settings tab: " + CONFIG_SHEET_NAME + ". Config rows no longer live in the upload tab."); } catch (e) {}',
+        '  });',
+        '}',
+        '',
+        'function findCol(headerRow, name) {',
+        '  const key = up(name);',
+        '  for (let i = 0; i < headerRow.length; i++) {',
+        '    if (up(headerRow[i]) === key) return i;',
+        '  }',
+        '  return -1;',
+        '}',
+        '',
+        'function normalizeScope(raw) {',
+        '  return up(raw) === "DAILY" ? "DAILY" : "COMPLETE";',
+        '}',
+        '',
+        'function getConfigSheet() {',
+        '  const all = SpreadsheetApp.getActiveSpreadsheet().getSheets();',
+        '  for (let i = 0; i < all.length; i++) {',
+        '    if (up(all[i].getName()) === CONFIG_SHEET_NAME) return all[i];',
+        '  }',
+        '  return null;',
+        '}',
+        '',
+        'function getRootFolderId() {',
+        '  return clean(ROOT_FOLDER_ID);',
+        '}',
+        '',
+        'function getRootFolder() {',
+        '  const id = getRootFolderId();',
+        '  if (!id || id.indexOf("PASTE_") === 0) throw new Error("ROOT_FOLDER_ID is not set at the top of the script");',
+        '  return DriveApp.getFolderById(id);',
+        '}',
+        '',
+        'function readNotices() {',
+        '  try {',
+        '    const raw = PropertiesService.getScriptProperties().getProperty("NOTICES");',
+        '    const list = raw ? JSON.parse(raw) : [];',
+        '    return Array.isArray(list) ? list : [];',
+        '  } catch (err) {',
+        '    return [];',
+        '  }',
+        '}',
+        '',
+        'function saveNotices(list) {',
+        '  PropertiesService.getScriptProperties().setProperty("NOTICES", JSON.stringify(list));',
+        '}',
+        '',
+        'function getNotices() {',
+        '  return readNotices().map(function(n) {',
+        '    let when = "";',
+        '    try { when = Utilities.formatDate(new Date(n.ts), Session.getScriptTimeZone(), "d MMM") + " • "; } catch (err) {}',
+        '    return { id: n.id, title: "📣 " + n.title, body: n.body, time: when + "Editor Notice" };',
+        '  });',
+        '}',
+        '',
+        'function getForwardUrl() {',
+        '  return clean(PropertiesService.getScriptProperties().getProperty("FORWARD_URL"));',
+        '}',
+        '',
+        'function ensureFolderStructure(root) {',
+        '  getOrCreateFolder(root, PENDING_FOLDER_NAME);',
+        '  getOrCreateFolder(root, OVERFLOW_FOLDER_NAME);',
+        '  for (let y = 1; y <= 5; y++) {',
+        '    const yearFolder = getOrCreateFolder(root, "YEAR " + y);',
+        '    getOrCreateFolder(yearFolder, "SEM " + (y * 2 - 1));',
+        '    getOrCreateFolder(yearFolder, "SEM " + (y * 2));',
+        '  }',
+        '}',
+        '',
+        'function withLock(fn) {',
+        '  const lock = LockService.getScriptLock();',
+        '  lock.waitLock(30000);',
+        '  try {',
+        '    return fn();',
+        '  } finally {',
+        '    lock.releaseLock();',
+        '  }',
+        '}',
+        '',
+        'function getConfig() {',
+        '  const cfg = { EDITOR_PIN: "2026", MAX_FILES_PER_MODULE: 5, NEW_FILE_GRACE_DAYS: 7 };',
+        '  try {',
+        '    const s = getConfigSheet();',
+        '    if (s && s.getLastRow() > 0) {',
+        '      s.getRange(1, 1, s.getLastRow(), 2).getValues().forEach(function(r) {',
+        '        const k = up(r[0]);',
+        '        const v = clean(r[1]);',
+        '        if (k === "EDITOR_PIN" && v) cfg.EDITOR_PIN = v;',
+        '        if (k === "MAX_FILES_PER_MODULE" && Number(v) > 0) cfg.MAX_FILES_PER_MODULE = Number(v);',
+        '        if (k === "NEW_FILE_GRACE_DAYS" && v !== "" && Number(v) >= 0) cfg.NEW_FILE_GRACE_DAYS = Number(v);',
+        '      });',
+        '    }',
+        '  } catch (err) {}',
+        '  return cfg;',
+        '}',
+        '',
+        'function getOrCreateFolder(parentFolder, name) {',
+        '  const wanted = up(name);',
+        '  const target = normalizeText(wanted) || wanted.toLowerCase();',
+        '  const folders = parentFolder.getFolders();',
+        '  while (folders.hasNext()) {',
+        '    const f = folders.next();',
+        '    const key = normalizeText(f.getName()) || String(f.getName()).toLowerCase();',
+        '    if (key === target) {',
+        '      if (f.getName() !== wanted) {',
+        '        try { f.setName(wanted); } catch (renameErr) {}',
+        '      }',
+        '      return f;',
+        '    }',
+        '  }',
+        '  return parentFolder.createFolder(wanted);',
+        '}',
+        '',
+        'function findFileCaseInsensitive(folder, name) {',
+        '  const targetName = up(name);',
+        '  const files = folder.getFiles();',
+        '  while (files.hasNext()) {',
+        '    const f = files.next();',
+        '    if (up(f.getName()) === targetName) {',
+        '      return f;',
+        '    }',
+        '  }',
+        '  return null;',
+        '}',
+        '',
+        'function getFullPath(folder) {',
+        '  let path = folder.getName();',
+        '  let parents = folder.getParents();',
+        '  while (parents.hasNext()) {',
+        '    const parent = parents.next();',
+        '    if (parent.getId() === DriveApp.getRootFolder().getId()) break;',
+        '    path = parent.getName() + " / " + path;',
+        '    parents = parent.getParents();',
+        '  }',
+        '  return path;',
+        '}',
+        '',
+        'function getUniqueFileName(folder, baseName, ownFileId) {',
+        '  const base = String(baseName);',
+        '  let candidate = base;',
+        '  let count = 2;',
+        '  while (true) {',
+        '    const hit = findFileCaseInsensitive(folder, candidate);',
+        '    if (hit === null || (ownFileId && hit.getId() === ownFileId)) break;',
+        '    candidate = base + "(" + count + ")";',
+        '    count++;',
+        '  }',
+        '  return candidate;',
+        '}',
+        '',
+        'function extractDriveId(rawUrlOrId) {',
+        '  const s = String(rawUrlOrId || "").trim();',
+        '  if (s.indexOf("/d/") > -1) {',
+        '    return s.split("/d/")[1].split("/")[0].split("?")[0].trim();',
+        '  }',
+        '  if (s.indexOf("id=") > -1) {',
+        '    return s.split("id=")[1].split("&")[0].trim();',
+        '  }',
+        '  return s;',
+        '}',
+        '',
+        'function getFileFromFormUpload(fileUrlOrId) {',
+        '  return DriveApp.getFileById(extractDriveId(fileUrlOrId));',
+        '}',
+        '',
+        'function moveFileTo(file, dest) {',
+        '  try {',
+        '    file.moveTo(dest);',
+        '    return;',
+        '  } catch (err) {}',
+        '  dest.addFile(file);',
+        '  const parents = file.getParents();',
+        '  while (parents.hasNext()) {',
+        '    const p = parents.next();',
+        '    if (p.getId() !== dest.getId()) {',
+        '      try { p.removeFile(file); } catch (err2) {}',
+        '    }',
+        '  }',
+        '}'
+      ];
+      return lines.join('\n');
+    }
+
+    // ==================== EVENT LISTENERS & INITIALIZATION ====================
+    function switchTab(targetId) {
+      if (targetId === 'viewSetup' && !canSeeSetup()) return;
+      state.activeTab = targetId;
+      ['viewBrowse', 'viewUpload', 'viewFeed', 'viewEditor', 'viewSetup'].forEach(id => {
+        const sec = document.getElementById(id);
+        if (!sec) return;
+        if (id === targetId) sec.classList.remove('hidden');
+        else sec.classList.add('hidden');
+      });
+
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        const isSetupBtn = btn.id === 'tabBtnSetup';
+        const hideClass = (isSetupBtn && !canSeeSetup()) ? 'hidden ' : '';
+        if (btn.getAttribute('data-target') === targetId) {
+          btn.className = hideClass + 'nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-white text-indigo-700 shadow-sm flex items-center gap-1.5';
+        } else {
+          btn.className = hideClass + 'nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5';
+        }
+      });
+      applySetupGate();
+    }
+    window.switchTab = switchTab;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.getAttribute('data-target')));
+      });
+
+      document.getElementById('btnDisconnectLiveQuick').addEventListener('click', () => {
+        applyLiveUrl('');
+        showToast('Disconnected on this device — paste a working Web App URL in ⚙️ Setup & Code.', 'info');
+      });
+
+      document.getElementById('btnSyncNow').addEventListener('click', () => syncFromLiveDrive(false));
+
+      ['filterSem', 'filterSubject', 'filterCourse', 'filterType', 'filterModule', 'filterMonth'].forEach(id => {
+        document.getElementById(id).addEventListener('change', renderBrowse);
+      });
+      document.getElementById('searchInput').addEventListener('input', renderBrowse);
+
+      document.getElementById('btnResetFilters').addEventListener('click', () => {
+        document.getElementById('filterSem').value = 'ALL';
+        document.getElementById('filterSubject').value = 'ALL';
+        document.getElementById('filterCourse').value = 'ALL';
+        document.getElementById('filterType').value = 'ALL';
+        document.getElementById('filterModule').value = 'ALL';
+        document.getElementById('filterMonth').value = 'ALL';
+        document.getElementById('searchInput').value = '';
+        renderBrowse();
+        showToast('Showing all Years (1–5), Courses & Modules', 'info');
+      });
+
+      ['upName', 'upMonth', 'upSem', 'upSubject', 'upCourse', 'upType', 'upModule', 'upScope'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateUploadPreview);
+        document.getElementById(id).addEventListener('change', updateUploadPreview);
+      });
+
+      document.getElementById('btnTriggerFileSelect').addEventListener('click', () => {
+        document.getElementById('upFileInput').click();
+      });
+
+      document.getElementById('upFileInput').addEventListener('change', (e) => {
+        const files = e.target.files;
+        const label = document.getElementById('selectedFileLabel');
+        if (files && files.length > 0) {
+          label.textContent = `${files.length} file(s) ready: ${Array.from(files).map(f => f.name).join(', ')}`;
+          label.className = 'text-xs text-emerald-700 font-semibold mt-2';
+        }
+      });
+
+      document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('btnSubmitUpload');
+        const rawName = UP(document.getElementById('upName').value) || 'ANON';
+        const month = document.getElementById('upMonth').value;
+        const sem = document.getElementById('upSem').value;
+        const subject = document.getElementById('upSubject').value;
+        const noCourse = SUBJECTS_NO_COURSE.includes(subject);
+        const course = noCourse ? 'NONE' : document.getElementById('upCourse').value;
+        const contentType = document.getElementById('upType').value;
+        const modNum = document.getElementById('upModule').value;
+        const module = modNum ? `MODULE ${modNum}` : 'MODULE';
+        const scope = document.getElementById('upScope').value;
+        const topics = document.getElementById('upTopics').value.trim() || 'General Class Notes';
+
+        const fileInput = document.getElementById('upFileInput');
+        const chosenFile = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+
+        if (!state.liveWebAppUrl) {
+          showToast('Not connected to the department Drive yet — ask your Editor for the join link.', 'warn');
+          return;
+        }
+        if (!chosenFile) {
+          showToast('Choose a file first — Live Drive needs the actual file.', 'warn');
+          return;
+        }
+
+        const baseName = `${rawName}.${month}`;
+        const existingInPending = state.pending.filter(p => p.displayName.toLowerCase().startsWith(baseName.toLowerCase()));
+        const pendingName = existingInPending.length === 0 ? baseName : `${baseName}(${existingInPending.length + 1})`;
+
+        // Upload EVERY selected file (the picker allows several) and check each one really landed.
+        const allFiles = Array.from(fileInput.files || []).filter(f => f.size <= 30 * 1024 * 1024);
+        const skipped = (fileInput.files ? fileInput.files.length : 0) - allFiles.length;
+        submitBtn.disabled = true;
+        let okCount = 0;
+        let lastError = '';
+        for (let i = 0; i < allFiles.length; i++) {
+          const f = allFiles[i];
+          submitBtn.textContent = 'Uploading ' + (i + 1) + ' of ' + allFiles.length + '...';
+          const thisPendingName = allFiles.length === 1 ? pendingName : (pendingName + ' (file ' + (i + 1) + ')');
+          let b64 = '';
+          try { b64 = await fileToBase64(f); } catch (err) { lastError = 'Could not read ' + f.name; continue; }
+          const liveResult = await postToLiveDrive({
+            action: 'upload',
+            name: rawName,
+            month,
+            sem,
+            subject,
+            course,
+            contentType,
+            module,
+            scope,
+            topics,
+            fileName: f.name,
+            base64Data: b64,
+            mimeType: f.type || 'application/pdf'
+          }, true);
+          if (!liveResult) { lastError = 'No answer from the Drive script for ' + f.name + ' — check your internet and the Web App link.'; continue; }
+          if (!liveResult.ok) { lastError = liveResult.error || 'Unknown error'; continue; }
+          okCount++;
+          state.pending.unshift({
+            id: 'row_' + liveResult.rowId,
+            rowId: liveResult.rowId,
+            name: rawName, month, displayName: thisPendingName, sem, subject, course, contentType, module, scope, topics,
+            size: (Math.max(0.1, f.size / (1024 * 1024))).toFixed(1) + ' MB',
+            fileUrl: liveResult.fileUrl || ''
+          });
+          addMyUpload({
+            rowId: liveResult.rowId,
+            label: thisPendingName + ' • ' + subject + ' ' + sem.toUpperCase().replace('SEM', 'SEM ') + ' • ' + contentType,
+            savedIn: liveResult.savedIn || '🕓 PENDING REVIEW',
+            time: Date.now()
+          });
+        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit to Pending Review';
+        if (skipped > 0) showToast(skipped + ' file(s) were over 30 MB and were skipped — send big videos through the Google Form.', 'warn');
+        if (okCount === 0) {
+          showToast('Upload failed: ' + (lastError || 'nothing was saved') + ' — nothing was lost on your side, please try again.', 'warn');
+          return;
+        }
+        if (lastError) showToast(okCount + ' uploaded, but one failed: ' + lastError, 'warn');
+
+        document.getElementById('upTopics').value = '';
+        document.getElementById('upFileInput').value = '';
+        const lbl = document.getElementById('selectedFileLabel');
+        if (lbl) { lbl.textContent = 'No file chosen yet'; lbl.className = 'text-xs text-slate-500 mt-2'; }
+        renderEditor();
+        renderMyUploads();
+        showToast('✅ Uploaded ' + okCount + ' file(s) to 🕓 Pending Review. They show in Browse once the Editor approves them.', 'success');
+        if (state.editorUnlocked) switchTab('viewEditor');
+        else { const r = document.getElementById('myUploadsBox'); if (r) r.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      });
+
+      document.getElementById('btnUnlockEditor').addEventListener('click', async () => {
+        const pin = document.getElementById('editorPinInput').value.trim();
+        if (!state.liveWebAppUrl) {
+          showToast('Not connected to a Drive yet — connect the Web App first (⚙️ Setup & Code).', 'warn');
+          return;
+        }
+        if (!pin) {
+          showToast('Enter the Editor PIN', 'warn');
+          return;
+        }
+        const res = await postToLiveDrive({ action: 'verifyPin', pin }, true);
+        if (res === null) {
+          showToast('Could not reach the Drive — check your connection and try again.', 'warn');
+          return;
+        }
+        if (res.ok) {
+          state.editorUnlocked = true;
+          state.editorPin = pin;
+          document.getElementById('editorMainContent').classList.remove('hidden');
+          document.getElementById('btnUnlockEditor').textContent = 'Unlocked ✓';
+          applySetupGate();
+          refreshLiveConfig();
+          renderFeedAndLeaderboard();
+          showToast('Editor Console unlocked (PIN verified) — Setup & Code tab is now visible', 'success');
+        } else if (res.error === 'Wrong editor PIN') {
+          lockEditor();
+          showToast('Wrong Editor PIN', 'warn');
+        } else {
+          showToast('The Drive script replied: ' + (res.error || 'unknown error') + ' — redeploy it as a New version.', 'warn');
+        }
+      });
+
+      document.getElementById('btnApproveAllPending').addEventListener('click', async () => {
+        if (state.pending.length === 0) {
+          showToast('No pending files to approve', 'info');
+          return;
+        }
+        const ids = state.pending.map(p => p.id);
+        for (const id of ids) {
+          await approvePendingItem(id, true);
+        }
+        if (state.liveWebAppUrl) await syncFromLiveDrive(true);
+      });
+
+      document.getElementById('btnMergeSelectedDaily').addEventListener('click', () => {
+        showToast('Combining daily notes into one PDF is not available yet — the Web App cannot merge PDFs inside Drive.', 'warn');
+      });
+
+      document.getElementById('btnPostAnnouncement').addEventListener('click', async () => {
+        const title = document.getElementById('annTitleInput').value.trim();
+        const body = document.getElementById('annBodyInput').value.trim();
+        if (!title || !body) {
+          showToast('Enter both a headline and details for the announcement', 'warn');
+          return;
+        }
+        const res = await postToLiveDrive({ action: 'postNotice', title, body });
+        if (!res || !res.ok) {
+          if (res && res.error && res.error !== 'Wrong editor PIN') showToast('Could not post: ' + res.error, 'warn');
+          return;
+        }
+        document.getElementById('annTitleInput').value = '';
+        document.getElementById('annBodyInput').value = '';
+        await syncFromLiveDrive(true);
+        showToast('Posted — everyone will see it in their Feed', 'success');
+        switchTab('viewFeed');
+      });
+
+      document.getElementById('btnCloseModal').addEventListener('click', closeFileModal);
+      document.getElementById('fileModal').addEventListener('click', (e) => {
+        if (e.target.id === 'fileModal') closeFileModal();
+      });
+
+      document.getElementById('btnSaveFilePropsModal').addEventListener('click', async () => {
+        const f = state.files.find(x => x.id === state.activeModalFileId);
+        if (!f) return;
+        const res = await postToLiveDrive({
+          action: 'editProps',
+          rowId: f.rowId || f.id,
+          course: document.getElementById('editModalCourse').value,
+          module: document.getElementById('editModalModule').value,
+          month: document.getElementById('editModalMonth').value,
+          topics: document.getElementById('editModalTopics').value.trim() || f.topics
+        });
+        if (!res || !res.ok) {
+          if (res && res.error && res.error !== 'Wrong editor PIN') showToast('Save failed: ' + res.error, 'warn');
+          return;
+        }
+        closeFileModal();
+        showToast('Saved & moved in Drive', 'success');
+        await syncFromLiveDrive(true);
+      });
+
+      document.getElementById('btnDeleteFileModal').addEventListener('click', async () => {
+        const idx = state.files.findIndex(x => x.id === state.activeModalFileId);
+        if (idx === -1) return;
+        const target = state.files[idx];
+        const res = await postToLiveDrive({ action: 'delete', rowId: target.rowId || target.id });
+        if (!res || !res.ok) {
+          if (res && res.error && res.error !== 'Wrong editor PIN') showToast('Delete failed: ' + res.error, 'warn');
+          return;
+        }
+        state.files.splice(idx, 1);
+        showToast(`Moved "${target.displayName}" to _Overflow / Archive`, 'warn');
+        closeFileModal();
+        renderBrowse();
+        renderEditor();
+        renderFeedAndLeaderboard();
+      });
+
+      const codeBlock = document.getElementById('appsScriptCodeBlock');
+      applySetupGate();
+
+      document.getElementById('btnInjectFolderId').addEventListener('click', () => {
+        const newId = cleanFolderId(document.getElementById('inputTestFolderId').value);
+        state.testFolderId = newId || 'PASTE_YOUR_NEW_TEST_FOLDER_ID_HERE';
+        codeBlock.textContent = generateAppsScriptCode(state.testFolderId);
+        showToast('Updated ROOT_FOLDER_ID inside Apps Script code!', 'success');
+      });
+
+      document.getElementById('btnCopyScript').addEventListener('click', () => {
+        const text = codeBlock.textContent;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => {
+            showToast('Copied complete Code.gs (with doGet & doPost) to clipboard!', 'success');
+          }).catch(() => fallbackCopy(text));
+        } else {
+          fallbackCopy(text);
+        }
+      });
+
+      const urlBox = document.getElementById('inputWebAppUrl');
+      const urlBtn = document.getElementById('btnConnectLiveUrl');
+      function lockUrlBox() { urlBox.readOnly = true; urlBtn.textContent = 'Change'; }
+      document.getElementById('btnConnectLiveUrl').addEventListener('click', async () => {
+        if (urlBox.readOnly) {
+          urlBox.readOnly = false;
+          urlBtn.textContent = 'Apply to Everyone';
+          urlBox.focus();
+          urlBox.select();
+          return;
+        }
+        const url = document.getElementById('inputWebAppUrl').value.trim();
+        if (!url) {
+          urlBox.value = state.liveWebAppUrl || DEFAULT_WEBAPP_URL;
+          lockUrlBox();
+          return;
+        }
+        if (!isValidWebAppUrl(url)) { showToast('That does not look like a deployed Web App URL (it must end with /exec).', 'warn'); return; }
+        if (url === state.liveWebAppUrl) { lockUrlBox(); await syncFromLiveDrive(false); checkUploadHealth(); if (!isValidWebAppUrl(DEFAULT_WEBAPP_URL)) showToast('Saved on THIS device only. For other devices click "Download everyone-ready index.html" below and upload it to GitHub.', 'info'); return; }
+        try {
+          const t = await (await fetch(url + '?action=listAll', { redirect: 'follow' })).json();
+          if (!t || !t.ok) throw new Error('bad reply');
+        } catch (e) {
+          showToast('That Web App did not answer — check Execute as: Me and Access: Anyone.', 'warn');
+          return;
+        }
+        const oldUrl = state.liveWebAppUrl;
+        if (oldUrl && state.editorUnlocked) {
+          const r = await postToLiveDrive({ action: 'setForwardUrl', forwardUrl: url }, true);
+          if (r && r.ok) showToast('Saved — every device will follow to the new Web App on its next refresh.', 'success');
+          else showToast('Switched this device to the new Web App URL.', 'info');
+        }
+        if (!oldUrl && !state.editorUnlocked) state.bootstrapSession = true; // first-time connect: keep ⚙️ Setup open this session so the permanent line can be copied
+        applyLiveUrl(url);
+        lockUrlBox();
+        lastSyncSig = '';
+        if (state.editorUnlocked) {
+          const v = await postToLiveDrive({ action: 'verifyPin', pin: state.editorPin }, true);
+          if (v && v.error === 'Wrong editor PIN') { lockEditor(); showToast('Connected, but the Editor PIN differs on the new script — unlock again with its PIN.', 'warn'); }
+          else if (v && v.ok) await postToLiveDrive({ action: 'setForwardUrl', forwardUrl: '' }, true);
+        }
+        await syncFromLiveDrive(false);
+        checkUploadHealth();
+        if (state.editorUnlocked) refreshLiveConfig();
+        if (!isValidWebAppUrl(DEFAULT_WEBAPP_URL)) {
+          showToast('Saved on THIS device only. To reach everyone: click "Download everyone-ready index.html" below and upload it to GitHub.', 'info');
+        }
+      });
+
+      document.getElementById('btnDownloadEveryoneFile').addEventListener('click', async () => {
+        const st = document.getElementById('everyoneStatus');
+        if (!state.liveWebAppUrl) { showToast('Connect a Web App URL first (Box 2 → Apply to Everyone).', 'warn'); return; }
+        try {
+          let raw = '';
+          const sources = location.protocol === 'file:' ? [SITE_URL] : [location.href.split('#')[0], SITE_URL];
+          for (const src of sources) {
+            try { raw = await (await fetch(src, { cache: 'no-store' })).text(); if (raw.indexOf('DEFAULT_WEBAPP_URL') > -1) break; } catch (e) {}
+          }
+          if (!raw) throw new Error('file');
+          const marker = /const DEFAULT_WEBAPP_URL = '[^']*';/;
+          if (!marker.test(raw)) throw new Error('marker');
+          const out = raw.replace(marker, function () { return "const DEFAULT_WEBAPP_URL = '" + state.liveWebAppUrl + "';"; });
+          const blob = new Blob([out], { type: 'text/html' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'index.html';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          st.textContent = 'Downloaded. Now upload this index.html to GitHub (replace the old one). Everyone who opens your site is connected automatically.';
+          showToast('Everyone-ready index.html downloaded — upload it to GitHub.', 'success');
+        } catch (err) {
+          st.textContent = 'This page was opened from a local file, so it cannot copy itself. Open it from your hosted link instead, or use the Permanent GitHub line below (one-time paste).';
+          showToast('Could not build the file here — use the Permanent GitHub line below instead.', 'warn');
+        }
+      });
+
+      document.getElementById('btnTestEveryone').addEventListener('click', async () => {
+        const st = document.getElementById('everyoneStatus');
+        if (!state.liveWebAppUrl) { showToast('Connect a Web App URL first.', 'warn'); return; }
+        st.textContent = 'Testing...';
+        try {
+          const h = await (await fetch(state.liveWebAppUrl + '?action=health', { redirect: 'follow' })).json();
+          if (!h || !h.problems) { st.textContent = '❌ The deployed script is OLD (no health check). Paste the latest code, then Deploy → Manage deployments → pencil → New version.'; return; }
+          if (h.ok) st.textContent = '✅ Ready for everyone. Uploads go to: ' + h.rootFolderName + ' / ' + h.pendingFolder + ' • Sheet tab: ' + h.uploadsSheet + ' • CONFIG tab: ' + (h.configSheet ? 'found' : 'missing');
+          else st.textContent = '❌ ' + h.problems.join(' • ');
+        } catch (err) {
+          st.textContent = '❌ Could not reach the Web App. Deploy it as Execute as: Me, Who has access: Anyone.';
+        }
+      });
+
+      function copyField(id, okMsg) {
+        const el = document.getElementById(id);
+        if (!state.liveWebAppUrl) { showToast('Connect a Web App URL first.', 'warn'); return; }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(el.value).then(() => showToast(okMsg, 'success')).catch(() => { el.select(); showToast('Press Ctrl+C / Cmd+C to copy', 'info'); });
+        } else { el.select(); showToast('Press Ctrl+C / Cmd+C to copy', 'info'); }
+      }
+
+      document.getElementById('btnCopyShareLink').addEventListener('click', () => {
+        copyField('inputShareLink', 'Join link copied!');
+      });
+      document.getElementById('btnCopyPermanentLine').addEventListener('click', () => copyField('inputPermanentLine', 'Line copied — paste it into the HTML file on GitHub.'));
+
+      updateUploadPreview();
+      renderBrowse();
+      renderFeedAndLeaderboard();
+      renderEditor();
+      renderMyUploads();
+      document.getElementById('btnClearMyUploads').addEventListener('click', () => { saveMyUploads([]); renderMyUploads(); });
+      applyLiveUrl(state.liveWebAppUrl);
+      if (state.liveWebAppUrl) { syncFromLiveDrive(true); checkUploadHealth(); }
+
+      setInterval(() => { if (state.liveWebAppUrl && !document.hidden) syncFromLiveDrive(true); }, 45000);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden && state.liveWebAppUrl) syncFromLiveDrive(true); });
+    });
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Copied complete Code.gs to clipboard!', 'success');
+      } catch (e) {
+        showToast('Select the code block and press Ctrl+C / Cmd+C to copy', 'info');
+      }
+      ta.remove();
+    }
+  </script>
+</body>
+</html>
