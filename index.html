@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DeptNotes Hub — 5-Year Department Archive & Operations</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Top Toast Notification -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+          DN
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 class="font-bold text-base sm:text-lg text-slate-900 tracking-tight">DeptNotes Hub</h1>
+            <span id="connectionBadge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+              Not Connected
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 hidden sm:block">Zero-Jargon Department Archive • Years 1–5 • Notes, PYQs, Syllabus & Class Videos</p>
+        </div>
+      </div>
+
+      <!-- Main View Switcher Tabs -->
+      <nav class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 overflow-x-auto max-w-full">
+        <button id="tabBtnBrowse" type="button" onclick="window.switchTab && window.switchTab('viewBrowse')" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all bg-white text-indigo-700 shadow-sm flex items-center gap-1.5" data-target="viewBrowse">
+          📚 Browse Archive
+        </button>
+        <button id="tabBtnUpload" type="button" onclick="window.switchTab && window.switchTab('viewUpload')" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5" data-target="viewUpload">
+          ⬆️ Share Notes
+        </button>
+        <button id="tabBtnFeed" type="button" onclick="window.switchTab && window.switchTab('viewFeed')" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5" data-target="viewFeed">
+          <span>🏆 Feed & Points</span>
+          <span id="feedCountBadge" class="px-1.5 py-0.2 bg-indigo-100 text-indigo-700 rounded-full text-[10px] font-semibold">0</span>
+        </button>
+        <button id="tabBtnEditor" type="button" onclick="window.switchTab && window.switchTab('viewEditor')" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5" data-target="viewEditor">
+          <span>🛡️ Editor</span>
+          <span id="pendingCountBadge" class="px-1.5 py-0.2 bg-rose-100 text-rose-700 rounded-full text-[10px] font-semibold">0</span>
+        </button>
+        <button id="tabBtnSetup" type="button" onclick="window.switchTab && window.switchTab('viewSetup')" class="nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1.5" data-target="viewSetup">
+          ⚙️ Drive Setup & Code
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Workspace Container -->
+  <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1">
+
+    <!-- ==================== VIEW 1: BROWSE ARCHIVE ==================== -->
+    <section id="viewBrowse" class="space-y-5">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-100">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md">My View Filter</span>
+            <span class="text-xs text-slate-500">Pick your Semester & Course to browse live archive files from Google Drive.</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btnSyncNow" type="button" class="text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition">
+              🔄 Sync Live Drive
+            </button>
+            <button id="btnResetFilters" type="button" class="text-xs font-medium text-slate-600 hover:text-indigo-600 px-2.5 py-1 rounded-lg border border-slate-200 hover:border-indigo-200 transition">
+              Show All
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+          <div>
+            <label for="filterSem" class="block text-xs font-medium text-slate-600 mb-1">Year & Semester</label>
+            <select id="filterSem" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:bg-white focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Years (Sem 1–10)</option>
+              <option value="SEM 1" selected>Year 1 — SEM 1</option>
+              <option value="SEM 2">Year 1 — SEM 2</option>
+              <option value="SEM 3">Year 2 — SEM 3</option>
+              <option value="SEM 4">Year 2 — SEM 4</option>
+              <option value="SEM 5">Year 3 — SEM 5</option>
+              <option value="SEM 6">Year 3 — SEM 6</option>
+              <option value="SEM 7">Year 4 — SEM 7</option>
+              <option value="SEM 8">Year 4 — SEM 8</option>
+              <option value="SEM 9">Year 5 — SEM 9</option>
+              <option value="SEM 10">Year 5 — SEM 10</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="filterSubject" class="block text-xs font-medium text-slate-600 mb-1">Subject</label>
+            <select id="filterSubject" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:bg-white focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Subjects</option>
+              <option value="CS" selected>CS</option>
+              <option value="ECO">ECO</option>
+              <option value="MATHS">MATHS</option>
+              <option value="PHYSICS">PHYSICS</option>
+              <option value="STATI">STATI</option>
+              <option value="CHEM">CHEM</option>
+              <option value="BIO">BIO</option>
+              <option value="EVS">EVS</option>
+              <option value="ENG">ENG</option>
+              <option value="FRENCH">FRENCH</option>
+            </select>
+          </div>
+
+          <div id="courseFilterWrapper">
+            <label for="filterCourse" class="block text-xs font-medium text-slate-600 mb-1">Course Stream</label>
+            <select id="filterCourse" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:bg-white focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Courses</option>
+              <option value="DSC-A">DSC-A</option>
+              <option value="DSC-B" selected>DSC-B</option>
+              <option value="DSC-C">DSC-C</option>
+              <option value="MDC">MDC</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="filterType" class="block text-xs font-medium text-slate-600 mb-1">Material Type</label>
+            <select id="filterType" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:bg-white focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Types</option>
+              <option value="NOTES">NOTES</option>
+              <option value="Q.PAPERS">Q.PAPERS</option>
+              <option value="SYLLABUS BREAKDOWN">SYLLABUS BREAKDOWN</option>
+              <option value="CLASS VIDEOS">CLASS VIDEOS</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="filterModule" class="block text-xs font-medium text-slate-600 mb-1">Module / Folder</label>
+            <select id="filterModule" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-800 focus:bg-white focus:border-indigo-500 focus:outline-none">
+              <option value="ALL">All Modules</option>
+              <option value="MODULE 1">Module 1</option>
+              <option value="MODULE 2">Module 2</option>
+              <option value="MODULE 3">Module 3</option>
+              <option value="MODULE 4">Module 4</option>
+              <option value="MODULE">Module (Unsorted)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div class="relative flex-1">
+            <input id="searchInput" type="text" placeholder="Search by Topic tags, Month (.SEP), or Contributor name..." class="w-full rounded-xl border border-slate-300 pl-9 pr-4 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+            <span class="absolute left-3 top-2.5 text-slate-400 text-sm">🔍</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-indigo-950 text-white px-4 py-3 rounded-2xl shadow-sm">
+        <div class="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto">
+          <span class="text-indigo-300 font-medium">Drive Mirror Path:</span>
+          <code id="liveDrivePath" class="bg-indigo-900/80 text-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-700 text-xs">YEAR 1 / SEM 1 / CS / DSC-B</code>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-indigo-200">
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>Sorted by 👍 Likes • Max 5 per Module (Ties kept • 🆕 7-Day Shield)</span>
+        </div>
+      </div>
+
+      <div id="resultsSummaryText" class="text-sm font-medium text-slate-700">Connecting to Google Drive...</div>
+      <div id="filesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- ==================== VIEW 2: SHARE NOTES ==================== -->
+    <section id="viewUpload" class="hidden max-w-2xl mx-auto">
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+        <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Share Notes, PYQs, Syllabus or Class Videos</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Files go to Pending Review for 1-tap Editor approval and get named <code class="bg-slate-100 px-1.5 py-0.5 rounded">Name.Month</code>.</p>
+          </div>
+          <span class="text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg whitespace-nowrap">
+            +1 to +2 Points
+          </span>
+        </div>
+
+        <form id="uploadForm" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="upName" class="block text-xs font-semibold text-slate-700 mb-1">Your Name</label>
+              <input id="upName" type="text" required placeholder="e.g. Devaki" class="uppercase w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+            </div>
+            <div>
+              <label for="upMonth" class="block text-xs font-semibold text-slate-700 mb-1">Month / Time Period</label>
+              <select id="upMonth" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="AUG">AUG</option>
+                <option value="SEP">SEP</option>
+                <option value="OCT" selected>OCT</option>
+                <option value="NOV">NOV</option>
+                <option value="DEC">DEC</option>
+                <option value="JAN">JAN</option>
+                <option value="FEB">FEB</option>
+                <option value="MAR">MAR</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="upSem" class="block text-xs font-semibold text-slate-700 mb-1">Semester</label>
+              <select id="upSem" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="SEM 1">SEM 1</option>
+                <option value="SEM 2">SEM 2</option>
+                <option value="SEM 3">SEM 3</option>
+                <option value="SEM 4">SEM 4</option>
+                <option value="SEM 5">SEM 5</option>
+                <option value="SEM 6">SEM 6</option>
+                <option value="SEM 7">SEM 7</option>
+                <option value="SEM 8">SEM 8</option>
+                <option value="SEM 9">SEM 9</option>
+                <option value="SEM 10">SEM 10</option>
+              </select>
+            </div>
+            <div>
+              <label for="upSubject" class="block text-xs font-semibold text-slate-700 mb-1">Subject</label>
+              <select id="upSubject" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="CS">CS</option>
+                <option value="ECO">ECO</option>
+                <option value="MATHS">MATHS</option>
+                <option value="PHYSICS">PHYSICS</option>
+                <option value="STATI">STATI</option>
+                <option value="CHEM">CHEM</option>
+                <option value="BIO">BIO</option>
+                <option value="EVS">EVS</option>
+                <option value="ENG">ENG</option>
+                <option value="FRENCH">FRENCH</option>
+              </select>
+            </div>
+            <div id="upCourseWrapper">
+              <label for="upCourse" class="block text-xs font-semibold text-slate-700 mb-1">Course Code</label>
+              <select id="upCourse" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="DSC-B">DSC-B</option>
+                <option value="DSC-C">DSC-C</option>
+                <option value="MDC">MDC</option>
+                <option value="DSC-A">DSC-A</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label for="upType" class="block text-xs font-semibold text-slate-700 mb-1">Content Type</label>
+              <select id="upType" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="NOTES">NOTES (+1 pt)</option>
+                <option value="Q.PAPERS">Q.PAPERS (+2 pts)</option>
+                <option value="SYLLABUS BREAKDOWN">SYLLABUS BREAKDOWN (+1 pt)</option>
+                <option value="CLASS VIDEOS">CLASS VIDEOS (+2 pts)</option>
+              </select>
+            </div>
+            <div id="upModuleWrapper">
+              <label for="upModule" class="block text-xs font-semibold text-slate-700 mb-1">Module Number</label>
+              <select id="upModule" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="1">Module 1</option>
+                <option value="2">Module 2</option>
+                <option value="3">Module 3</option>
+                <option value="4">Module 4</option>
+                <option value="">Unnumbered Module</option>
+              </select>
+            </div>
+            <div>
+              <label for="upScope" class="block text-xs font-semibold text-slate-700 mb-1">Upload Scope</label>
+              <select id="upScope" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
+                <option value="COMPLETE">Complete Module / Exam</option>
+                <option value="DAILY">Daily Class Note</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="upTopics" class="block text-xs font-semibold text-slate-700 mb-1">Properties / Topics Covered</label>
+            <input id="upTopics" type="text" required placeholder="e.g. Linked Lists, Recursion, or 2025 Mid-Sem" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+          </div>
+
+          <div class="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center">
+            <input id="upFileInput" type="file" accept=".pdf,image/*,video/*" class="hidden" />
+            <button id="btnTriggerFileSelect" type="button" class="px-4 py-2 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 hover:border-indigo-400 shadow-sm transition">
+              📎 Choose PDF, Photo, or Video File
+            </button>
+            <p id="selectedFileLabel" class="text-xs text-slate-500 mt-2">No file chosen yet</p>
+          </div>
+
+          <div class="flex items-center justify-between gap-3 pt-2">
+            <p class="text-xs text-slate-500">Goes to Pending Review for approval.</p>
+            <button id="btnSubmitUpload" type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm transition">
+              Submit to Pending Review
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 3: FEED & POINTS ==================== -->
+    <section id="viewFeed" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <h2 class="text-base font-bold text-slate-900 mb-4">📢 Department Announcements & New Uploads</h2>
+            <div id="announcementsList" class="space-y-3"></div>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <h2 class="text-base font-bold text-slate-900 mb-1">🏆 Top Contributors</h2>
+            <p class="text-xs text-slate-500 mb-4">Points calculated live from approved files.</p>
+            <div id="leaderboardList" class="space-y-2.5"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 4: EDITOR CONSOLE ==================== -->
+    <section id="viewEditor" class="hidden space-y-6">
+      <div id="editorLockBanner" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">🛡️ Editor Operations Console</h2>
+          <p class="text-xs text-slate-500">1-Tap mobile approval and archive management. Default PIN is <code class="bg-slate-100 px-1 rounded font-semibold">2026</code>.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <input id="editorPinInput" type="password" placeholder="Editor PIN (2026)" class="w-36 rounded-xl border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none" />
+          <button id="btnUnlockEditor" type="button" class="px-4 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition">
+            Unlock Console
+          </button>
+        </div>
+      </div>
+
+      <div id="editorMainContent" class="hidden space-y-6">
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <h3 class="text-base font-bold text-slate-900">🕓 Pending Review Queue</h3>
+            <button id="btnApproveAllPending" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">
+              ✅ Approve All Pending
+            </button>
+          </div>
+          <div id="pendingQueueList" class="space-y-3"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== VIEW 5: DRIVE SETUP & CODE ==================== -->
+    <section id="viewSetup" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
+        <h2 class="text-lg font-bold text-slate-900">Connect Live Google Drive & Apps Script</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+          <div>
+            <label for="inputTestFolderId" class="block text-xs font-semibold text-slate-700 mb-1">1. Root Folder ID:</label>
+            <div class="flex gap-2">
+              <input id="inputTestFolderId" type="text" value="PASTE_YOUR_ROOT_FOLDER_ID_HERE" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:outline-none" />
+              <button id="btnInjectFolderId" type="button" class="px-3 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">Update Script</button>
+            </div>
+          </div>
+          <div>
+            <label for="inputWebAppUrl" class="block text-xs font-semibold text-slate-700 mb-1">2. Deployed Web App URL (/exec):</label>
+            <div class="flex gap-2">
+              <input id="inputWebAppUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:outline-none" />
+              <button id="btnConnectLiveUrl" type="button" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition">Save & Connect</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-slate-900">Complete Apps Script Code (`Code.gs`)</h3>
+          <button id="btnCopyScript" type="button" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">📋 Copy Code</button>
+        </div>
+        <pre id="appsScriptCodeBlock" class="bg-slate-900 text-slate-100 p-4 rounded-2xl text-xs overflow-x-auto max-h-[400px] custom-scroll"></pre>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL -->
+  <div id="fileModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="px-5 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 id="modalFileName" class="font-bold text-base text-slate-900">File</h3>
+          <p id="modalFilePath" class="text-xs text-slate-500 font-mono"></p>
+        </div>
+        <button id="btnCloseModal" type="button" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold">✕</button>
+      </div>
+      <div class="p-5 overflow-y-auto space-y-4 flex-1">
+        <div id="modalPreviewBox" class="rounded-xl bg-slate-900 text-white p-6 flex flex-col items-center justify-center text-center"></div>
+        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 text-xs space-y-1">
+          <div><span class="text-slate-500">Topics:</span> <p id="modalTopics" class="font-medium text-slate-900"></p></div>
+        </div>
+        <div id="modalEditorBlock" class="hidden bg-indigo-50 rounded-xl p-4 border border-indigo-200 space-y-3 text-xs">
+          <div class="font-bold text-indigo-900">✏️ Editor Controls</div>
+          <div class="grid grid-cols-3 gap-2">
+            <select id="editModalCourse" class="rounded border p-1"><option value="DSC-B">DSC-B</option><option value="DSC-C">DSC-C</option><option value="MDC">MDC</option><option value="DSC-A">DSC-A</option></select>
+            <select id="editModalModule" class="rounded border p-1"><option value="MODULE 1">Module 1</option><option value="MODULE 2">Module 2</option><option value="MODULE 3">Module 3</option><option value="MODULE 4">Module 4</option><option value="MODULE">Module</option></select>
+            <select id="editModalMonth" class="rounded border p-1"><option value="AUG">AUG</option><option value="SEP">SEP</option><option value="OCT">OCT</option><option value="NOV">NOV</option><option value="DEC">DEC</option></select>
+          </div>
+          <input id="editModalTopics" type="text" class="w-full rounded border px-2 py-1" />
+          <div class="flex justify-between">
+            <button id="btnDeleteFileModal" type="button" class="px-3 py-1 bg-rose-100 text-rose-800 rounded font-semibold">Delete</button>
+            <button id="btnSaveFilePropsModal" type="button" class="px-3 py-1 bg-indigo-600 text-white rounded font-semibold">Save & Move</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUBJECTS_NO_COURSE = ['ENG', 'FRENCH'];
+    const POINTS_MAP = { 'NOTES': 1, 'Q.PAPERS': 2, 'SYLLABUS BREAKDOWN': 1, 'CLASS VIDEOS': 2 };
+
+    function isValidWebAppUrl(u) {
+      const s = String(u || '').trim();
+      return s.indexOf('https://script.google.com/') === 0 && s.slice(-5) === '/exec';
+    }
+
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function safeUrl(u) { return String(u || '').toLowerCase().indexOf('https://') === 0 ? String(u) : ''; }
+    function UP(s) { return String(s == null ? '' : s).trim().replace(/\s+/g, ' ').toUpperCase(); }
+    function extractDigits(s) {
+      let out = '';
+      const str = String(s == null ? '' : s);
+      for (let i = 0; i < str.length; i++) {
+        const ch = str.charAt(i);
+        if (ch >= '0' && ch <= '9') out += ch;
+      }
+      return out;
+    }
+
+    function canonItem(it) {
+      const o = Object.assign({}, it);
+      o.name = UP(o.name) || 'ANON';
+      o.month = UP(o.month);
+      o.subject = UP(o.subject);
+      o.course = SUBJECTS_NO_COURSE.includes(o.subject) ? 'NONE' : (UP(o.course) || 'DSC-B');
+      o.contentType = UP(o.contentType) || 'NOTES';
+      o.module = UP(o.module) || 'MODULE';
+      o.scope = UP(o.scope) === 'DAILY' ? 'DAILY' : 'COMPLETE';
+      o.sem = 'SEM ' + (extractDigits(o.sem) || '1');
+      o.displayName = UP(o.displayName || (o.name + '.' + o.month));
+      o.topics = String(o.topics == null ? '' : o.topics);
+      o.fileUrl = o.fileUrl || '';
+      return o;
+    }
+
+    const state = {
+      activeTab: 'viewBrowse',
+      liveWebAppUrl: '',
+      testFolderId: 'PASTE_YOUR_ROOT_FOLDER_ID_HERE',
+      activeModalFileId: null,
+      editorUnlocked: false,
+      editorPin: '',
+      likedIds: {},
+      files: [],
+      pending: [],
+      announcements: []
+    };
+
+    try {
+      const savedLikes = localStorage.getItem('deptnotes_liked_ids');
+      if (savedLikes) state.likedIds = JSON.parse(savedLikes);
+      const savedUrl = localStorage.getItem('deptnotes_live_url');
+      if (savedUrl && isValidWebAppUrl(savedUrl)) state.liveWebAppUrl = savedUrl;
+    } catch (e) {}
+
+    try {
+      const hashStr = String(location.hash || '');
+      const hubIdx = hashStr.indexOf('hub=');
+      if (hubIdx > -1) {
+        const hu = decodeURIComponent(hashStr.slice(hubIdx + 4).split('&')[0]);
+        if (isValidWebAppUrl(hu)) {
+          state.liveWebAppUrl = hu;
+          try { localStorage.setItem('deptnotes_live_url', hu); } catch (e) {}
+        }
+      }
+    } catch (e) {}
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const colors = { info: 'bg-slate-900 text-white', success: 'bg-emerald-700 text-white', warn: 'bg-amber-600 text-white' };
+      const el = document.createElement('div');
+      el.className = `pointer-events-auto px-4 py-3 rounded-xl border shadow-lg text-xs font-medium transition-all ${colors[type] || colors.info}`;
+      el.textContent = msg;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 3600);
+    }
+
+    function semToYearFolder(sem) {
+      const num = parseInt(extractDigits(sem), 10) || 1;
+      return `YEAR ${Math.min(Math.max(Math.ceil(num / 2), 1), 5)}`;
+    }
+
+    function buildDrivePath(item) {
+      const yr = semToYearFolder(item.sem);
+      const semLabel = UP(item.sem);
+      const noCourse = SUBJECTS_NO_COURSE.includes(item.subject);
+      let parts = [yr, semLabel, item.subject];
+      if (!noCourse && item.course && item.course !== 'NONE') parts.push(item.course);
+      parts.push(item.contentType);
+      if (item.contentType === 'NOTES' || item.contentType === 'CLASS VIDEOS') {
+        parts.push(noCourse ? item.month : (item.module || 'MODULE'));
+      }
+      return parts.join(' / ');
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const res = String(reader.result || '');
+          resolve(res.includes(',') ? res.split(',')[1] : res);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function syncFromLiveDrive(quiet) {
+      if (!state.liveWebAppUrl) return;
+      try {
+        if (!quiet) showToast('Syncing with Google Drive...', 'info');
+        const res = await fetch(state.liveWebAppUrl + '?action=listAll', { redirect: 'follow' });
+        const data = await res.json();
+        if (data && data.ok) {
+          state.files = (data.files || []).map(canonItem);
+          state.pending = (data.pending || []).map(canonItem);
+          state.announcements = data.announcements || [];
+          renderBrowse();
+          renderEditor();
+          renderFeedAndLeaderboard();
+          if (!quiet) showToast(`Synced! ${state.files.length} files loaded.`, 'success');
+        }
+      } catch (err) {
+        if (!quiet) showToast('Could not reach Web App URL.', 'warn');
+      }
+    }
+
+    function applyLiveUrl(url) {
+      state.liveWebAppUrl = url || '';
+      try { if (url) localStorage.setItem('deptnotes_live_url', url); else localStorage.removeItem('deptnotes_live_url'); } catch (e) {}
+      const badge = document.getElementById('connectionBadge');
+      badge.textContent = url ? 'Live Drive Connected' : 'Not Connected';
+      badge.className = 'text-[11px] font-medium px-2 py-0.5 rounded-full border ' + (url ? 'bg-emerald-100 text-emerald-800 border-emerald-200' : 'bg-amber-100 text-amber-800 border-amber-200');
+      document.getElementById('inputWebAppUrl').value = url || '';
+    }
+
+    function cleanFolderId(raw) {
+      const s = String(raw || '').trim();
+      const idx = s.indexOf('folders/');
+      return idx > -1 ? s.slice(idx + 8).split('?')[0].split('/')[0].trim() : s;
+    }
+
+    function applySetupGate() {
+      const on = state.editorUnlocked;
+      document.getElementById('tabBtnSetup').classList.toggle('hidden', !on);
+      if (on) {
+        document.getElementById('appsScriptCodeBlock').textContent = generateAppsScriptCode(state.testFolderId);
+      }
+    }
+
+    async function postToLiveDrive(payload, silentError) {
+      if (!state.liveWebAppUrl) return null;
+      payload.pin = payload.pin || state.editorPin;
+      try {
+        const res = await fetch(state.liveWebAppUrl, {
+          method: 'POST',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        return await res.json();
+      } catch (err) {
+        if (!silentError) showToast('Live Drive request failed.', 'warn');
+        return null;
+      }
+    }
+
+    function renderBrowse() {
+      const sem = document.getElementById('filterSem').value;
+      const subject = document.getElementById('filterSubject').value;
+      const course = document.getElementById('filterCourse').value;
+      const type = document.getElementById('filterType').value;
+      const mod = document.getElementById('filterModule').value;
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      let filtered = state.files.filter(f => f.approved);
+      if (sem !== 'ALL') filtered = filtered.filter(f => f.sem === sem);
+      if (subject !== 'ALL') filtered = filtered.filter(f => f.subject === subject);
+      if (course !== 'ALL') filtered = filtered.filter(f => f.course === course);
+      if (type !== 'ALL') filtered = filtered.filter(f => f.contentType === type);
+      if (mod !== 'ALL') filtered = filtered.filter(f => f.module === mod);
+
+      if (query) {
+        filtered = filtered.filter(f => f.displayName.toLowerCase().includes(query) || f.topics.toLowerCase().includes(query));
+      }
+
+      filtered.sort((a, b) => (b.likes - a.likes) || (a.daysOld - b.daysOld));
+      document.getElementById('resultsSummaryText').textContent = `Showing ${filtered.length} approved item(s)`;
+
+      const grid = document.getElementById('filesGrid');
+      grid.innerHTML = '';
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full bg-white rounded-2xl border border-slate-200 p-8 text-center text-xs text-slate-500">0 files found. Upload notes using "Share Notes" tab.</div>`;
+        return;
+      }
+
+      filtered.forEach((f, idx) => {
+        const isLiked = !!state.likedIds[f.id];
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-col justify-between gap-3';
+        card.innerHTML = `
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-[10px]">
+              <span class="font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">${esc(f.contentType)}</span>
+              <span class="text-slate-400 font-mono">#${idx + 1}</span>
+            </div>
+            <h3 class="font-bold text-base text-slate-900 font-mono">${esc(f.displayName)}</h3>
+            <p class="text-xs text-slate-700 line-clamp-2">${esc(f.topics)}</p>
+            <div class="text-[11px] text-slate-400 font-mono">📁 ${esc(buildDrivePath(f))}</div>
+          </div>
+          <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <button type="button" data-like-id="${esc(f.id)}" class="btn-like px-3 py-1 rounded-lg text-xs font-semibold border ${isLiked ? 'bg-indigo-600 text-white' : 'bg-slate-50 text-slate-700'}">👍 ${f.likes}</button>
+            <button type="button" data-open-id="${esc(f.id)}" class="btn-open-modal px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold">Open File</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      grid.querySelectorAll('.btn-like').forEach(b => b.addEventListener('click', () => toggleLike(b.getAttribute('data-like-id'))));
+      grid.querySelectorAll('.btn-open-modal').forEach(b => b.addEventListener('click', () => openFileModal(b.getAttribute('data-open-id'))));
+    }
+
+    async function toggleLike(fileId) {
+      const file = state.files.find(f => f.id === fileId);
+      if (!file) return;
+      const delta = state.likedIds[fileId] ? -1 : 1;
+      if (delta < 0) { delete state.likedIds[fileId]; file.likes = Math.max(0, file.likes - 1); }
+      else { state.likedIds[fileId] = true; file.likes += 1; }
+      try { localStorage.setItem('deptnotes_liked_ids', JSON.stringify(state.likedIds)); } catch (e) {}
+      renderBrowse();
+      if (state.liveWebAppUrl) await postToLiveDrive({ action: 'like', rowId: file.rowId || file.id, delta });
+    }
+
+    function updateUploadPreview() {
+      const rawName = UP(document.getElementById('upName').value) || 'ANON';
+      const month = document.getElementById('upMonth').value;
+      const sem = document.getElementById('upSem').value;
+      const subject = document.getElementById('upSubject').value;
+      const course = SUBJECTS_NO_COURSE.includes(subject) ? 'NONE' : document.getElementById('upCourse').value;
+      const contentType = document.getElementById('upType').value;
+      const modRaw = document.getElementById('upModule').value;
+      const module = modRaw ? `MODULE ${modRaw}` : 'MODULE';
+      document.getElementById('selectedFileLabel').textContent = `${rawName}.${month} -> ${buildDrivePath({ sem, subject, course, contentType, module, month })}`;
+    }
+
+    function renderFeedAndLeaderboard() {
+      document.getElementById('feedCountBadge').textContent = state.announcements.length;
+      const annList = document.getElementById('announcementsList');
+      annList.innerHTML = state.announcements.length ? state.announcements.map(a => `<div class="p-3 rounded bg-slate-50 border text-xs"><div class="font-bold">${esc(a.title)}</div><div>${esc(a.body)}</div></div>`).join('') : '<p class="text-xs text-slate-400">No announcements.</p>';
+
+      const scores = {};
+      state.files.filter(f => f.approved).forEach(f => {
+        const pts = POINTS_MAP[f.contentType] || 1;
+        if (!scores[f.name]) scores[f.name] = { name: f.name, points: 0 };
+        scores[f.name].points += pts;
+      });
+      const lb = Object.values(scores).sort((a, b) => b.points - a.points);
+      document.getElementById('leaderboardList').innerHTML = lb.length ? lb.map((c, i) => `<div class="flex justify-between text-xs p-2 bg-slate-50 rounded border"><span>#${i+1} ${esc(c.name)}</span><span class="font-bold">${c.points} pts</span></div>`).join('') : '<p class="text-xs text-slate-400">0 contributors.</p>';
+    }
+
+    function renderEditor() {
+      document.getElementById('pendingCountBadge').textContent = state.pending.length;
+      const pList = document.getElementById('pendingQueueList');
+      pList.innerHTML = state.pending.length ? state.pending.map(p => `
+        <div class="p-4 rounded border bg-slate-50 flex items-center justify-between text-xs">
+          <div>
+            <div class="font-mono font-bold text-indigo-700">${esc(p.displayName)}</div>
+            <div class="text-slate-600">Topics: ${esc(p.topics)}</div>
+          </div>
+          <button onclick="window.approveItem('${p.id}')" class="px-3 py-1 bg-emerald-600 text-white rounded font-semibold">Approve</button>
+        </div>`).join('') : '<p class="text-xs text-slate-400">Pending queue is clear.</p>';
+    }
+
+    window.approveItem = async function(id) {
+      if (!state.liveWebAppUrl) return;
+      const item = state.pending.find(p => p.id === id);
+      if (!item) return;
+      const res = await postToLiveDrive({ action: 'approve', rowId: item.rowId || item.id });
+      if (res && res.ok) {
+        showToast('Approved and moved in Drive!', 'success');
+        await syncFromLiveDrive(true);
+      } else {
+        showToast('Approval failed: ' + (res ? res.error : 'unknown'), 'warn');
+      }
+    };
+
+    function openFileModal(fileId) {
+      const f = state.files.find(x => x.id === fileId);
+      if (!f) return;
+      state.activeModalFileId = fileId;
+      document.getElementById('modalFileName').textContent = f.displayName;
+      document.getElementById('modalFilePath').textContent = buildDrivePath(f);
+      document.getElementById('modalTopics').textContent = f.topics;
+      document.getElementById('modalPreviewBox').innerHTML = safeUrl(f.fileUrl) ? `<a href="${esc(f.fileUrl)}" target="_blank" class="px-4 py-2 bg-indigo-600 text-white rounded text-xs font-semibold">Open in Google Drive</a>` : `<p class="text-xs">No direct link attached.</p>`;
+      document.getElementById('modalEditorBlock').classList.toggle('hidden', !state.editorUnlocked);
+      document.getElementById('fileModal').classList.remove('hidden');
+      document.getElementById('fileModal').classList.add('flex');
+    }
+
+    function closeFileModal() {
+      document.getElementById('fileModal').classList.add('hidden');
+      document.getElementById('fileModal').classList.remove('flex');
+    }
+
+    function generateAppsScriptCode(rootFolderId) {
+      const cleanId = (rootFolderId || 'PASTE_YOUR_ROOT_FOLDER_ID_HERE').trim();
+      const lines = [
+        'const ROOT_FOLDER_ID = "' + cleanId + '";',
+        'const PENDING_FOLDER_NAME = "🕓 PENDING REVIEW";',
+        'const OVERFLOW_FOLDER_NAME = "_OVERFLOW";',
+        'const CONFIG_SHEET_NAME = "CONFIG";',
+        'const SUBJECTS_NO_COURSE_LAYER = ["ENG", "FRENCH"];',
+        'const ECO_COURSES = ["DSC-A", "DSC-B"];',
+        'const DEFAULT_COURSES = ["DSC-B", "DSC-C", "MDC"];',
+        'const ALL_SUBJECTS = ["BIO", "CHEM", "CS", "ECO", "ENG", "EVS", "FRENCH", "MATHS", "PHYSICS", "STATI"];',
+        'const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];',
+        'const SUBJECT_ALIASES = {"math":"MATHS","maths":"MATHS","stat":"STATI","stats":"STATI","stati":"STATI","english":"ENG","eng":"ENG","economics":"ECO","eco":"ECO","cs":"CS","biology":"BIO","chemistry":"CHEM","evs":"EVS"};',
+        'const CONTENT_ALIASES = {"notes":"NOTES","note":"NOTES","qpaper":"Q.PAPERS","qpapers":"Q.PAPERS","pyq":"Q.PAPERS","syllabus":"SYLLABUS BREAKDOWN","videos":"CLASS VIDEOS","video":"CLASS VIDEOS"};',
+        'const POINTS_TABLE = {"NOTES":1,"Q.PAPERS":2,"SYLLABUS BREAKDOWN":1,"CLASS VIDEOS":2};',
+        'const COL = {TIMESTAMP:0,NAME:1,SEM:2,SUBJECT:3,COURSE:4,CONTENT_TYPE:5,MODULE:6,MONTH:7,FILE:8};',
+        'const FORM_COL_HEADERS = ["Timestamp", "Name", "Sem", "Subject", "Course", "Content Type", "Module", "Month", "File"];',
+        'const EXTRA_COL_HEADERS = ["Status", "File Link", "Approved", "Processed", "Points", "Public Path", "Likes", "Topics", "Approved Timestamp", "Upload Scope"];',
+        'const EDITOR_ACTIONS = ["approve", "reject", "editProps", "delete", "verifyPin", "getConfig", "setForwardUrl"];',
+        'function setup() {',
+        '  ensureFolderStructure(getRootFolder());',
+        '  const ss = SpreadsheetApp.getActiveSpreadsheet();',
+        '  const sheet = ss.getSheets()[0];',
+        '  const currentLastCol = sheet.getLastColumn();',
+        '  const currentHeaders = currentLastCol > 0 ? sheet.getRange(1, 1, 1, currentLastCol).getValues()[0] : [];',
+        '  for (let i = 0; i < FORM_COL_HEADERS.length; i++) {',
+        '    if (!clean(currentHeaders[i]) || findCol(EXTRA_COL_HEADERS, currentHeaders[i]) > -1) {',
+        '      sheet.getRange(1, i + 1).setValue(FORM_COL_HEADERS[i]);',
+        '    }',
+        '  }',
+        '  const lastCol = Math.max(sheet.getLastColumn(), FORM_COL_HEADERS.length);',
+        '  const headerRow = sheet.getRange(1, 1, 1, lastCol).getValues()[0];',
+        '  const helperSlice = headerRow.slice(FORM_COL_HEADERS.length);',
+        '  let nextCol = lastCol + 1;',
+        '  EXTRA_COL_HEADERS.forEach(function(h) { if (findCol(helperSlice, h) === -1) { sheet.getRange(1, nextCol).setValue(h); nextCol++; } });',
+        '  const newHeaderRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];',
+        '  const approvedColIndex = findCol(newHeaderRow, "Approved") + 1;',
+        '  const rule = SpreadsheetApp.newDataValidation().requireValueInList(["YES", "NO"], true).setAllowInvalid(false).build();',
+        '  sheet.getRange(2, approvedColIndex, Math.max(1, sheet.getMaxRows() - 1), 1).setDataValidation(rule);',
+        '  let configSheet = getConfigSheet();',
+        '  if (!configSheet) { configSheet = ss.insertSheet(CONFIG_SHEET_NAME); configSheet.getRange(1, 1, 1, 2).setValues([["Setting", "Value"]]); }',
+        '  const defaults = [["EDITOR_PIN", "2026"], ["MAX_FILES_PER_MODULE", "5"], ["NEW_FILE_GRACE_DAYS", "7"], ["SUBJECTS", ALL_SUBJECTS.join(", ")], ["COURSES", "DSC-A, DSC-B, DSC-C, MDC"]];',
+        '  const existingKeys = configSheet.getLastRow() > 1 ? configSheet.getRange(2, 1, configSheet.getLastRow() - 1, 1).getValues().map(function(r) { return up(r[0]); }) : [];',
+        '  defaults.forEach(function(pair) { if (existingKeys.indexOf(pair[0]) === -1) configSheet.appendRow(pair); });',
+        '  ss.setActiveSheet(sheet);',
+        '  const triggers = ScriptApp.getProjectTriggers();',
+        '  if (!triggers.some(function(t) { return t.getHandlerFunction() === "onFormSubmit"; })) ScriptApp.newTrigger("onFormSubmit").forSpreadsheet(ss).onFormSubmit().create();',
+        '  if (!triggers.some(function(t) { return t.getHandlerFunction() === "onSheetEdit"; })) ScriptApp.newTrigger("onSheetEdit").forSpreadsheet(ss).onEdit().create();',
+        '  SpreadsheetApp.getUi().alert("Setup complete!");',
+        '}',
+        'function onOpen() { SpreadsheetApp.getUi().createMenu("Archive Tools").addItem("Process Approved Files", "processApprovedFilesMenu").addToUi(); }',
+        'function processApprovedFilesMenu() { withLock(function() { processApprovedFiles(false); }); }',
+        'function onSheetEdit(e) {',
+        '  if (!e || !e.range || e.range.getSheet().getIndex() !== 1 || e.range.getRow() < 2) return;',
+        '  const headerRow = e.range.getSheet().getRange(1, 1, 1, e.range.getSheet().getLastColumn()).getValues()[0];',
+        '  const approvedCol = findCol(headerRow, "Approved") + 1;',
+        '  if (approvedCol > 0 && e.range.getColumn() <= approvedCol && (e.range.getColumn() + e.range.getNumColumns() - 1) >= approvedCol) {',
+        '    withLock(function() { processApprovedFiles(true); });',
+        '  }',
+        '}',
+        'function onFormSubmit(e) {',
+        '  withLock(function() {',
+        '    const sheet = e.range.getSheet();',
+        '    const row = e.range.getRow();',
+        '    const headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];',
+        '    const col = function(name) { return findCol(headerRow, name) + 1; };',
+        '    try {',
+        '      const values = sheet.getRange(row, 1, 1, COL.FILE + 1).getValues()[0];',
+        '      const fileUrlOrId = values[COL.FILE];',
+        '      if (!fileUrlOrId) throw new Error("No file uploaded.");',
+        '      const c = canonRow(values[COL.NAME], values[COL.SEM], values[COL.SUBJECT], values[COL.COURSE], values[COL.CONTENT_TYPE], values[COL.MODULE], values[COL.MONTH]);',
+        '      const root = getRootFolder();',
+        '      const pendingFolder = getOrCreateFolder(root, PENDING_FOLDER_NAME);',
+        '      const file = getFileFromFormUpload(fileUrlOrId);',
+        '      file.setName(getUniqueFileName(pendingFolder, c.name + "." + c.month, file.getId()));',
+        '      moveFileTo(file, pendingFolder);',
+        '      writeCanonToRow(sheet, row, c);',
+        '      sheet.getRange(row, col("Status")).setValue("Uploaded OK — pending approval");',
+        '      sheet.getRange(row, col("File Link")).setValue(file.getUrl());',
+        '      sheet.getRange(row, col("Approved")).setValue("NO");',
+        '      sheet.getRange(row, col("Processed")).setValue("");',
+        '      sheet.getRange(row, col("Points")).setValue(getPoints(c.contentType));',
+        '      sheet.getRange(row, col("Public Path")).setValue("");',
+        '    } catch (err) { sheet.getRange(row, col("Status")).setValue("ERROR: " + err.message); }',
+        '  });',
+        '}',
+        'function processApprovedFiles(silentMode) {',
+        '  const sheet = getMainSheet();',
+        '  const data = sheet.getDataRange().getValues();',
+        '  if (data.length < 2) return 0;',
+        '  const h = data[0];',
+        '  const approvedCol = findCol(h, "Approved"), processedCol = findCol(h, "Processed"), statusCol = findCol(h, "Status");',
+        '  if (approvedCol === -1 || processedCol === -1) return 0;',
+        '  const root = getRootFolder(), pendingFolder = getOrCreateFolder(root, PENDING_FOLDER_NAME);',
+        '  let count = 0;',
+        '  for (let r = 1; r < data.length; r++) {',
+        '    const row = data[r];',
+        '    if (up(row[approvedCol]) !== "YES" || up(row[processedCol]) !== "") continue;',
+        '    try {',
+        '      const c = canonRow(row[COL.NAME], row[COL.SEM], row[COL.SUBJECT], row[COL.COURSE], row[COL.CONTENT_TYPE], row[COL.MODULE], row[COL.MONTH]);',
+        '      const file = getFileFromFormUpload(row[COL.FILE]);',
+        '      let baseFolder = root;',
+        '      if (normalizeText(root.getName()).indexOf("year") !== 0) baseFolder = getOrCreateFolder(root, c.year);',
+        '      let dest = getOrCreateFolder(baseFolder, c.sem);',
+        '      dest = getOrCreateFolder(dest, c.subject);',
+        '      if (c.hasCourse) dest = getOrCreateFolder(dest, c.course);',
+        '      dest = getOrCreateFolder(dest, c.contentType);',
+        '      if (c.contentType === "NOTES" || c.contentType === "CLASS VIDEOS") dest = getOrCreateFolder(dest, c.hasCourse ? c.moduleLabel : c.month);',
+        '      file.setName(getUniqueFileName(dest, c.name + "." + c.month, file.getId()));',
+        '      moveFileTo(file, dest);',
+        '      sheet.getRange(r + 1, processedCol + 1).setValue("YES");',
+        '      sheet.getRange(r + 1, statusCol + 1).setValue("Moved to Public");',
+        '      count++;',
+        '    } catch (err) { sheet.getRange(r + 1, statusCol + 1).setValue("ERROR: " + err.message); }',
+        '  }',
+        '  return count;',
+        '}',
+        'function doGet(e) {',
+        '  if (e && e.parameter && e.parameter.action === "verifyPin") {',
+        '    const ok = clean(e.parameter.pin) === clean(getConfig().EDITOR_PIN);',
+        '    return jsonResponse({ ok: ok });',
+        '  }',
+        '  const sheet = getMainSheet(), data = sheet.getDataRange().getValues();',
+        '  if (data.length <= 1) return jsonResponse({ ok: true, files: [], pending: [], announcements: [] });',
+        '  const h = data[0], idx = function(n) { return findCol(h, n); };',
+        '  const files = [], pending = [];',
+        '  for (let r = 1; r < data.length; r++) {',
+        '    const row = data[r];',
+        '    if (!row[COL.NAME] && !row[COL.FILE]) continue;',
+        '    const processed = up(row[idx("Processed")] || "");',
+        '    if (processed === "OVERFLOW" || processed === "REJECTED") continue;',
+        '    const c = canonRow(row[COL.NAME], row[COL.SEM], row[COL.SUBJECT], row[COL.COURSE], row[COL.CONTENT_TYPE], row[COL.MODULE], row[COL.MONTH]);',
+        '    const item = { id: "row_" + (r + 1), rowId: r + 1, name: c.name, month: c.month, displayName: c.name + "." + c.month, sem: "SEM " + c.semNum, subject: c.subject, course: c.course, contentType: c.contentType, module: c.moduleLabel, topics: clean(row[idx("Topics")]) || "Notes", likes: Number(row[idx("Likes")] || 0), points: getPoints(c.contentType), fileUrl: String(row[idx("File Link")] || row[COL.FILE] || "") };',
+        '    if (processed === "YES") { item.approved = true; files.push(item); }',
+        '    else { item.approved = false; pending.push(item); }',
+        '  }',
+        '  return jsonResponse({ ok: true, files: files, pending: pending, announcements: [] });',
+        '}',
+        'function doPost(e) {',
+        '  const lock = LockService.getScriptLock();',
+        '  lock.waitLock(30000);',
+        '  try {',
+        '    const body = JSON.parse(e.postData.contents);',
+        '    const sheet = getMainSheet(), h = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];',
+        '    const idx = function(n) { return findCol(h, n) + 1; };',
+        '    const targetRow = Number(onlyDigits(body.rowId || body.fileId || ""));',
+        '    if (EDITOR_ACTIONS.indexOf(body.action) > -1 && clean(body.pin) !== clean(getConfig().EDITOR_PIN)) {',
+        '      return jsonResponse({ ok: false, error: "Wrong editor PIN" });',
+        '    }',
+        '    if (body.action === "verifyPin") return jsonResponse({ ok: true });',
+        '    if (body.action === "getConfig") return jsonResponse({ ok: true, rootFolderId: ROOT_FOLDER_ID });',
+        '    if (body.action === "upload") {',
+        '      const c = canonRow(body.name, body.sem, body.subject, body.course, body.contentType, body.module, body.month);',
+        '      const root = getRootFolder(), pendingFolder = getOrCreateFolder(root, PENDING_FOLDER_NAME);',
+        '      const blob = Utilities.newBlob(Utilities.base64Decode(body.base64Data), body.mimeType || "application/pdf", body.fileName || "upload.pdf");',
+        '      const driveFile = pendingFolder.createFile(blob);',
+        '      driveFile.setName(getUniqueFileName(pendingFolder, c.name + "." + c.month, driveFile.getId()));',
+        '      const newRow = new Array(h.length).fill("");',
+        '      newRow[COL.TIMESTAMP] = new Date();',
+        '      newRow[COL.NAME] = c.name; newRow[COL.SEM] = c.sem; newRow[COL.SUBJECT] = c.subject; newRow[COL.COURSE] = c.course; newRow[COL.CONTENT_TYPE] = c.contentType; newRow[COL.MODULE] = c.modNum ? c.moduleLabel : ""; newRow[COL.MONTH] = c.month; newRow[COL.FILE] = driveFile.getUrl();',
+        '      if (idx("Status") > 0) newRow[idx("Status") - 1] = "Pending";',
+        '      if (idx("File Link") > 0) newRow[idx("File Link") - 1] = driveFile.getUrl();',
+        '      if (idx("Approved") > 0) newRow[idx("Approved") - 1] = "NO";',
+        '      if (idx("Points") > 0) newRow[idx("Points") - 1] = getPoints(c.contentType);',
+        '      if (idx("Likes") > 0) newRow[idx("Likes") - 1] = 0;',
+        '      if (idx("Topics") > 0) newRow[idx("Topics") - 1] = clean(body.topics);',
+        '      sheet.appendRow(newRow);',
+        '      return jsonResponse({ ok: true, rowId: sheet.getLastRow(), fileUrl: driveFile.getUrl() });',
+        '    }',
+        '    if (body.action === "approve" && targetRow >= 2) {',
+        '      sheet.getRange(targetRow, idx("Approved")).setValue("YES");',
+        '      processApprovedFiles(true);',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '    if (body.action === "reject" && targetRow >= 2) {',
+        '      sheet.getRange(targetRow, idx("Processed")).setValue("REJECTED");',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '    if (body.action === "like" && targetRow >= 2 && idx("Likes") > 0) {',
+        '      const cell = sheet.getRange(targetRow, idx("Likes"));',
+        '      cell.setValue(Math.max(0, Number(cell.getValue() || 0) + (Number(body.delta) < 0 ? -1 : 1)));',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '    return jsonResponse({ ok: false, error: "Unknown action" });',
+        '  } catch (err) { return jsonResponse({ ok: false, error: err.message }); }',
+        '  finally { lock.releaseLock(); }',
+        '}',
+        'function jsonResponse(obj) { return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON); }',
+        'function clean(r) { return String(r == null ? "" : r).trim().split(" ").filter(Boolean).join(" "); }',
+        'function up(r) { return clean(r).toUpperCase(); }',
+        'function onlyDigits(r) { let out = "", s = String(r || ""); for(let i=0;i<s.length;i++){if(s.charAt(i)>="0"&&s.charAt(i)<="9")out+=s.charAt(i);} return out; }',
+        'function normalizeText(r) { let out = "", s = String(r || "").toLowerCase(); for(let i=0;i<s.length;i++){const c=s.charAt(i); if((c>="a"&&c<="z")||(c>="0"&&c<="9"))out+=c;} return out; }',
+        'function normalizeSubject(r) { return SUBJECT_ALIASES[normalizeText(r)] || up(r) || "CS"; }',
+        'function hasCourseLayer(s) { return SUBJECTS_NO_COURSE_LAYER.indexOf(s) === -1; }',
+        'function resolveCourse(s, cr) { if (!hasCourseLayer(s)) return "NONE"; const allowed = s === "ECO" ? ECO_COURSES : DEFAULT_COURSES, key = normalizeText(cr); for(let i=0;i<allowed.length;i++){if(normalizeText(allowed[i])===key)return allowed[i];} return allowed[0]; }',
+        'function canonRow(name, sem, subject, course, contentType, module, month) {',
+        '  const subj = normalizeSubject(subject), semNum = Number(onlyDigits(sem) || "1");',
+        '  const modNum = onlyDigits(module);',
+        '  return { name: up(name) || "ANON", semNum: semNum, sem: "SEM " + semNum, year: "YEAR " + Math.min(5, Math.max(1, Math.ceil(semNum / 2))), subject: subj, hasCourse: hasCourseLayer(subj), course: resolveCourse(subj, course), contentType: CONTENT_ALIASES[normalizeText(contentType)] || "NOTES", modNum: modNum, moduleLabel: modNum ? "MODULE " + modNum : "MODULE", month: up(month).substring(0,3) || "GEN" };',
+        '}',
+        'function writeCanonToRow(sheet, rowNum, c) { sheet.getRange(rowNum, COL.NAME + 1, 1, 7).setValues([[c.name, c.sem, c.subject, c.course, c.contentType, c.modNum ? c.moduleLabel : "", c.month]]); }',
+        'function getPoints(t) { return POINTS_TABLE[CONTENT_ALIASES[normalizeText(t)] || "NOTES"] || 1; }',
+        'function getMainSheet() { return SpreadsheetApp.getActiveSpreadsheet().getSheets()[0]; }',
+        'function findCol(h, name) { const key = up(name); for(let i=0;i<h.length;i++){if(up(h[i])===key)return i;} return -1; }',
+        'function getConfigSheet() { const all = SpreadsheetApp.getActiveSpreadsheet().getSheets(); for(let i=0;i<all.length;i++){if(up(all[i].getName())===CONFIG_SHEET_NAME)return all[i];} return null; }',
+        'function getRootFolder() { return DriveApp.getFolderById(clean(ROOT_FOLDER_ID)); }',
+        'function ensureFolderStructure(root) { getOrCreateFolder(root, PENDING_FOLDER_NAME); getOrCreateFolder(root, OVERFLOW_FOLDER_NAME); for(let y=1;y<=5;y++){ const yf = getOrCreateFolder(root, "YEAR " + y); getOrCreateFolder(yf, "SEM " + (y*2-1)); getOrCreateFolder(yf, "SEM " + (y*2)); } }',
+        'function withLock(fn) { const l = LockService.getScriptLock(); l.waitLock(30000); try { return fn(); } finally { l.releaseLock(); } }',
+        'function getConfig() { const cfg = { EDITOR_PIN: "2026" }; try { const s = getConfigSheet(); if(s && s.getLastRow()>1) { s.getRange(2,1,s.getLastRow()-1,2).getValues().forEach(function(r){ if(up(r[0])==="EDITOR_PIN" && r[1]) cfg.EDITOR_PIN = clean(r[1]); }); } } catch(e){} return cfg; }',
+        'function getOrCreateFolder(parent, name) {',
+        '  const wanted = up(name), target = normalizeText(wanted) || wanted.toLowerCase();',
+        '  const folders = parent.getFolders();',
+        '  while(folders.hasNext()) {',
+        '    const f = folders.next();',
+        '    if ((normalizeText(f.getName()) || f.getName().toLowerCase()) === target) return f;',
+        '  }',
+        '  return parent.createFolder(wanted);',
+        '}',
+        'function findFileCaseInsensitive(folder, name) { const target = up(name), files = folder.getFiles(); while(files.hasNext()) { const f = files.next(); if (up(f.getName()) === target) return f; } return null; }',
+        'function getUniqueFileName(folder, baseName, ownId) {',
+        '  let cand = baseName, count = 2;',
+        '  while(true) {',
+        '    const hit = findFileCaseInsensitive(folder, cand);',
+        '    if (!hit || (ownId && hit.getId() === ownId)) break;',
+        '    cand = baseName + "(" + count + ")"; count++;',
+        '  }',
+        '  return cand;',
+        '}',
+        'function getFileFromFormUpload(urlOrId) {',
+        '  const s = String(urlOrId || "").trim();',
+        '  let id = s;',
+        '  if (s.indexOf("/d/") > -1) id = s.split("/d/")[1].split("/")[0].split("?")[0].trim();',
+        '  else if (s.indexOf("id=") > -1) id = s.split("id=")[1].split("&")[0].trim();',
+        '  return DriveApp.getFileById(id);',
+        '}',
+        'function moveFileTo(file, dest) {',
+        '  try { file.moveTo(dest); return; } catch(e){}',
+        '  dest.addFile(file);',
+        '  const p = file.getParents();',
+        '  while(p.hasNext()) { const parent = p.next(); if (parent.getId() !== dest.getId()) { try { parent.removeFile(file); } catch(ex){} } }',
+        '}'
+      ];
+      return lines.join('\n');
+    }
+
+    function switchTab(targetId) {
+      state.activeTab = targetId;
+      ['viewBrowse', 'viewUpload', 'viewFeed', 'viewEditor', 'viewSetup'].forEach(id => {
+        const sec = document.getElementById(id);
+        if (sec) sec.classList.toggle('hidden', id !== targetId);
+      });
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        const isTarget = btn.getAttribute('data-target') === targetId;
+        btn.className = `nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${isTarget ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'} flex items-center gap-1.5`;
+      });
+      applySetupGate();
+    }
+    window.switchTab = switchTab;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('btnSyncNow').addEventListener('click', () => syncFromLiveDrive(false));
+      ['filterSem', 'filterSubject', 'filterCourse', 'filterType', 'filterModule'].forEach(id => {
+        document.getElementById(id).addEventListener('change', renderBrowse);
+      });
+      document.getElementById('searchInput').addEventListener('input', renderBrowse);
+      document.getElementById('btnResetFilters').addEventListener('click', () => {
+        document.getElementById('filterSem').value = 'ALL';
+        document.getElementById('filterSubject').value = 'ALL';
+        document.getElementById('filterCourse').value = 'ALL';
+        document.getElementById('filterType').value = 'ALL';
+        document.getElementById('filterModule').value = 'ALL';
+        document.getElementById('searchInput').value = '';
+        renderBrowse();
+      });
+
+      ['upName', 'upMonth', 'upSem', 'upSubject', 'upCourse', 'upType', 'upModule', 'upScope'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateUploadPreview);
+        document.getElementById(id).addEventListener('change', updateUploadPreview);
+      });
+      document.getElementById('btnTriggerFileSelect').addEventListener('click', () => document.getElementById('upFileInput').click());
+      document.getElementById('upFileInput').addEventListener('change', (e) => {
+        const f = e.target.files;
+        if (f && f.length) document.getElementById('selectedFileLabel').textContent = f[0].name + ' ready.';
+      });
+
+      document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const rawName = UP(document.getElementById('upName').value) || 'ANON';
+        const month = document.getElementById('upMonth').value;
+        const sem = document.getElementById('upSem').value;
+        const subject = document.getElementById('upSubject').value;
+        const course = SUBJECTS_NO_COURSE.includes(subject) ? 'NONE' : document.getElementById('upCourse').value;
+        const contentType = document.getElementById('upType').value;
+        const modNum = document.getElementById('upModule').value;
+        const module = modNum ? `MODULE ${modNum}` : 'MODULE';
+        const scope = document.getElementById('upScope').value;
+        const topics = document.getElementById('upTopics').value.trim() || 'Notes';
+        const fileInput = document.getElementById('upFileInput');
+        const file = fileInput.files && fileInput.files[0];
+
+        if (!state.liveWebAppUrl) { showToast('Connect Web App URL in Setup tab first.', 'warn'); return; }
+        if (!file) { showToast('Please select a file.', 'warn'); return; }
+
+        showToast('Uploading to Drive...', 'info');
+        const b64 = await fileToBase64(file);
+        const res = await postToLiveDrive({
+          action: 'upload',
+          name: rawName, month, sem, subject, course, contentType, module, scope, topics,
+          base64Data: b64, mimeType: file.type || 'application/pdf', fileName: file.name
+        });
+
+        if (res && res.ok) {
+          showToast('Uploaded to Pending Review!', 'success');
+          document.getElementById('upTopics').value = '';
+          fileInput.value = '';
+          switchTab('viewEditor');
+          await syncFromLiveDrive(true);
+        } else {
+          showToast('Upload failed: ' + (res ? res.error : 'error'), 'warn');
+        }
+      });
+
+      document.getElementById('btnUnlockEditor').addEventListener('click', async () => {
+        const pin = document.getElementById('editorPinInput').value.trim();
+        if (!pin) { showToast('Enter PIN', 'warn'); return; }
+        const res = await postToLiveDrive({ action: 'verifyPin', pin }, true);
+        if (res && res.ok) {
+          state.editorUnlocked = true;
+          state.editorPin = pin;
+          document.getElementById('editorMainContent').classList.remove('hidden');
+          document.getElementById('btnUnlockEditor').textContent = 'Unlocked ✓';
+          applySetupGate();
+          showToast('Editor Console unlocked!', 'success');
+        } else {
+          showToast('Wrong Editor PIN', 'warn');
+        }
+      });
+
+      document.getElementById('btnApproveAllPending').addEventListener('click', async () => {
+        for (const p of state.pending) {
+          await postToLiveDrive({ action: 'approve', rowId: p.rowId || p.id });
+        }
+        await syncFromLiveDrive(true);
+        showToast('All pending files approved!', 'success');
+      });
+
+      document.getElementById('btnCloseModal').addEventListener('click', () => {
+        document.getElementById('fileModal').classList.add('hidden');
+        document.getElementById('fileModal').classList.remove('flex');
+      });
+
+      document.getElementById('btnSaveFilePropsModal').addEventListener('click', async () => {
+        const f = state.files.find(x => x.id === state.activeModalFileId);
+        if (!f) return;
+        const res = await postToLiveDrive({
+          action: 'editProps',
+          rowId: f.rowId || f.id,
+          course: document.getElementById('editModalCourse').value,
+          module: document.getElementById('editModalModule').value,
+          month: document.getElementById('editModalMonth').value,
+          topics: document.getElementById('editModalTopics').value.trim() || f.topics
+        });
+        if (res && res.ok) {
+          document.getElementById('fileModal').classList.add('hidden');
+          document.getElementById('fileModal').classList.remove('flex');
+          showToast('Updated successfully', 'success');
+          await syncFromLiveDrive(true);
+        }
+      });
+
+      document.getElementById('btnDeleteFileModal').addEventListener('click', async () => {
+        const f = state.files.find(x => x.id === state.activeModalFileId);
+        if (!f) return;
+        const res = await postToLiveDrive({ action: 'delete', rowId: f.rowId || f.id });
+        if (res && res.ok) {
+          document.getElementById('fileModal').classList.add('hidden');
+          document.getElementById('fileModal').classList.remove('flex');
+          showToast('Moved to Overflow', 'success');
+          await syncFromLiveDrive(true);
+        }
+      });
+
+      document.getElementById('btnInjectFolderId').addEventListener('click', () => {
+        state.testFolderId = cleanFolderId(document.getElementById('inputTestFolderId').value) || 'PASTE_YOUR_ROOT_FOLDER_ID_HERE';
+        document.getElementById('appsScriptCodeBlock').textContent = generateAppsScriptCode(state.testFolderId);
+        showToast('Updated script code with Folder ID!', 'success');
+      });
+
+      document.getElementById('btnCopyScript').addEventListener('click', () => {
+        navigator.clipboard.writeText(document.getElementById('appsScriptCodeBlock').textContent)
+          .then(() => showToast('Copied script to clipboard!', 'success'));
+      });
+
+      document.getElementById('btnConnectLiveUrl').addEventListener('click', async () => {
+        const url = document.getElementById('inputWebAppUrl').value.trim();
+        if (!isValidWebAppUrl(url)) { showToast('Invalid Web App URL (/exec required)', 'warn'); return; }
+        applyLiveUrl(url);
+        await syncFromLiveDrive(false);
+        showToast('Connected live!', 'success');
+      });
+
+      updateUploadPreview();
+      applyLiveUrl(state.liveWebAppUrl);
+      if (state.liveWebAppUrl) syncFromLiveDrive(true);
+    });
+  </script>
+</body>
+</html>
