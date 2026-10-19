@@ -1249,328 +1249,921 @@
               <select id="upMonth" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
                 <option value="AUG">AUG (.AUG)</option>
                 <option value="SEP">SEP (.SEP)</option>
-                <option value="OCT" selected>OCT (.OCT)</option>
-                <option value="NOV">NOV (.NOV)</option>
-                <option value="DEC">DEC (.DEC)</option>
-                <option value="JAN">JAN (.JAN)</option>
-                <option value="FEB">FEB (.FEB)</option>
-                <option value="MAR">MAR (.MAR)</option>
-              </select>
-            </div>
-          </div>
+               <!-- Dynamic options (Sheet + In-App Editor) + Smart Limiters + Upgraded Code.gs + Themed Selectors -->
+  <script id="deptnotes-options-layer">
+(function () {
+  'use strict';
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label for="upSem" class="block text-xs font-semibold text-slate-700 mb-1">Semester (Routes to Year 1–5)</label>
-              <select id="upSem" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
-                <option value="SEM1">SEM 1 (Year 1)</option>
-                <option value="SEM2">SEM 2 (Year 1)</option>
-                <option value="SEM3">SEM 3 (Year 2)</option>
-                <option value="SEM4">SEM 4 (Year 2)</option>
-                <option value="SEM5">SEM 5 (Year 3)</option>
-                <option value="SEM6">SEM 6 (Year 3)</option>
-                <option value="SEM7">SEM 7 (Year 4)</option>
-                <option value="SEM8">SEM 8 (Year 4)</option>
-                <option value="SEM9">SEM 9 (Year 5)</option>
-                <option value="SEM10">SEM 10 (Year 5)</option>
-              </select>
-            </div>
-            <div>
-              <label for="upSubject" class="block text-xs font-semibold text-slate-700 mb-1">Subject</label>
-              <select id="upSubject" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
-                <option value="CS">CS</option>
-                <option value="ECO">ECO</option>
-                <option value="MATHS">MATHS</option>
-                <option value="PHYSICS">PHYSICS</option>
-                <option value="STATI">STATI (Statistics)</option>
-                <option value="CHEM">CHEM</option>
-                <option value="BIO">BIO</option>
-                <option value="EVS">EVS</option>
-                <option value="ENG">ENG (No Course Layer)</option>
-                <option value="FRENCH">FRENCH (No Course Layer)</option>
-              </select>
-            </div>
-            <div id="upCourseWrapper">
-              <label for="upCourse" class="block text-xs font-semibold text-slate-700 mb-1">Course Code</label>
-              <select id="upCourse" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
-                <option value="DSC-B">DSC-B</option>
-                <option value="DSC-C">DSC-C</option>
-                <option value="MDC">MDC</option>
-                <option value="DSC-A">DSC-A (Eco)</option>
-              </select>
-            </div>
-          </div>
+  /* ============================================================================================
+     PART A — ACADEMIC LIMITERS & SHEET-CONTROLLED OPTIONS
+     Enforces: 12 Calendar Months (JAN-DEC) · Max 6 Modules/Sem · Max 10 Sems (5 Years)
+     ============================================================================================ */
+  var CACHE_KEY = 'deptnotes_options_v3';
+  var LIMITS = {
+    ALL_MONTHS: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'],
+    MAX_MODULES: 6,
+    MAX_SEMS: 10,
+    MAX_FILES_CAP: 20,
+    MAX_GRACE_CAP: 30
+  };
+  var DEFAULT_LABELS = { CS: 'Computer Science', ECO: 'Economics', STATI: 'Statistics' };
+  var cur = null;
+  var lastSig = '';
+  var liveSeen = false;
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label for="upType" class="block text-xs font-semibold text-slate-700 mb-1">Content Type</label>
-              <select id="upType" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
-                <option value="NOTES">NOTES (+1 pt)</option>
-                <option value="Q.PAPERS">Q.PAPERS (+2 pts)</option>
-                <option value="SYLLABUS BREAKDOWN">SYLLABUS BREAKDOWN (+1 pt)</option>
-                <option value="CLASS VIDEOS">CLASS VIDEOS (+2 pts)</option>
-              </select>
-            </div>
-            <div id="upModuleWrapper">
-              <label for="upModule" class="block text-xs font-semibold text-slate-700 mb-1">Module Number</label>
-              <select id="upModule" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
-                <option value="1">Module 1</option>
-                <option value="2">Module 2</option>
-                <option value="3">Module 3</option>
-                <option value="4">Module 4</option>
-                <option value="">Not Sure -> Use Unnumbered 'MODULE' Folder</option>
-              </select>
-            </div>
-            <div>
-              <label for="upScope" class="block text-xs font-semibold text-slate-700 mb-1">Upload Scope</label>
-              <select id="upScope" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
-                <option value="COMPLETE">Complete Module / Exam</option>
-                <option value="DAILY">Daily Class Note (Mergeable at Month-End)</option>
-              </select>
-            </div>
-          </div>
+  function $(id) { return document.getElementById(id); }
+  function splitTokens(raw) {
+    if (Array.isArray(raw)) return raw.map(function (x) { return String(x == null ? '' : x).trim(); }).filter(Boolean);
+    return String(raw == null ? '' : raw).replace(/[\r\n;]+/g, ',').split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+  function strs(x, upper) {
+    var out = [];
+    splitTokens(x).forEach(function (v) {
+      if (upper) v = v.toUpperCase();
+      if (v && out.indexOf(v) < 0) out.push(v);
+    });
+    return out;
+  }
 
-          <!-- Video-style Properties / Topics Input -->
-          <div>
-            <label for="upTopics" class="block text-xs font-semibold text-slate-700 mb-1">
-              Properties / Topics Covered <span class="text-slate-400 font-normal">(Searchable like video tags; written to Drive file description)</span>
-            </label>
-            <input id="upTopics" type="text" required placeholder="e.g. Linked Lists, Stack & Queue, or '2025 End-Sem PYQ with Solutions'" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
-          </div>
+  // Limiter 1: Modules (1..6 max per semester). Single number "6" -> 1..6; range "1-5" -> 1..5.
+  function parseModulesLimited(raw) {
+    var tokens = splitTokens(raw);
+    if (tokens.length === 1 && /^[0-9]+$/.test(tokens[0])) {
+      var count = Math.min(LIMITS.MAX_MODULES, Math.max(1, parseInt(tokens[0], 10)));
+      var seq = [];
+      for (var k = 1; k <= count; k++) seq.push(String(k));
+      return seq;
+    }
+    var seen = {}, nums = [];
+    function add(n) { if (n >= 1 && n <= LIMITS.MAX_MODULES && !seen[n]) { seen[n] = true; nums.push(n); } }
+    tokens.forEach(function (part) {
+      var mRange = part.match(/([0-9]+)\s*(?:-|to|\.\.)\s*([0-9]+)/i);
+      if (mRange) {
+        var a = parseInt(mRange[1], 10), b = parseInt(mRange[2], 10);
+        if (a > b) { var t = a; a = b; b = t; }
+        for (var n = a; n <= b; n++) add(n);
+        return;
+      }
+      var d = part.replace(/[^0-9]/g, '');
+      if (d) add(parseInt(d, 10));
+    });
+    nums.sort(function (x, y) { return x - y; });
+    return nums.map(String);
+  }
 
-          <!-- File Dropzone + Live Auto-Name Preview -->
-          <div class="rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center">
-            <input id="upFileInput" type="file" multiple accept=".pdf,image/*,video/*" class="hidden" />
-            <button id="btnTriggerFileSelect" type="button" class="px-4 py-2 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 hover:border-indigo-400 shadow-sm transition">
-              📎 Choose PDF, Class Photos, or Class Video
-            </button>
-            <p id="selectedFileLabel" class="text-xs text-slate-500 mt-2">No file chosen yet (When connected to Live Drive, your selected file uploads directly to 🕓 Pending Review)</p>
-          </div>
+  // Limiter 2: Months (strictly validated against the 12 calendar months JAN..DEC, max 12).
+  function toMonthCode(token) {
+    var s = String(token || '').trim().toUpperCase();
+    if (!s) return '';
+    if (/^[0-9]+$/.test(s)) {
+      var idx = parseInt(s, 10);
+      return (idx >= 1 && idx <= 12) ? LIMITS.ALL_MONTHS[idx - 1] : '';
+    }
+    var letters = s.replace(/[^A-Z]/g, '').slice(0, 3);
+    return LIMITS.ALL_MONTHS.indexOf(letters) > -1 ? letters : '';
+  }
 
-          <div class="bg-slate-100 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div>
-              <span class="text-slate-500">Drive Filename Preview:</span>
-              <code id="previewFileName" class="ml-1 font-semibold text-indigo-700">Anon.OCT</code>
-            </div>
-            <div>
-              <span class="text-slate-500">Destination After Approval:</span>
-              <code id="previewDestPath" class="ml-1 font-semibold text-slate-800">Year 1 / SEM 1 / CS / DSC-B / NOTES / Module 1</code>
-            </div>
-          </div>
+  function parseMonthsLimited(raw) {
+    var tokens = splitTokens(raw);
+    if (tokens.length === 1 && /^[0-9]+$/.test(tokens[0])) {
+      var cnt = Math.min(12, Math.max(1, parseInt(tokens[0], 10)));
+      var res = [];
+      for (var c = 0; c < cnt; c++) res.push(LIMITS.ALL_MONTHS[(7 + c) % 12]);
+      return res;
+    }
+    var out = [], seen = {};
+    function pushM(code) { if (code && !seen[code] && out.length < 12) { seen[code] = true; out.push(code); } }
+    tokens.forEach(function (part) {
+      var rMatch = part.split(/\s*(?:-|to|\.\.)\s*/i);
+      if (rMatch.length === 2) {
+        var m1 = toMonthCode(rMatch[0]), m2 = toMonthCode(rMatch[1]);
+        if (m1 && m2) {
+          var i1 = LIMITS.ALL_MONTHS.indexOf(m1), i2 = LIMITS.ALL_MONTHS.indexOf(m2);
+          for (var step = 0; step < 12; step++) {
+            var ci = (i1 + step) % 12;
+            pushM(LIMITS.ALL_MONTHS[ci]);
+            if (ci === i2) break;
+          }
+          return;
+        }
+      }
+      pushM(toMonthCode(part));
+    });
+    return out;
+  }
 
-          <div id="uploadHealthBanner" class="hidden rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900"></div>
-          <div class="flex items-center justify-between gap-3 pt-2">
-            <p class="text-xs text-slate-500">Goes to <code class="bg-slate-100 px-1 py-0.5 rounded">🕓 Pending Review</code> first for 1-tap Editor approval.</p>
-            <button id="btnSubmitUpload" type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm transition">
-              Submit to Pending Review
-            </button>
-          </div>
-        </form>
-      </div>
-      <div id="myUploadsBox" class="hidden mt-4 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-        <div class="flex items-center justify-between gap-2 mb-2">
-          <h3 class="text-sm font-bold text-slate-900">📮 My recent uploads (this device)</h3>
-          <button id="btnClearMyUploads" type="button" class="text-[11px] text-slate-500 hover:text-slate-800 underline">Clear</button>
-        </div>
-        <p class="text-[11px] text-slate-500 mb-2">Your file is safe in Drive. It waits in Pending Review until the Editor approves it, then it appears under Browse.</p>
-        <div id="myUploadsList" class="space-y-2"></div>
-      </div>
-    </section>
+  // Limiter 3: Semesters (1..10 across Years 1..5).
+  function parseSemsLimited(raw) {
+    if (!raw) return ['1','2','3','4','5','6','7','8','9','10'];
+    var tokens = splitTokens(raw);
+    if (tokens.length === 1) {
+      var kw = tokens[0].toUpperCase();
+      if (kw === 'ODD') return ['1','3','5','7','9'];
+      if (kw === 'EVEN') return ['2','4','6','8','10'];
+      if (/^[0-9]+$/.test(kw)) {
+        var maxS = Math.min(LIMITS.MAX_SEMS, Math.max(1, parseInt(kw, 10)));
+        var sList = [];
+        for (var i = 1; i <= maxS; i++) sList.push(String(i));
+        return sList;
+      }
+    }
+    var seen = {}, nums = [];
+    function addS(n) { if (n >= 1 && n <= LIMITS.MAX_SEMS && !seen[n]) { seen[n] = true; nums.push(n); } }
+    tokens.forEach(function (part) {
+      var mRange = part.match(/([0-9]+)\s*(?:-|to|\.\.)\s*([0-9]+)/i);
+      if (mRange) {
+        var a = parseInt(mRange[1], 10), b = parseInt(mRange[2], 10);
+        if (a > b) { var t = a; a = b; b = t; }
+        for (var n = a; n <= b; n++) addS(n);
+        return;
+      }
+      var d = part.replace(/[^0-9]/g, '');
+      if (d) addS(parseInt(d, 10));
+    });
+    nums.sort(function (x, y) { return x - y; });
+    return nums.length ? nums.map(String) : ['1','2','3','4','5','6','7','8','9','10'];
+  }
 
-    <!-- ==================== VIEW 3: IN-APP ANNOUNCEMENTS & POINTS LEADERBOARD ==================== -->
-    <section id="viewFeed" class="hidden space-y-6">
-      <div class="hud-eyebrow" aria-hidden="true">◈ World Economy News &amp; Bounty Dojo</div>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Left 2 Cols: In-App Announcements & Newly Approved Stream -->
-        <div class="lg:col-span-2 space-y-4">
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <div class="flex items-center justify-between gap-2 mb-4">
-              <div>
-                <h2 class="text-base font-bold text-slate-900">📢 Department Announcements & New Uploads</h2>
-              </div>
-            </div>
-            <div id="announcementsList" class="space-y-3"></div>
-          </div>
-        </div>
+  function normalise(o) {
+    if (!o || typeof o !== 'object') return null;
+    var labels = {};
+    if (o.subjectLabels && typeof o.subjectLabels === 'object') {
+      Object.keys(o.subjectLabels).forEach(function (k) { labels[String(k).toUpperCase()] = String(o.subjectLabels[k]); });
+    }
+    var subjects = [];
+    splitTokens(o.subjects).forEach(function (part) {
+      var eq = part.indexOf('=');
+      var code = (eq > -1 ? part.slice(0, eq) : part).trim().toUpperCase();
+      if (!code || subjects.indexOf(code) > -1) return;
+      subjects.push(code);
+      if (eq > -1 && part.slice(eq + 1).trim()) labels[code] = part.slice(eq + 1).trim();
+    });
+    var courses = strs(o.courses, true);
+    var modules = parseModulesLimited(o.modules);
+    var months = parseMonthsLimited(o.months);
+    var sems = parseSemsLimited(o.semesters || o.sems);
+    if (!subjects.length || !courses.length || !months.length || !modules.length) return null;
 
-        <!-- Right Col: Contributor Points Leaderboard -->
-        <div class="space-y-4">
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-1">
-              <h2 class="text-base font-bold text-slate-900">🏆 Top Contributors</h2>
-              <span class="text-[11px] font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Points Table</span>
-            </div>
-            <p class="text-xs text-slate-500 mb-4">Notes = 1 pt • Syllabus = 1 pt • Q.Papers = 2 pts • Videos = 2 pts</p>
-            <div id="leaderboardList" class="space-y-2.5"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+    var maxFiles = parseInt(o.maxFilesPerModule, 10);
+    if (isNaN(maxFiles) || maxFiles < 1) maxFiles = 5;
+    maxFiles = Math.min(LIMITS.MAX_FILES_CAP, maxFiles);
 
-    <!-- ==================== VIEW 4: EDITOR 1-TAP WORKSPACE ==================== -->
-    <section id="viewEditor" class="hidden space-y-6">
-      <div class="hud-eyebrow" aria-hidden="true">⬡ Command Bridge · Kumite Judge Console</div>
-      <!-- Editor PIN Lock Bar -->
-      <div id="editorLockBanner" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 class="text-base font-bold text-slate-900">🛡️ Editor Operations Console</h2>
-          <p class="text-xs text-slate-500">1-Tap mobile approval, property/folder reorganization, and month-end daily note merging. The Editor PIN is set in the Sheet's <code class="bg-slate-100 px-1.5 py-0.5 rounded font-semibold">Config</code> tab (<code class="bg-slate-100 px-1.5 py-0.5 rounded">EDITOR_PIN</code>).</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <input id="editorPinInput" type="password" value="" placeholder="Editor PIN" class="w-36 rounded-xl border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none" />
-          <button id="btnUnlockEditor" type="button" class="px-4 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition">
-            Unlock Console
-          </button>
-          <button id="btnDisconnectLiveQuick" type="button" class="hidden px-3 py-1.5 rounded-xl bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs font-semibold border border-amber-200 transition" title="Clear saved Live Web App URL if an old deployment URL is failing">
-            🔌 Disconnect Live URL
-          </button>
-        </div>
-      </div>
+    var graceDays = parseInt(o.graceDays != null ? o.graceDays : o.newFileGraceDays, 10);
+    if (isNaN(graceDays) || graceDays < 0) graceDays = 7;
+    graceDays = Math.min(LIMITS.MAX_GRACE_CAP, graceDays);
 
-      <div id="editorMainContent" class="hidden space-y-6">
-        <!-- Pending Review Queue (1-Tap Approve / Fix Properties / Reject) -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <div>
-              <h3 class="text-base font-bold text-slate-900">🕓 Pending Review Queue (File-ID Safe Lookup)</h3>
-              <p class="text-xs text-slate-500">Approving moves the file by its exact Google Drive File ID (fixing the duplicate <code class="bg-slate-100 px-1 rounded">Name.Month(2)</code> bug) and activates its 7-day grace shield.</p>
-            </div>
-            <button id="btnApproveAllPending" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">
-              ✅ Approve All Pending
-            </button>
-          </div>
-          <div id="pendingQueueList" class="space-y-3"></div>
-        </div>
+    return {
+      subjects: subjects,
+      courses: courses,
+      ecoCourses: strs(o.ecoCourses, true),
+      ecoOnlyCourses: strs(o.ecoOnlyCourses, true),
+      noCourseSubjects: strs(o.noCourseSubjects, true),
+      modules: modules,
+      months: months,
+      sems: sems,
+      maxFilesPerModule: maxFiles,
+      graceDays: graceDays,
+      labels: labels
+    };
+  }
 
-        <!-- Month-End Daily Notes Merger (Approach B) & Post-Approval Post Announcement -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Month-End Daily Notes Merger -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-1">
-                <h3 class="text-base font-bold text-slate-900">🔗 Month-End Daily Notes Merger (Approach B)</h3>
-                <span class="text-[11px] font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">Editor Controlled</span>
-              </div>
-              <p class="text-xs text-slate-500 mb-4">Select approved <code class="bg-slate-100 px-1 rounded">Daily</code> uploads from the same module, uncheck any bad/duplicate snaps, and combine them into one clean monthly file.</p>
-              <div id="dailyMergeList" class="space-y-2 mb-4 max-h-60 overflow-y-auto custom-scroll"></div>
-            </div>
-            <div class="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
-              <input id="mergedMonthTitle" type="text" value="Combined_Daily_SEP" class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs flex-1" placeholder="Merged Base Name" />
-              <button id="btnMergeSelectedDaily" type="button" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">
-                🔗 Combine Selected into 1 File
-              </button>
-            </div>
-          </div>
+  function fill(id, items, fallback) {
+    var sel = $(id);
+    if (!sel) return;
+    var prev = vdesc ? vdesc.get.call(sel) : sel.value;
+    while (sel.options.length) sel.remove(0);
+    items.forEach(function (it) {
+      var o = document.createElement('option');
+      o.value = it.v;
+      o.textContent = it.t;
+      sel.appendChild(o);
+    });
+    var has = function (v) { return items.some(function (i) { return i.v === v; }); };
+    var want = has(prev) ? prev : fallback;
+    if (want == null || !has(want)) want = items.length ? items[0].v : '';
+    if (vdesc) vdesc.set.call(sel, want); else sel.value = want;
+    if (controls[id]) controls[id].render();
+  }
 
-          <!-- Post Custom Announcement -->
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
-            <div>
-              <h3 class="text-base font-bold text-slate-900 mb-1">📣 Post In-App Department Notice</h3>
-              <p class="text-xs text-slate-500 mb-4">Need to tell juniors which modules are in the internal exam or request missing notes? Post directly to the in-app feed.</p>
-              <div class="space-y-3">
-                <input id="annTitleInput" type="text" placeholder="Headline (e.g. 'Sem 1 CS DSC-B Module 3 Notes Needed')" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
-                <textarea id="annBodyInput" rows="3" placeholder="Details for classmates, juniors, or seniors..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"></textarea>
-              </div>
-            </div>
-            <div class="pt-3 border-t border-slate-100 flex justify-end">
-              <button id="btnPostAnnouncement" type="button" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition">
-                Post to In-App Feed
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+  function applyLimitersToDOMAndCSS(n) {
+    var topN = n.maxFilesPerModule || 5;
+    var cutIdx = topN + 1;
+    var dynStyle = $('deptnotes-dynamic-limits');
+    if (!dynStyle) {
+      dynStyle = document.createElement('style');
+      dynStyle.id = 'deptnotes-dynamic-limits';
+      document.head.appendChild(dynStyle);
+    }
+    dynStyle.textContent =
+      '#liveDrivePath::after { content: "  •  MARKET CAP: TOP ' + topN + ' SURVIVAL" !important; }\n' +
+      'html[data-theme] #filesGrid > div:not(.col-span-full)::before { content: none !important; display: none !important; }\n' +
+      'html[data-theme] #filesGrid > div:not(.col-span-full):nth-child(-n+' + topN + ')::before {\n' +
+      '  content: "IN · TOP ' + topN + ' COURT" !important; display: inline-block !important;\n' +
+      '  position: absolute; top: -10px; left: 16px; z-index: 2; padding: 4px 10px; border-radius: var(--r-pill);\n' +
+      '  font: 700 9.5px/1 var(--font-mono); letter-spacing: 0.12em; background-color: var(--ok); color: var(--ok-fg); border: var(--border-w) solid var(--ok-line);\n' +
+      '}\n' +
+      'html[data-theme] #filesGrid > div:not(.col-span-full):nth-child(' + cutIdx + ')::before {\n' +
+      '  content: "▼ NET · CUTLINE" !important; display: inline-block !important;\n' +
+      '  position: absolute; top: -10px; left: 16px; z-index: 2; padding: 4px 10px; border-radius: var(--r-pill);\n' +
+      '  font: 700 9.5px/1 var(--font-mono); letter-spacing: 0.12em; background-color: var(--surface-solid); color: var(--text-dim); border: 1px dashed var(--text-faint);\n' +
+      '}';
 
-    <!-- ==================== VIEW 5: 0-FILE BLANK TEST DRIVE SETUP & APPS SCRIPT ==================== -->
-    <section id="viewSetup" class="hidden space-y-6">
-      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
-        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
-          <div>
-            <span class="text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">Safe 0-File Test Drive Rollout</span>
-            <h2 class="text-lg font-bold text-slate-900 mt-2">Initialize Your Brand-New "0-File" Test Google Drive</h2>
-          </div>
-        </div>
+    var pathEl = $('liveDrivePath');
+    if (pathEl && pathEl.parentNode && pathEl.parentNode.nextElementSibling) {
+      var spans = pathEl.parentNode.nextElementSibling.querySelectorAll('span');
+      if (spans.length > 1) {
+        spans[1].textContent = 'Sorted by 👍 Likes • Max ' + topN + ' per Module (Ties kept • 🆕 ' + n.graceDays + '-Day Shield protects new uploads)';
+      }
+    }
+  }
 
-        <!-- 4-Step Quick Setup Guide -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="font-bold text-indigo-700 mb-1">Step 1: Create 1 Blank Folder</div>
-            <p class="text-slate-600">In your new test Google Drive, create one empty folder (e.g., <code class="bg-white px-1 rounded">Dept_Archive_Test</code>) and copy its Folder ID from the URL.</p>
-          </div>
-          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="font-bold text-indigo-700 mb-1">Step 2: Paste Folder ID Below</div>
-            <p class="text-slate-600">Paste that Folder ID into Box 1 below and click <strong>Update Script</strong>—it injects directly into <code class="bg-white px-1 rounded">ROOT_FOLDER_ID</code>.</p>
-          </div>
-          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="font-bold text-indigo-700 mb-1">Step 3: Run <code class="bg-white px-1 rounded">setup()</code> Once</div>
-            <p class="text-slate-600">Create a blank Google Sheet in that test Drive, open <strong>Extensions → Apps Script</strong>, paste the code, and click <strong>Run → setup</strong>. This makes a separate <code class="bg-white px-1 rounded">CONFIG</code> tab for the PIN. Already have a cluttered sheet? Run <strong>setup</strong> again (or <strong>Archive Tools → Repair Sheets</strong>) and the config rows move over automatically.</p>
-          </div>
-          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="font-bold text-indigo-700 mb-1">Step 4: Deploy Web App & Connect</div>
-            <p class="text-slate-600">Click <strong>Deploy → New Deployment → Web App</strong> (Execute as: <em>Me</em>, Access: <em>Anyone</em>) and paste the URL in Box 2 and click <strong>Apply to Everyone</strong> so every device connects to it!</p>
-          </div>
-        </div>
+  function rebuild(n) {
+    var labelFor = function (c) { return n.labels[c] || DEFAULT_LABELS[c] || ''; };
+    var noC = function (c) { return n.noCourseSubjects.indexOf(c) > -1; };
+    var ecoOnly = function (c) { return n.ecoOnlyCourses.indexOf(c) > -1; };
 
-        <!-- Sheet-controlled options (new, additive) -->
-        <div id="optionsConfigNote" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
-          <div class="font-bold text-indigo-700">⬡ Sheet-controlled options — no code edits needed</div>
-          <p class="text-slate-600">In the Sheet's <code class="bg-white px-1 rounded">CONFIG</code> tab, edit the <strong>Value</strong> column to add or remove choices any time: <code class="bg-white px-1 rounded">SUBJECTS</code> (optionally <code class="bg-white px-1 rounded">CS=Computer Science</code>), <code class="bg-white px-1 rounded">COURSES</code>, <code class="bg-white px-1 rounded">MODULES</code> (<code class="bg-white px-1 rounded">1, 2, 3</code> or a range like <code class="bg-white px-1 rounded">1-6</code>), <code class="bg-white px-1 rounded">MONTHS</code>, <code class="bg-white px-1 rounded">NO_COURSE_SUBJECTS</code>, <code class="bg-white px-1 rounded">ECO_COURSES</code>, <code class="bg-white px-1 rounded">ECO_ONLY_COURSES</code>. Every device picks the change up on its next sync (within about 45 seconds). Old files stay where they are, and a month or module you remove still shows under “All”.</p>
-          <p class="text-slate-600">After pasting the new code below: run <strong>setup()</strong> once (it adds the missing CONFIG rows), then <strong>Deploy → Manage deployments → pencil → New version → Deploy</strong>.</p>
-          <p id="optionsLiveReadout" class="font-mono text-slate-700">◈ Waiting for the first sync…</p>
-        </div>
+    var sems = n.sems || ['1','2','3','4','5','6','7','8','9','10'];
+    fill('filterSem', [{ v: 'ALL', t: 'All Years (' + sems.length + ' Sems)' }].concat(sems.map(function (s) {
+      var yr = Math.ceil(parseInt(s, 10) / 2);
+      return { v: 'SEM' + s, t: 'Year ' + yr + ' — SEM ' + s };
+    })), 'ALL');
+    fill('upSem', sems.map(function (s) {
+      var yr = Math.ceil(parseInt(s, 10) / 2);
+      return { v: 'SEM' + s, t: 'SEM ' + s + ' (Year ' + yr + ')' };
+    }), 'SEM' + sems[0]);
 
-        <!-- Interactive Folder ID Injector & Live Web App Connector -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-          <div>
-            <label for="inputTestFolderId" class="block text-xs font-semibold text-slate-700 mb-1">1. Root Folder ID <span class="font-normal text-slate-500">(only used to edit the code below)</span>:</label>
-            <div class="flex gap-2">
-              <input id="inputTestFolderId" type="text" value="PASTE_YOUR_NEW_TEST_FOLDER_ID_HERE" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:border-indigo-500 focus:outline-none" />
-              <button id="btnInjectFolderId" type="button" class="px-3 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition whitespace-nowrap">
-                Update Script
-              </button>
-            </div>
-          </div>
-          <div>
-            <label for="inputWebAppUrl" class="block text-xs font-semibold text-slate-700 mb-1">2. Deployed Web App URL <span class="font-normal text-slate-500">(decides which script every device connects to — locked; press Change to switch it)</span>:</label>
-            <div class="flex gap-2">
-              <input id="inputWebAppUrl" type="url" readonly value="https://script.google.com/macros/s/AKfycbwUVbW6ERtKmEF-rZJD-ssO1IPQmyNcsyF6zzUJJOmLd11ZKohOHOjXW7GHVISU4Nlh/exec" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:border-indigo-500 focus:outline-none" />
-              <button id="btnConnectLiveUrl" type="button" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition whitespace-nowrap">
-                Change
-              </button>
-            </div>
-          </div>
-        </div>
+    fill('filterSubject', [{ v: 'ALL', t: 'All Subjects' }].concat(n.subjects.map(function (c) {
+      return { v: c, t: c + (noC(c) ? ' (Common — No Course Layer)' : (labelFor(c) ? ' (' + labelFor(c) + ')' : '')) };
+    })), 'ALL');
+    fill('upSubject', n.subjects.map(function (c) {
+      return { v: c, t: c + (noC(c) ? ' (No Course Layer)' : (labelFor(c) ? ' (' + labelFor(c) + ')' : '')) };
+    }), n.subjects[0]);
 
-        <div class="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4 space-y-3 text-xs">
-          <div class="font-bold text-emerald-900">🌐 Shared Settings (applied to every device)</div>
-          <p id="liveConfigStatus" class="text-slate-700">Not connected to a live Web App yet — refresh the page to reconnect.</p>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Student Join Link (always uses notesgng.github.io/NOTES — opens straight into this Drive on any device)</label>
-            <div class="flex gap-2">
-              <input id="inputShareLink" type="text" readonly class="flex-1 rounded-xl border border-slate-300 px-3 py-2 font-mono bg-white" />
-              <button id="btnCopyShareLink" type="button" class="px-3 py-2 rounded-xl bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition whitespace-nowrap">Copy Link</button>
-            </div>
-          </div>
-          <div class="rounded-xl border-2 border-emerald-300 bg-emerald-50 p-3">
-            <label class="block font-bold text-emerald-900 mb-1">✅ Make it work for EVERYONE</label>
-            <div class="flex flex-wrap gap-2">
-              <button id="btnDownloadEveryoneFile" type="button" class="px-3 py-2 rounded-xl bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition">⬇ Download everyone-ready index.html</button>
-              <button id="btnTestEveryone" type="button" class="px-3 py-2 rounded-xl bg-white border border-emerald-400 text-emerald-900 font-semibold hover:bg-emerald-100 transition">🔍 Test uploads end-to-end</button>
-            </div>
-            <p id="everyoneStatus" class="mt-2 text-slate-600"></p>
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Permanent GitHub line (do this once, then the plain GitHub link works for everyone)</label>
-            <div class="flex gap-2">
-              <input id="inputPermanentLine" type="text" readonly class="flex-1 rounded-xl border border-slate-300 px-3 py-2 font-mono bg-white" />
-              <button id="btnCopyPermanentLine" type="button" class="px-3 py-2 rounded-xl bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition whitespace-nowrap">Copy Line</button>
-            </div>
-          </div>
-        </div>
+    fill('filterCourse', [{ v: 'ALL', t: 'All Courses (DSC / MDC)' }].concat(n.courses.map(function (c) {
+      return { v: c, t: c + (ecoOnly(c) ? ' (Eco Core)' : '') };
+    })), 'ALL');
+    fill('upCourse', n.courses.map(function (c) { return { v: c, t: c + (ecoOnly(c) ? ' (Eco)' : '') }; }), n.courses[0]);
+    fill('editModalCourse', n.courses.map(function (c) { return { v: c, t: c }; }).concat([{ v: 'NONE', t: 'NONE (Eng/French)' }]), n.courses[0]);
 
-        <!-- Code Header & Copy Button -->
-        <div class="flex flex-wrap items-center justify-between gap-2">
+    var mods = n.modules;
+    fill('filterModule', [{ v: 'ALL', t: 'All Modules (Max ' + mods.length + ')' }].concat(
+      mods.map(function (m) { return { v: 'MODULE ' + m, t: 'Module ' + m }; }),
+      [{ v: 'MODULE', t: 'Module (Unsorted / Time-Based)' }]
+    ), 'ALL');
+    fill('upModule', mods.map(function (m) { return { v: m, t: 'Module ' + m }; }).concat([{ v: '', t: "Not Sure -> Use Unnumbered 'MODULE' Folder" }]), mods[0]);
+    fill('editModalModule', mods.map(function (m) { return { v: 'MODULE ' + m, t: 'Module ' + m }; }).concat([{ v: 'MODULE', t: 'Module (Unsorted)' }]), 'MODULE ' + mods[0]);
+
+    fill('filterMonth', [{ v: 'ALL', t: 'All Months (' + n.months.length + ')' }].concat(n.months.map(function (m) { return { v: m, t: '.' + m }; })), 'ALL');
+    fill('upMonth', n.months.map(function (m) { return { v: m, t: m + ' (.' + m + ')' }; }), n.months[0]);
+    fill('editModalMonth', n.months.map(function (m) { return { v: m, t: m }; }), n.months[0]);
+
+    applyLimitersToDOMAndCSS(n);
+    syncInAppConfigInputs();
+  }
+
+  function readout(live, cached) {
+    var el = $('optionsLiveReadout');
+    if (!el) return;
+    if (!live || !cur) {
+      el.textContent = '◈ Using built-in lists — copy the updated Code.gs below, run setup(), and deploy a New version to enable live Sheet configs.';
+      return;
+    }
+    el.textContent = '◈ ' + (cached && !liveSeen ? 'CACHED FROM SHEET' : 'LIVE FROM SHEET') +
+      ' · ' + cur.subjects.length + ' subjects · ' + cur.courses.length + ' courses · ' +
+      cur.modules.length + '/6 modules (' + cur.modules.join(', ') + ') · ' +
+      cur.months.length + '/12 months (' + cur.months.join(', ') + ') · Top-' +
+      cur.maxFilesPerModule + ' cap · ' + cur.graceDays + 'd shield';
+  }
+
+  function apply(raw, fromCache) {
+    var n = normalise(raw);
+    if (!n) { if (!fromCache && !liveSeen) readout(false); return; }
+    if (!fromCache) liveSeen = true;
+    var sig = JSON.stringify(n);
+    cur = n;
+    try {
+      if (typeof SUBJECTS_NO_COURSE !== 'undefined') {
+        SUBJECTS_NO_COURSE.length = 0;
+        n.noCourseSubjects.forEach(function (x) { SUBJECTS_NO_COURSE.push(x); });
+      }
+      if (typeof state !== 'undefined' && Array.isArray(state.files) && typeof canonItem === 'function') {
+        state.files = state.files.map(canonItem);
+        state.pending = (state.pending || []).map(canonItem);
+      }
+    } catch (e) {}
+
+    if (sig !== lastSig) {
+      lastSig = sig;
+      rebuild(n);
+      if (!fromCache) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(raw)); } catch (e) {} }
+    }
+    readout(true, fromCache);
+    refreshAll();
+    try { if (typeof updateUploadPreview === 'function') updateUploadPreview(); } catch (e) {}
+    try { if (typeof renderBrowse === 'function') renderBrowse(); } catch (e) {}
+  }
+
+  function allowedCourses(subject) {
+    if (!cur) return subject === 'ECO' ? ['DSC-A', 'DSC-B'] : ['DSC-B', 'DSC-C', 'MDC'];
+    var a = subject === 'ECO'
+      ? (cur.ecoCourses.length ? cur.ecoCourses : cur.courses)
+      : cur.courses.filter(function (c) { return cur.ecoOnlyCourses.indexOf(c) < 0; });
+    return a.length ? a : cur.courses;
+  }
+
+  window.DeptOptions = {
+    apply: function (o) { try { apply(o, false); } catch (e) {} },
+    allowedCourses: allowedCourses,
+    get: function () { return cur; }
+  };
+
+  /* ============================================================================================
+     PART B — IN-APP CONFIG EDITOR & SCRIPT UPDATER (Edit Sheet Configs from inside the app)
+     ============================================================================================ */
+  function buildInAppConfigPanel() {
+    var host = $('editorMainContent');
+    if (!host || $('inAppConfigCard')) return;
+    var card = document.createElement('div');
+    card.id = 'inAppConfigCard';
+    card.className = 'bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4';
+    card.innerHTML =
+      '<div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">' +
+        '<div>' +
+          '<h3 class="text-base font-bold text-slate-900">⚙️ Live Sheet Config & Limiters (Synced with Google Sheet <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs">CONFIG</code> Tab)</h3>' +
+          '<p class="text-xs text-slate-500">Edit here or in the Sheet — limiters automatically clamp Modules (max 6/sem), Months (12 calendar months), and Semesters (max 10).</p>' +
+        '</div>' +
+        '<button id="btnSaveInAppConfig" type="button" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">💾 Save to Sheet & Apply Live</button>' +
+      '</div>' +
+      '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">' +
+        '<div>' +
+          '<label class="block font-semibold text-slate-700 mb-1">Modules (Limiter: Max 6 / Sem)</label>' +
+          '<input id="cfgModules" type="text" placeholder="e.g. 4, 6, or 1-5" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 font-mono" />' +
+          '<div class="flex gap-1 mt-1"><button type="button" data-preset="cfgModules:1-4" class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-mono">1-4</button><button type="button" data-preset="cfgModules:1-5" class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-mono">1-5</button><button type="button" data-preset="cfgModules:1-6" class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-mono">Max 6</button></div>' +
+        '</div>' +
+        '<div>' +
+          '<label class="block font-semibold text-slate-700 mb-1">Months (Limiter: Max 12 Calendar)</label>' +
+          '<input id="cfgMonths" type="text" placeholder="e.g. AUG-MAR or 12" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 font-mono" />' +
+          '<div class="flex gap-1 mt-1"><button type="button" data-preset="cfgMonths:AUG-MAR" class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-mono">AUG-MAR</button><button type="button" data-preset="cfgMonths:JUN-NOV" class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-mono">JUN-NOV</button><button type="button" data-preset="cfgMonths:JAN-DEC" class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-mono">All 12</button></div>' +
+        '</div>' +
+        '<div>' +
+          '<label class="block font-semibold text-slate-700 mb-1">Semesters (Limiter: Max 10)</label>' +
+          '<input id="cfgSems" type="text" placeholder="e.g. 1-10, ODD, EVEN" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 font-mono" />' +
+          '<div class="flex gap-1 mt-1"><button type="button" data-preset="cfgSems:1-10" class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-mono">All 10</button><button type="button" data-preset="cfgSems:ODD" class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-mono">ODD</button><button type="button" data-preset="cfgSems:EVEN" class="px-2 py-0.5 rounded bg-slate-100 text-[10px] font-mono">EVEN</button></div>' +
+        '</div>' +
+        '<div class="grid grid-cols-2 gap-2">' +
+          '<div><label class="block font-semibold text-slate-700 mb-1">Top-N Cap (1-20)</label><input id="cfgMaxFiles" type="number" min="1" max="20" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 font-mono" /></div>' +
+          '<div><label class="block font-semibold text-slate-700 mb-1">Shield Days (0-30)</label><input id="cfgGraceDays" type="number" min="0" max="30" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 font-mono" /></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">' +
+        '<div><label class="block font-semibold text-slate-700 mb-1">Subjects (comma-separated)</label><input id="cfgSubjects" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 font-mono" /></div>' +
+        '<div><label class="block font-semibold text-slate-700 mb-1">Courses (comma-separated)</label><input id="cfgCourses" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 font-mono" /></div>' +
+        '<div><label class="block font-semibold text-slate-700 mb-1">No-Course Subjects / Eco Courses</label><div class="grid grid-cols-2 gap-2"><input id="cfgNoCourse" type="text" placeholder="ENG, FRENCH" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 font-mono" /><input id="cfgEcoCourses" type="text" placeholder="DSC-A, DSC-B" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 font-mono" /></div></div>' +
+      '</div>';
+    host.appendChild(card);
+
+    card.querySelectorAll('[data-preset]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var pair = btn.getAttribute('data-preset').split(':');
+        var inp = $(pair[0]);
+        if (inp) inp.value = pair[1];
+      });
+    });
+
+    $('btnSaveInAppConfig').addEventListener('click', async function () {
+      var draft = {
+        subjects: $('cfgSubjects').value,
+        courses: $('cfgCourses').value,
+        modules: $('cfgModules').value,
+        months: $('cfgMonths').value,
+        semesters: $('cfgSems').value,
+        noCourseSubjects: $('cfgNoCourse').value,
+        ecoCourses: $('cfgEcoCourses').value,
+        ecoOnlyCourses: cur ? cur.ecoOnlyCourses.join(', ') : 'DSC-A',
+        maxFilesPerModule: $('cfgMaxFiles').value,
+        graceDays: $('cfgGraceDays').value,
+        subjectLabels: cur ? cur.labels : {}
+      };
+      apply(draft, false);
+      if (typeof state !== 'undefined' && state.liveWebAppUrl && typeof postToLiveDrive === 'function') {
+        var res = await postToLiveDrive({
+          action: 'saveConfig',
+          config: {
+            SUBJECTS: cur.subjects.map(function (s) { return cur.labels[s] ? s + '=' + cur.labels[s] : s; }).join(', '),
+            COURSES: cur.courses.join(', '),
+            MODULES: cur.modules.join(', '),
+            MONTHS: cur.months.join(', '),
+            SEMESTERS: cur.sems.join(', '),
+            NO_COURSE_SUBJECTS: cur.noCourseSubjects.join(', '),
+            ECO_COURSES: cur.ecoCourses.join(', '),
+            MAX_FILES_PER_MODULE: String(cur.maxFilesPerModule),
+            NEW_FILE_GRACE_DAYS: String(cur.graceDays)
+          }
+        }, true);
+        if (res && res.ok) {
+          if (typeof showToast === 'function') showToast('Saved to Google Sheet CONFIG tab & applied live!', 'success');
+          return;
+        }
+      }
+      if (typeof showToast === 'function') showToast('Applied live on website! (Deploy the updated Code.gs once so it also writes back to the Sheet.)', 'info');
+    });
+    syncInAppConfigInputs();
+  }
+
+  function syncInAppConfigInputs() {
+    if (!$('inAppConfigCard') || !cur) return;
+    $('cfgModules').value = cur.modules.join(', ');
+    $('cfgMonths').value = cur.months.join(', ');
+    $('cfgSems').value = cur.sems.join(', ');
+    $('cfgMaxFiles').value = cur.maxFilesPerModule;
+    $('cfgGraceDays').value = cur.graceDays;
+    $('cfgSubjects').value = cur.subjects.map(function (s) { return cur.labels[s] ? s + '=' + cur.labels[s] : s; }).join(', ');
+    $('cfgCourses').value = cur.courses.join(', ');
+    $('cfgNoCourse').value = cur.noCourseSubjects.join(', ');
+    $('cfgEcoCourses').value = cur.ecoCourses.join(', ');
+  }
+
+  /* ============================================================================================
+     PART C — CACHE-BUSTING SYNC & UPGRADED APPS SCRIPT GENERATOR INSIDE THE APP
+     ============================================================================================ */
+  var origFetch = window.fetch;
+  if (origFetch) {
+    window.fetch = function (input, init) {
+      if (typeof input === 'string' && input.indexOf('action=listAll') > -1 && input.indexOf('_ts=') === -1) {
+        input += (input.indexOf('?') > -1 ? '&' : '?') + '_ts=' + Date.now();
+        init = Object.assign({ cache: 'no-store' }, init || {});
+      }
+      return origFetch.call(this, input, init);
+    };
+  }
+
+  function patchAppAndScriptGenerator() {
+    if (typeof EDITOR_ACTIONS !== 'undefined' && Array.isArray(EDITOR_ACTIONS) && EDITOR_ACTIONS.indexOf('saveConfig') === -1) {
+      EDITOR_ACTIONS.push('saveConfig');
+    }
+
+    if (typeof window.renderBrowse === 'function' && !window.renderBrowse.__patched) {
+      var origRB = window.renderBrowse;
+      window.renderBrowse = function () {
+        origRB.apply(this, arguments);
+        if (!cur || cur.graceDays === 7) return;
+        var g = cur.graceDays;
+        document.querySelectorAll('#filesGrid > div:not(.col-span-full)').forEach(function (card) {
+          var likeBtn = card.querySelector('.btn-like');
+          if (!likeBtn || typeof state === 'undefined') return;
+          var fid = likeBtn.getAttribute('data-like-id');
+          var f = (state.files || []).find(function (x) { return x.id === fid; });
+          var h3 = card.querySelector('h3');
+          var badge = h3 && h3.parentNode ? h3.parentNode.querySelector('span') : null;
+          if (!f || !badge) return;
+          if (f.daysOld <= g) {
+            var rem = Math.max(0, g - f.daysOld);
+            badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200';
+            badge.title = 'Uploaded ' + f.daysOld + 'd ago — protected from Top-' + cur.maxFilesPerModule + ' pruning for ' + rem + ' more days';
+            badge.textContent = '🛡️ 🆕 ' + rem + 'd Shield';
+          } else {
+            badge.className = 'text-[10px] text-slate-400';
+            badge.removeAttribute('title');
+            badge.textContent = f.daysOld + 'd ago';
+          }
+        });
+      };
+      window.renderBrowse.__patched = true;
+    }
+
+    if (typeof window.openFileModal === 'function' && !window.openFileModal.__patched) {
+      var origOM = window.openFileModal;
+      window.openFileModal = function (fileId) {
+        origOM.apply(this, arguments);
+        if (!cur || typeof state === 'undefined') return;
+        var f = (state.files || []).find(function (x) { return x.id === fileId; });
+        var sh = $('modalShield');
+        if (f && sh) {
+          sh.textContent = f.daysOld <= cur.graceDays
+            ? '🛡️ Active (' + Math.max(0, cur.graceDays - f.daysOld) + ' days remaining)'
+            : 'Standard Pool (' + f.daysOld + ' days old)';
+        }
+      };
+      window.openFileModal.__patched = true;
+    }
+
+    if (typeof window.generateAppsScriptCode === 'function' && !window.generateAppsScriptCode.__patched) {
+      var origGen = window.generateAppsScriptCode;
+      window.generateAppsScriptCode = function (rootFolderId) {
+        var code = origGen.apply(this, arguments);
+        code = code.replace(
+          'const CONFIG_KEYS = ["EDITOR_PIN", "MAX_FILES_PER_MODULE", "NEW_FILE_GRACE_DAYS", "SUBJECTS", "COURSES", "MODULES", "MONTHS", "NO_COURSE_SUBJECTS", "ECO_COURSES", "ECO_ONLY_COURSES"];',
+          'const CONFIG_KEYS = ["EDITOR_PIN", "MAX_FILES_PER_MODULE", "NEW_FILE_GRACE_DAYS", "SUBJECTS", "COURSES", "MODULES", "MONTHS", "SEMESTERS", "NO_COURSE_SUBJECTS", "ECO_COURSES", "ECO_ONLY_COURSES"];'
+        );
+        code = code.replace(
+          'const EDITOR_ACTIONS = ["approve", "reject", "editProps", "delete", "verifyPin", "getConfig", "setForwardUrl", "postNotice", "deleteNotice"];',
+          'const EDITOR_ACTIONS = ["approve", "reject", "editProps", "delete", "verifyPin", "getConfig", "saveConfig", "setForwardUrl", "postNotice", "deleteNotice"];'
+        );
+        code = code.replace(
+          '    if (body.action === "getConfig") {',
+          '    if (body.action === "saveConfig" && body.config) {\n' +
+          '      const cfgSheet = ensureConfigSheet(sheet);\n' +
+          '      const rows = cfgSheet.getRange(1, 1, cfgSheet.getLastRow(), 2).getValues();\n' +
+          '      Object.keys(body.config).forEach(function(k) {\n' +
+          '        const uk = up(k);\n' +
+          '        let found = false;\n' +
+          '        for (let r = 1; r < rows.length; r++) {\n' +
+          '          if (up(rows[r][0]) === uk) { cfgSheet.getRange(r + 1, 2).setValue(String(body.config[k])); found = true; break; }\n' +
+          '        }\n' +
+          '        if (!found) cfgSheet.appendRow([uk, String(body.config[k])]);\n' +
+          '      });\n' +
+          '      OPTIONS_CACHE = null;\n' +
+          '      SpreadsheetApp.flush();\n' +
+          '      return jsonResponse({ ok: true, options: getOptions() });\n' +
+          '    }\n\n    if (body.action === "getConfig") {'
+        );
+
+        var startMarker = 'function moduleList(raw) {';
+        var endMarker = 'function hasCourseLayer(subject) {';
+        var sIdx = code.indexOf(startMarker);
+        var eIdx = code.indexOf(endMarker);
+        if (sIdx > -1 && eIdx > sIdx) {
+          var upgradedBlock = [
+            '// Limiters: Max 6 Modules/Sem (1..6), 12 Calendar Months (JAN..DEC), Max 10 Semesters (1..10)',
+            'function moduleList(raw) {',
+            '  const parts = splitList(raw);',
+            '  if (parts.length === 1 && onlyDigits(parts[0]) === clean(parts[0]) && parts[0].indexOf("-") === -1) {',
+            '    const cnt = Math.min(6, Math.max(1, parseInt(parts[0], 10) || 4));',
+            '    const seq = [];',
+            '    for (let k = 1; k <= cnt; k++) seq.push(String(k));',
+            '    return seq;',
+            '  }',
+            '  const seen = {}, nums = [];',
+            '  function add(n) { if (n >= 1 && n <= 6 && !seen[n]) { seen[n] = true; nums.push(n); } }',
+            '  parts.forEach(function(part) {',
+            '    const dash = part.indexOf("-");',
+            '    if (dash > 0) {',
+            '      let a = parseInt(onlyDigits(part.substring(0, dash)), 10);',
+            '      let b = parseInt(onlyDigits(part.substring(dash + 1)), 10);',
+            '      if (a > b) { const t = a; a = b; b = t; }',
+            '      if (a > 0 && b >= a) { for (let n = a; n <= b && n <= 6; n++) add(n); }',
+            '      return;',
+            '    }',
+            '    const d = parseInt(onlyDigits(part), 10);',
+            '    if (d > 0) add(d);',
+            '  });',
+            '  nums.sort(function(x, y) { return x - y; });',
+            '  return nums.map(function(n) { return String(n); });',
+            '}',
+            '',
+            'function monthCode(tok) {',
+            '  const s = up(tok);',
+            '  if (!s) return "";',
+            '  if (onlyDigits(s) === s) {',
+            '    const idx = parseInt(s, 10);',
+            '    return (idx >= 1 && idx <= 12) ? MONTHS[idx - 1] : "";',
+            '  }',
+            '  let letters = "";',
+            '  for (let i = 0; i < s.length; i++) { const ch = s.charAt(i); if (ch >= "A" && ch <= "Z") letters += ch; }',
+            '  letters = letters.substring(0, 3);',
+            '  return MONTHS.indexOf(letters) > -1 ? letters : "";',
+            '}',
+            '',
+            'function monthListLimited(raw) {',
+            '  const parts = splitList(raw);',
+            '  if (parts.length === 1 && onlyDigits(parts[0]) === clean(parts[0]) && parts[0].indexOf("-") === -1) {',
+            '    const cnt = Math.min(12, Math.max(1, parseInt(parts[0], 10) || 8));',
+            '    const seq = [];',
+            '    for (let c = 0; c < cnt; c++) seq.push(MONTHS[(7 + c) % 12]);',
+            '    return seq;',
+            '  }',
+            '  const mo = [];',
+            '  function pushM(c) { if (c && mo.indexOf(c) === -1 && mo.length < 12) mo.push(c); }',
+            '  parts.forEach(function(part) {',
+            '    const dash = part.indexOf("-");',
+            '    if (dash > 0) {',
+            '      const m1 = monthCode(part.substring(0, dash)), m2 = monthCode(part.substring(dash + 1));',
+            '      if (m1 && m2) {',
+            '        const i1 = MONTHS.indexOf(m1), i2 = MONTHS.indexOf(m2);',
+            '        for (let st = 0; st < 12; st++) {',
+            '          const ci = (i1 + st) % 12;',
+            '          pushM(MONTHS[ci]);',
+            '          if (ci === i2) break;',
+            '        }',
+            '        return;',
+            '      }',
+            '    }',
+            '    pushM(monthCode(part));',
+            '  });',
+            '  return mo;',
+            '}',
+            '',
+            'function getOptions() {',
+            '  if (OPTIONS_CACHE) return OPTIONS_CACHE;',
+            '  const opt = {',
+            '    subjects: ALL_SUBJECTS.slice(),',
+            '    subjectLabels: {},',
+            '    courses: ["DSC-A", "DSC-B", "DSC-C", "MDC"],',
+            '    ecoCourses: ECO_COURSES.slice(),',
+            '    ecoOnlyCourses: ["DSC-A"],',
+            '    noCourseSubjects: SUBJECTS_NO_COURSE_LAYER.slice(),',
+            '    modules: ["1", "2", "3", "4"],',
+            '    months: ["AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB", "MAR"],',
+            '    semesters: ["1","2","3","4","5","6","7","8","9","10"],',
+            '    maxFilesPerModule: 5,',
+            '    graceDays: 7',
+            '  };',
+            '  try {',
+            '    const s = getConfigSheet();',
+            '    if (s && s.getLastRow() > 0) {',
+            '      s.getRange(1, 1, s.getLastRow(), 2).getValues().forEach(function(r) {',
+            '        const k = up(r[0]);',
+            '        const v = r[1];',
+            '        if (!clean(v)) return;',
+            '        if (k === "SUBJECTS") {',
+            '          const codes = [], labels = {};',
+            '          splitList(v).forEach(function(part) {',
+            '            const eq = part.indexOf("=");',
+            '            const code = up(eq > -1 ? part.substring(0, eq) : part);',
+            '            if (!code || codes.indexOf(code) > -1) return;',
+            '            codes.push(code);',
+            '            if (eq > -1 && clean(part.substring(eq + 1))) labels[code] = clean(part.substring(eq + 1));',
+            '          });',
+            '          if (codes.length) { opt.subjects = codes; opt.subjectLabels = labels; }',
+            '        }',
+            '        if (k === "COURSES") { const a = upList(v); if (a.length) opt.courses = a; }',
+            '        if (k === "ECO_COURSES") { const b = upList(v); if (b.length) opt.ecoCourses = b; }',
+            '        if (k === "ECO_ONLY_COURSES") { opt.ecoOnlyCourses = upList(v); }',
+            '        if (k === "NO_COURSE_SUBJECTS") { opt.noCourseSubjects = upList(v); }',
+            '        if (k === "MODULES" || k === "MAX_MODULES") { const m = moduleList(v); if (m.length) opt.modules = m; }',
+            '        if (k === "MONTHS") { const mo = monthListLimited(v); if (mo.length) opt.months = mo; }',
+            '        if (k === "SEMESTERS" || k === "SEMS") { opt.semesters = splitList(v); }',
+            '        if (k === "MAX_FILES_PER_MODULE" && Number(v) > 0) { opt.maxFilesPerModule = Math.min(20, Math.max(1, Number(v))); }',
+            '        if (k === "NEW_FILE_GRACE_DAYS" && Number(v) >= 0) { opt.graceDays = Math.min(30, Math.max(0, Number(v))); }',
+            '      });',
+            '    }',
+            '  } catch (err) {}',
+            '  OPTIONS_CACHE = opt;',
+            '  return opt;',
+            '}',
+            ''
+          ].join('\n');
+          code = code.slice(0, sIdx) + upgradedBlock + code.slice(eIdx);
+        }
+        return code;
+      };
+      window.generateAppsScriptCode.__patched = true;
+    }
+  }
+
+  /* ============================================================================================
+     PART D — THEMED SELECTORS (Fixed so removed Sheet options are never resurrected)
+     ============================================================================================ */
+  var DROPDOWNS = ['filterSem', 'filterSubject', 'filterCourse', 'filterModule', 'filterMonth', 'upSem', 'upSubject', 'upCourse', 'editModalCourse', 'editModalModule', 'editModalMonth'];
+  var CHIPS = ['filterType', 'upType', 'upScope', 'upMonth', 'upModule'];
+  var COMPACT = ['filterType', 'upMonth', 'upModule'];
+  var TITLES = { filterMonth: 'Month Filter' };
+  var controls = {};
+  var panel = null, scrim = null, openCtl = null;
+  var vdesc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function visibleOptions(sel) { return Array.prototype.filter.call(sel.options, function (o) { return !o.disabled && !o.hidden; }); }
+  function selectedOption(sel) { return sel.options[sel.selectedIndex] || visibleOptions(sel)[0] || null; }
+  function splitLabel(text, value, id) {
+    text = String(text || '');
+    if (id === 'upModule' && value === '') return { m: 'Not sure', s: "Unnumbered 'MODULE' folder" };
+    if (id === 'upModule' && /^[0-9]+$/.test(String(value))) return { m: String(value), s: '' };
+    var i = text.indexOf(' (');
+    if (i > 0 && text.charAt(text.length - 1) === ')') return { m: text.slice(0, i), s: text.slice(i + 2, -1) };
+    return { m: text, s: '' };
+  }
+  function titleOf(sel) {
+    if (TITLES[sel.id]) return TITLES[sel.id];
+    var l = document.querySelector('label[for="' + sel.id + '"]');
+    if (!l && sel.parentNode) l = sel.parentNode.querySelector('label');
+    return l ? l.textContent.replace(/\s+/g, ' ').replace(/:$/, '').trim() : sel.id;
+  }
+  function fire(sel) {
+    sel.dispatchEvent(new Event('input', { bubbles: true }));
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  function choose(ctl, opt) {
+    var changed = ctl.sel.value !== opt.value;
+    ctl.sel.value = opt.value;
+    if (changed) fire(ctl.sel);
+    ctl.render();
+  }
+
+  function ensurePanel() {
+    if (panel) return;
+    scrim = document.createElement('div'); scrim.id = 'tselScrim';
+    panel = document.createElement('div'); panel.id = 'tselPanel'; panel.setAttribute('role', 'dialog');
+    document.body.appendChild(scrim); document.body.appendChild(panel);
+    scrim.addEventListener('click', function () { closePanel(); });
+    panel.addEventListener('click', function (e) {
+      var x = e.target.closest ? e.target.closest('.tsel-x') : null;
+      if (x) { closePanel(); return; }
+      var it = e.target.closest ? e.target.closest('.tsel-item') : null;
+      if (it && openCtl) { var ctl = openCtl; closePanel(true); choose(ctl, it.__opt); try { ctl.btn.focus({ preventScroll: true }); } catch (er) {} }
+    });
+    panel.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); closePanel(); return; }
+      var items = Array.prototype.slice.call(panel.querySelectorAll('.tsel-item'));
+      var i = items.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') { e.preventDefault(); (items[Math.min(i + 1, items.length - 1)] || items[0]).focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); (items[Math.max(i - 1, 0)] || items[0]).focus(); }
+      else if (e.key === 'Home') { e.preventDefault(); if (items[0]) items[0].focus(); }
+      else if (e.key === 'End') { e.preventDefault(); if (items.length) items[items.length - 1].focus(); }
+      else if (e.key === 'Tab') { closePanel(true); }
+    });
+    window.addEventListener('resize', function () { if (openCtl) closePanel(true); });
+    document.addEventListener('scroll', function (e) {
+      if (openCtl && window.innerWidth >= 640 && !(panel && panel.contains(e.target))) closePanel(true);
+    }, true);
+  }
+
+  function place(ctl) {
+    var listEl = panel.querySelector('.tsel-list');
+    if (window.innerWidth < 640) {
+      panel.style.left = panel.style.top = panel.style.width = '';
+      listEl.style.maxHeight = '';
+      return;
+    }
+    var r = ctl.btn.getBoundingClientRect();
+    var w = Math.max(r.width, 250);
+    var below = window.innerHeight - r.bottom - 14;
+    var above = r.top - 14;
+    var useBelow = below >= 230 || below >= above;
+    listEl.style.maxHeight = Math.max(150, Math.min(340, (useBelow ? below : above) - 52)) + 'px';
+    panel.style.width = w + 'px';
+    panel.style.left = Math.min(Math.max(8, r.left), window.innerWidth - w - 8) + 'px';
+    var ph = panel.offsetHeight;
+    panel.style.top = (useBelow ? r.bottom + 6 : Math.max(8, r.top - ph - 6)) + 'px';
+  }
+
+  function openPanel(ctl) {
+    ensurePanel();
+    closePanel(true);
+    openCtl = ctl;
+    var cursor = selectedOption(ctl.sel);
+    panel.setAttribute('aria-label', ctl.title);
+    panel.innerHTML = '<div class="tsel-head"><span>◈ ' + esc(ctl.title) + '</span><button type="button" class="tsel-x" aria-label="Close">✕</button></div><div class="tsel-list" role="listbox"></div>';
+    var listEl = panel.querySelector('.tsel-list');
+    var focusEl = null;
+    visibleOptions(ctl.sel).forEach(function (o) {
+      var on = o === cursor;
+      var p = splitLabel(o.text, o.value, ctl.sel.id);
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'tsel-item'; b.setAttribute('role', 'option'); b.setAttribute('aria-selected', on ? 'true' : 'false');
+      b.innerHTML = '<span class="tsel-g" aria-hidden="true">' + (on ? '◈' : '⬡') + '</span><span class="tsel-t">' + esc(p.m) + (p.s ? '<span class="tsel-s">' + esc(p.s) + '</span>' : '') + '</span>';
+      b.__opt = o;
+      listEl.appendChild(b);
+      if (on) focusEl = b;
+    });
+    panel.classList.add('on'); scrim.classList.add('on');
+    ctl.btn.setAttribute('aria-expanded', 'true');
+    place(ctl);
+    focusEl = focusEl || listEl.querySelector('.tsel-item');
+    if (focusEl) { try { focusEl.focus({ preventScroll: true }); focusEl.scrollIntoView({ block: 'nearest' }); } catch (e) {} }
+  }
+
+  function closePanel(skipFocus) {
+    if (!panel) return;
+    var ctl = openCtl;
+    openCtl = null;
+    panel.classList.remove('on'); scrim.classList.remove('on');
+    if (ctl) {
+      ctl.btn.setAttribute('aria-expanded', 'false');
+      if (skipFocus !== true) { try { ctl.btn.focus({ preventScroll: true }); } catch (e) {} }
+    }
+  }
+
+  function hook(ctl) {
+    var sel = ctl.sel;
+    Object.defineProperty(sel, 'value', {
+      configurable: true, enumerable: true,
+      get: function () { return vdesc.get.call(sel); },
+      set: function (v) {
+        vdesc.set.call(sel, v);
+        if (vdesc.get.call(sel) !== String(v == null ? '' : v)) {
+          var vis = visibleOptions(sel);
+          if (vis.length) vdesc.set.call(sel, vis[0].value);
+        }
+        ctl.render();
+      }
+    });
+    sel.addEventListener('change', function () { ctl.render(); });
+    var q = 0;
+    new MutationObserver(function () {
+      if (q) return;
+      q = requestAnimationFrame(function () { q = 0; ctl.render(); });
+    }).observe(sel, { childList: true, subtree: true, attributes: true, attributeFilter: ['disabled', 'hidden', 'selected', 'label'] });
+  }
+
+  function make(id, kind) {
+    var sel = $(id);
+    if (!sel || controls[id]) return;
+    var host = document.createElement('div');
+    host.className = 'tsel';
+    sel.parentNode.insertBefore(host, sel.nextSibling);
+    sel.classList.add('tsel-native');
+    sel.setAttribute('tabindex', '-1'); sel.setAttribute('aria-hidden', 'true');
+    var ctl = { sel: sel, host: host, title: titleOf(sel) };
+    controls[id] = ctl;
+
+    if (kind === 'dd') {
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'tsel-btn';
+      btn.setAttribute('aria-haspopup', 'listbox'); btn.setAttribute('aria-expanded', 'false');
+      btn.innerHTML = '<span class="tsel-glyph" aria-hidden="true">⬡</span><span class="tsel-val"></span><span class="tsel-caret" aria-hidden="true">▾</span>';
+      host.appendChild(btn);
+      if (id === 'filterMonth') host.style.minWidth = '150px';
+      ctl.btn = btn;
+      ctl.render = function () {
+        var o = selectedOption(sel);
+        btn.querySelector('.tsel-val').textContent = o ? o.text : 'Select…';
+        btn.disabled = !!sel.disabled;
+        btn.setAttribute('aria-label', ctl.title + ': ' + (o ? o.text : 'none selected'));
+      };
+      btn.addEventListener('click', function () { if (openCtl === ctl) closePanel(); else openPanel(ctl); });
+      btn.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); openPanel(ctl); }
+      });
+    } else {
+      host.classList.add('tchips');
+      if (id === 'upMonth' || id === 'upModule') host.classList.add('tchips--grid');
+      if (COMPACT.indexOf(id) > -1) host.classList.add('tchips--compact');
+      host.setAttribute('role', 'radiogroup'); host.setAttribute('aria-label', ctl.title);
+      ctl.btn = host;
+      ctl.render = function () {
+        var kids = Array.prototype.slice.call(host.children);
+        var ai = kids.indexOf(document.activeElement);
+        var on = selectedOption(sel);
+        host.innerHTML = '';
+        visibleOptions(sel).forEach(function (o) {
+          var p = splitLabel(o.text, o.value, id);
+          var b = document.createElement('button');
+          b.type = 'button'; b.className = 'tchip'; b.setAttribute('role', 'radio');
+          b.setAttribute('aria-checked', o === on ? 'true' : 'false');
+          b.innerHTML = esc(p.m) + (p.s ? '<span class="tchip-sub">' + esc(p.s) + '</span>' : '');
+          b.__opt = o;
+          if (id === 'upModule' && o.value === '') b.style.gridColumn = '1 / -1';
+          host.appendChild(b);
+        });
+        if (ai > -1 && host.children[ai]) { try { host.children[ai].focus({ preventScroll: true }); } catch (e) {} }
+      };
+      host.addEventListener('click', function (e) {
+        var b = e.target.closest ? e.target.closest('.tchip') : null;
+        if (b) choose(ctl, b.__opt);
+      });
+      host.addEventListener('keydown', function (e) {
+        var step = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : ((e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0);
+        if (!step) return;
+        var kids = Array.prototype.slice.call(host.children);
+        var i = kids.indexOf(document.activeElement);
+        if (i < 0) return;
+        e.preventDefault();
+        var nx = kids[(i + step + kids.length) % kids.length];
+        if (nx) { choose(ctl, nx.__opt); }
+      });
+    }
+
+    hook(ctl);
+    var lab = document.querySelector('label[for="' + id + '"]') || (id === 'filterMonth' ? sel.parentNode.querySelector('label') : null);
+    if (lab) {
+      lab.classList.add('tsel-label');
+      lab.addEventListener('click', function (e) {
+        e.preventDefault();
+        var t = kind === 'dd' ? ctl.btn : (host.querySelector('[aria-checked="true"]') || host.querySelector('.tchip'));
+        if (t) t.focus();
+      });
+    }
+    ctl.render();
+  }
+
+  function refreshAll() { Object.keys(controls).forEach(function (k) { controls[k].render(); }); }
+
+  function init() {
+    patchAppAndScriptGenerator();
+    DROPDOWNS.forEach(function (id) { make(id, 'dd'); });
+    CHIPS.forEach(function (id) { make(id, 'chips'); });
+    buildInAppConfigPanel();
+    readout(false);
+    var el = $('optionsLiveReadout');
+    if (el) el.textContent = '◈ Waiting for the first sync…';
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      if (raw) apply(JSON.parse(raw), true);
+    } catch (e) {}
+    try {
+      var cb = $('appsScriptCodeBlock');
+      if (cb && typeof state !== 'undefined' && typeof canSeeSetup === 'function' && canSeeSetup()) {
+        cb.textContent = window.generateAppsScriptCode(state.testFolderId);
+      }
+    } catch (e) {}
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+  </script>
+</body>
+</html>
           <div>
             <h3 class="text-sm font-bold text-slate-900">Complete <code class="text-indigo-600">Code.gs</code> (Includes <code class="text-emerald-700">setup()</code> + <code class="text-emerald-700">onFormSubmit</code> + <code class="text-emerald-700">onSheetEdit</code> + <code class="text-emerald-700">doGet/doPost</code> Web App API)</h3>
             <p class="text-xs text-slate-500">Works from 0 files, supports both your Google Form fail-safe AND this Web App simultaneously.</p>
