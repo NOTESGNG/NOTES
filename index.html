@@ -1,5 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+  ╔═══════════════════ WHERE TO CHANGE THE DRIVE / WEB APP LINKS ═══════════════════╗
+  All links live in ONE block. Find it: Ctrl+F (Cmd+F on Mac) → CONNECTION SETTINGS
+    Line LINE_SITE  SITE_URL                public address of this app (GitHub Pages)
+    Line LINE_URL  DEFAULT_WEBAPP_URL      deployed Apps Script Web App (.../exec)
+    Line LINE_FOLDER  DEFAULT_ROOT_FOLDER_ID  Drive folder ID put into the generated Apps Script
+  Everything else (Setup boxes, join link, GitHub line, Code.gs generator) reads these.
+  Live switch with no file edit: ⚙️ Setup → box 1 / box 2 → "Apply to Everyone".
+  ╚══════════════════════════════════════════════════════════════════════════════════╝
+-->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -382,10 +392,10 @@
       box-shadow: var(--chip-shadow);
     }
     #connectionBadge::after {
-      content: '⬡ SIGNAL OFFLINE';
+      content: '⬡ OFFLINE';
       font: 600 11px/1 var(--font-mono); letter-spacing: 0.08em;
     }
-    #connectionBadge.bg-emerald-100::after { content: '⬡ ONLINE · 100% NOMINAL'; }
+    #connectionBadge.bg-emerald-100::after { content: '⬡ CONNECTED'; }
     html[data-theme="midnight"] #connectionBadge.bg-emerald-100 { background-color: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.45); color: #6EE7B7; box-shadow: 0 0 20px -6px rgba(16, 185, 129, 0.55); }
     html[data-theme="midnight"] #connectionBadge.bg-amber-100 { background-color: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.45); color: #FCD34D; box-shadow: 0 0 20px -6px rgba(245, 158, 11, 0.5); }
     html[data-theme="matinee"] #connectionBadge { background-color: #FFFFFF; border-color: #111315; }
@@ -482,8 +492,8 @@
       color: var(--text); background-color: var(--surface-2); border-color: var(--border-color);
       white-space: normal; line-height: 1.5;
     }
-    #liveDrivePath::before { content: '◈ SECTOR: '; color: var(--accent-4); font-weight: 700; }
-    #liveDrivePath::after { content: '  •  MARKET CAP: TOP 5 SURVIVAL'; color: var(--text-faint); }
+    #liveDrivePath::before { content: '◈ FOLDER: '; color: var(--accent-4); font-weight: 700; }
+    #liveDrivePath::after { content: '  •  TOP 5 STAY'; color: var(--text-faint); }
     html[data-theme] #viewBrowse > .bg-indigo-950 .overflow-x-auto > span:first-child { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); }
     html[data-theme] #resultsSummaryText { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--text-dim); font-variant-numeric: tabular-nums; }
 
@@ -508,7 +518,7 @@
     }
     /* Top-5 court badge + net/cutline */
     html[data-theme] #filesGrid > div:not(.col-span-full):nth-child(-n+5)::before {
-      content: 'IN · TOP 5 COURT';
+      content: 'TOP 5 · KEPT';
       position: absolute; top: -10px; left: 16px; z-index: 2;
       padding: 4px 10px; border-radius: var(--r-pill);
       font: 700 9.5px/1 var(--font-mono); letter-spacing: 0.12em;
@@ -516,7 +526,7 @@
       border: var(--border-w) solid var(--ok-line);
     }
     html[data-theme] #filesGrid > div:not(.col-span-full):nth-child(6)::before {
-      content: '▼ NET · CUTLINE';
+      content: '▼ BELOW TOP 5';
       position: absolute; top: -10px; left: 16px; z-index: 2;
       padding: 4px 10px; border-radius: var(--r-pill);
       font: 700 9.5px/1 var(--font-mono); letter-spacing: 0.12em;
@@ -533,7 +543,7 @@
     html[data-theme="matinee"] #filesGrid .bg-slate-50.rounded-xl { border-width: 1px; box-shadow: inset 3px 0 0 var(--accent-1); }
     /* shield: RALLY ACTIVE */
     html[data-theme] #filesGrid span[title][class*="rounded-full"] { font-family: var(--font-mono); letter-spacing: 0.04em; white-space: nowrap; }
-    html[data-theme] #filesGrid span[title][class*="rounded-full"]::after { content: ' · RALLY ACTIVE'; opacity: 0.85; }
+    html[data-theme] #filesGrid span[title][class*="rounded-full"]::after { content: ' · PROTECTED'; opacity: 0.85; }
     /* like + open */
     html[data-theme] #filesGrid .btn-like {
       position: relative; font-family: var(--font-mono); font-variant-numeric: tabular-nums;
@@ -639,11 +649,11 @@
       flex: 0 0 100%; font: 700 9.5px/1 var(--font-mono); letter-spacing: 0.16em; text-transform: uppercase;
     }
     html[data-theme] #toastContainer > div.bg-slate-900 { box-shadow: inset 4px 0 0 var(--accent-4), var(--shadow); }
-    html[data-theme] #toastContainer > div.bg-slate-900::before { content: '◈ TELEMETRY'; color: var(--accent-4); }
+    html[data-theme] #toastContainer > div.bg-slate-900::before { content: '◈ INFO'; color: var(--accent-4); }
     html[data-theme] #toastContainer > div.bg-emerald-700 { box-shadow: inset 4px 0 0 var(--ok), var(--shadow); }
-    html[data-theme] #toastContainer > div.bg-emerald-700::before { content: '▲ CONFIRMED'; color: var(--ok-text); }
+    html[data-theme] #toastContainer > div.bg-emerald-700::before { content: '▲ DONE'; color: var(--ok-text); }
     html[data-theme] #toastContainer > div.bg-amber-600 { box-shadow: inset 4px 0 0 var(--accent-2), var(--shadow); }
-    html[data-theme] #toastContainer > div.bg-amber-600::before { content: '▼ ALERT'; color: var(--warn-text); }
+    html[data-theme] #toastContainer > div.bg-amber-600::before { content: '▼ HEADS UP'; color: var(--warn-text); }
     html[data-theme] #toastContainer > div.bg-slate-900::after {
       content: ''; position: absolute; right: 12px; top: 12px; width: 15px; height: 15px; border-radius: 50%;
       border: 1.5px solid var(--text-faint);
@@ -1120,6 +1130,21 @@
 
     /* ---- merger: Subject + Course filter ---- */
     .mg-hide { display: none !important; }
+
+    /* ---- Reusable motion helpers (Course Structure editor, modals, anything new) ----
+       anim-in   : fades + slides a card/row in when it's added
+       anim-pop  : a small scale-in for chips
+       anim-out  : played by animateOut(el) right before an element is removed */
+    @keyframes dnIn  { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    @keyframes dnPop { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: none; } }
+    @keyframes dnOut { to { opacity: 0; transform: scale(0.92); } }
+    .anim-in  { animation: dnIn 240ms var(--ease) both; }
+    .anim-pop { animation: dnPop 200ms var(--ease) both; }
+    .anim-out { animation: dnOut 160ms ease-in forwards; pointer-events: none; }
+    #batchModal.flex > div, #fileModal.flex > div { animation: dnIn 240ms var(--ease) both; }
+    @media (prefers-reduced-motion: reduce) {
+      .anim-in, .anim-pop, .anim-out, #batchModal.flex > div, #fileModal.flex > div { animation: none !important; }
+    }
     #mergeFilterBar { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px; }
     @media (max-width: 459px) { #mergeFilterBar { grid-template-columns: 1fr; } }
     html[data-theme] #mergeFilterBar > div {
@@ -1170,6 +1195,9 @@
 
       <!-- Status cluster: connection badge + theme switcher (new, additive) -->
       <div class="status-cluster">
+        <button id="batchChip" type="button" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition">
+          🎓 Set your batch
+        </button>
         <span id="connectionBadge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
           Not connected
         </span>
@@ -1212,9 +1240,9 @@
 
     <!-- ==================== VIEW 1: BROWSE ARCHIVE (STUDENT / JUNIOR / SENIOR) ==================== -->
     <section id="viewBrowse" class="space-y-5">
-      <div class="hud-eyebrow" aria-hidden="true">◈ Tactical Scouting &amp; Court Filter</div>
+      <div class="hud-eyebrow" aria-hidden="true">◈ Find notes</div>
       <div id="notConnectedBanner" class="bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl px-4 py-3 text-xs sm:text-sm">
-        <strong>Not connected to the department Drive yet.</strong> Ask your Editor for the join link. (Editor: open <strong>⚙️ 0-File Drive Setup &amp; Code</strong> to connect.)
+        <strong>This app isn't connected to the notes Drive yet.</strong> Ask your Editor for the join link. (Editor: connect it from <strong>⚙️ 0-File Drive Setup &amp; Code</strong>.)
       </div>
       <!-- Quick Student Profile / My Course Filter Bar -->
       <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
@@ -1316,6 +1344,14 @@
             <span class="absolute left-3 top-2.5 text-slate-400 text-sm">🔍</span>
           </div>
           <div class="flex items-center gap-2">
+            <label class="text-xs font-medium text-slate-600 whitespace-nowrap">Batch:</label>
+            <select id="filterBatch" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-indigo-500 focus:outline-none">
+              <option value="MINE">My Batch</option>
+              <option value="SENIORS">Seniors (Earlier Batches)</option>
+              <option value="ALL" selected>All Batches</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
             <label class="text-xs font-medium text-slate-600 whitespace-nowrap">Month Filter:</label>
             <select id="filterMonth" class="rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 focus:border-indigo-500 focus:outline-none">
               <option value="ALL">All Months</option>
@@ -1337,12 +1373,12 @@
       <!-- Drive Breadcrumb Path & Top-5 Likes Rule Banner -->
       <div class="flex flex-wrap items-center justify-between gap-3 bg-indigo-950 text-white px-4 py-3 rounded-2xl shadow-sm">
         <div class="flex items-center gap-2 text-xs sm:text-sm overflow-x-auto">
-          <span class="text-indigo-300 font-medium">Drive Mirror Path:</span>
+          <span class="text-indigo-300 font-medium">Folder:</span>
           <code id="liveDrivePath" class="bg-indigo-900/80 text-indigo-100 px-2.5 py-1 rounded-lg border border-indigo-700 text-xs">Year 1 / SEM 1 / CS / DSC-B</code>
         </div>
         <div class="flex items-center gap-2 text-xs text-indigo-200">
           <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span>Sorted by 👍 Likes • Max 5 per Module (Ties kept • 🆕 7-Day Shield protects new uploads)</span>
+          <span>Most-liked first. Each module keeps its top 5 notes; new uploads are safe for their first 7 days.</span>
         </div>
       </div>
 
@@ -1357,12 +1393,12 @@
 
     <!-- ==================== VIEW 2: UPLOAD / SHARE NOTES (STUDENT & SENIOR) ==================== -->
     <section id="viewUpload" class="hidden max-w-2xl mx-auto">
-      <div class="hud-eyebrow" aria-hidden="true" style="margin-bottom:10px">◈ Sector Targeting &amp; Drop Zone</div>
+      <div class="hud-eyebrow" aria-hidden="true" style="margin-bottom:10px">◈ Share a file</div>
       <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
         <div class="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
             <h2 class="text-lg font-bold text-slate-900">Share Notes, PYQs, Syllabus or Class Videos</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Files stay cleanly named <code class="bg-slate-100 px-1.5 py-0.5 rounded">Name.Month</code> in Drive, while your Topics power instant search.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Your file is saved as <code class="bg-slate-100 px-1.5 py-0.5 rounded">Name.Month</code> in Drive. The topics you type are what people search for.</p>
           </div>
           <span class="text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-lg whitespace-nowrap">
             +1 to +2 Points
@@ -1370,6 +1406,10 @@
         </div>
 
         <form id="uploadForm" class="space-y-4">
+          <div id="upBatchReadout" class="hidden text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+            <span>🎓 Uploading as <strong id="upBatchReadoutLabel"></strong> — tagged automatically.</span>
+            <button type="button" id="btnChangeBatchInline" class="underline hover:no-underline whitespace-nowrap">Not you?</button>
+          </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label for="upName" class="block text-xs font-semibold text-slate-700 mb-1">Your Name (for <code class="text-indigo-600">Name.Month</code> & Points)</label>
@@ -1394,7 +1434,8 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label for="upSem" class="block text-xs font-semibold text-slate-700 mb-1">Semester (Routes to Year 1–5)</label>
+              <label for="upSem" class="block text-xs font-semibold text-slate-700 mb-1">Semester</label>
+              <p id="upSemNotSetUp" class="hidden mb-1 text-[11px] font-medium rounded-lg px-2 py-1 bg-amber-100 text-amber-800 border border-amber-200 anim-in" role="status"></p>
               <select id="upSem" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none">
                 <option value="SEM1">SEM 1 (Year 1)</option>
                 <option value="SEM2">SEM 2 (Year 1)</option>
@@ -1468,7 +1509,7 @@
           <!-- Video-style Properties / Topics Input -->
           <div>
             <label for="upTopics" class="block text-xs font-semibold text-slate-700 mb-1">
-              Properties / Topics Covered <span class="text-slate-400 font-normal">(Searchable like video tags; written to Drive file description)</span>
+              Topics covered <span class="text-slate-400 font-normal">(what people will search for)</span>
             </label>
             <input id="upTopics" type="text" required placeholder="e.g. Linked Lists, Stack & Queue, or '2025 End-Sem PYQ with Solutions'" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
           </div>
@@ -1479,16 +1520,16 @@
             <button id="btnTriggerFileSelect" type="button" class="px-4 py-2 rounded-xl bg-white border border-slate-300 text-xs sm:text-sm font-semibold text-slate-700 hover:border-indigo-400 shadow-sm transition">
               📎 Choose PDF, Class Photos, or Class Video
             </button>
-            <p id="selectedFileLabel" class="text-xs text-slate-500 mt-2">No file chosen yet (When connected to Live Drive, your selected file uploads directly to 🕓 Pending Review)</p>
+            <p id="selectedFileLabel" class="text-xs text-slate-500 mt-2">No file chosen yet. Once you upload, it waits for the Editor to approve it.</p>
           </div>
 
           <div class="bg-slate-100 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs">
             <div>
-              <span class="text-slate-500">Drive Filename Preview:</span>
+              <span class="text-slate-500">Saved as:</span>
               <code id="previewFileName" class="ml-1 font-semibold text-indigo-700">Anon.OCT</code>
             </div>
             <div>
-              <span class="text-slate-500">Destination After Approval:</span>
+              <span class="text-slate-500">Goes to (after approval):</span>
               <code id="previewDestPath" class="ml-1 font-semibold text-slate-800">Year 1 / SEM 1 / CS / DSC-B / NOTES / Module 1</code>
             </div>
           </div>
@@ -1507,21 +1548,21 @@
           <h3 class="text-sm font-bold text-slate-900">📮 My recent uploads (this device)</h3>
           <button id="btnClearMyUploads" type="button" class="text-[11px] text-slate-500 hover:text-slate-800 underline">Clear</button>
         </div>
-        <p class="text-[11px] text-slate-500 mb-2">Your file is safe in Drive. It waits in Pending Review until the Editor approves it, then it appears under Browse.</p>
+        <p class="text-[11px] text-slate-500 mb-2">Your file is safely in Drive. Once the Editor approves it, it shows up in Browse.</p>
         <div id="myUploadsList" class="space-y-2"></div>
       </div>
     </section>
 
     <!-- ==================== VIEW 3: IN-APP ANNOUNCEMENTS & POINTS LEADERBOARD ==================== -->
     <section id="viewFeed" class="hidden space-y-6">
-      <div class="hud-eyebrow" aria-hidden="true">◈ World Economy News &amp; Bounty Dojo</div>
+      <div class="hud-eyebrow" aria-hidden="true">◈ News and points</div>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Left 2 Cols: In-App Announcements & Newly Approved Stream -->
         <div class="lg:col-span-2 space-y-4">
           <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
             <div class="flex items-center justify-between gap-2 mb-4">
               <div>
-                <h2 class="text-base font-bold text-slate-900">📢 Department Announcements & New Uploads</h2>
+                <h2 class="text-base font-bold text-slate-900">📢 Announcements and new uploads</h2>
               </div>
             </div>
             <div id="announcementsList" class="space-y-3"></div>
@@ -1533,9 +1574,9 @@
           <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
             <div class="flex items-center justify-between mb-1">
               <h2 class="text-base font-bold text-slate-900">🏆 Top Contributors</h2>
-              <span class="text-[11px] font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Points Table</span>
+              <span class="text-[11px] font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">How points work</span>
             </div>
-            <p class="text-xs text-slate-500 mb-4">Notes = 1 pt • Syllabus = 1 pt • Q.Papers = 2 pts • Videos = 2 pts</p>
+            <p class="text-xs text-slate-500 mb-4">Notes and syllabus: 1 point each. Question papers and videos: 2 points each.</p>
             <div id="leaderboardList" class="space-y-2.5"></div>
           </div>
         </div>
@@ -1544,12 +1585,12 @@
 
     <!-- ==================== VIEW 4: EDITOR 1-TAP WORKSPACE ==================== -->
     <section id="viewEditor" class="hidden space-y-6">
-      <div class="hud-eyebrow" aria-hidden="true">⬡ Command Bridge · Kumite Judge Console</div>
+      <div class="hud-eyebrow" aria-hidden="true">⬡ Editor tools</div>
       <!-- Editor PIN Lock Bar -->
       <div id="editorLockBanner" class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 class="text-base font-bold text-slate-900">🛡️ Editor Operations Console</h2>
-          <p class="text-xs text-slate-500">1-Tap mobile approval, property/folder reorganization, and month-end daily note merging. The Editor PIN is set in the Sheet's <code class="bg-slate-100 px-1.5 py-0.5 rounded font-semibold">Config</code> tab (<code class="bg-slate-100 px-1.5 py-0.5 rounded">EDITOR_PIN</code>).</p>
+          <h2 class="text-base font-bold text-slate-900">🛡️ Editor console</h2>
+          <p class="text-xs text-slate-500">Approve uploads, fix where notes are filed, set up each semester's subjects, and merge daily notes. Your Editor PIN lives in the Sheet's <code class="bg-slate-100 px-1.5 py-0.5 rounded font-semibold">Config</code> tab (<code class="bg-slate-100 px-1.5 py-0.5 rounded">EDITOR_PIN</code>).</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <input id="editorPinInput" type="password" value="" placeholder="Editor PIN" class="w-36 rounded-xl border border-slate-300 px-3 py-1.5 text-sm focus:border-indigo-500 focus:outline-none" />
@@ -1562,19 +1603,70 @@
         </div>
       </div>
 
+      <div id="scriptVersionBanner" class="hidden bg-amber-100 text-amber-800 border border-amber-200 rounded-2xl p-4 text-xs space-y-2 anim-in" role="status">
+        <p class="font-bold text-sm">⚠️ Your Apps Script is out of date</p>
+        <p id="scriptVersionDetail"></p>
+        <ol class="list-decimal pl-5 space-y-0.5">
+          <li>Unlock the console, open <strong>⚙️ 0-File Drive Setup &amp; Code</strong> and copy the code.</li>
+          <li>In your Sheet: <strong>Extensions → Apps Script</strong>, select all, paste, save.</li>
+          <li>Click <strong>Run → setup</strong> once.</li>
+          <li><strong>Deploy → Manage deployments → ✏️ → Version: New version → Deploy</strong>.</li>
+        </ol>
+        <div class="flex flex-wrap gap-2 pt-1">
+          <button id="btnOpenSetupFromBanner" type="button" class="px-3 py-1.5 rounded-xl bg-white text-xs font-semibold border border-amber-200 hover:bg-amber-50 transition">Open Setup &amp; Code</button>
+          <button id="btnRecheckScript" type="button" class="px-3 py-1.5 rounded-xl bg-white text-xs font-semibold border border-amber-200 hover:bg-amber-50 transition">I've redeployed, check again</button>
+        </div>
+      </div>
+
       <div id="editorMainContent" class="hidden space-y-6">
         <!-- Pending Review Queue (1-Tap Approve / Fix Properties / Reject) -->
         <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
             <div>
-              <h3 class="text-base font-bold text-slate-900">🕓 Pending Review Queue (File-ID Safe Lookup)</h3>
-              <p class="text-xs text-slate-500">Approving moves the file by its exact Google Drive File ID (fixing the duplicate <code class="bg-slate-100 px-1 rounded">Name.Month(2)</code> bug) and activates its 7-day grace shield.</p>
+              <h3 class="text-base font-bold text-slate-900">🕓 Waiting for approval</h3>
+              <p class="text-xs text-slate-500">Approving moves the file into its proper folder and makes it visible to everyone. New files are protected from the top-5 cut for 7 days.</p>
             </div>
             <button id="btnApproveAllPending" type="button" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition">
-              ✅ Approve All Pending
+              ✅ Approve all
             </button>
           </div>
           <div id="pendingQueueList" class="space-y-3"></div>
+        </div>
+
+        <!-- Course Structure Editor: per-semester Subjects / Courses, as a "need system" the Editor can change any time -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+            <div>
+              <h3 class="text-base font-bold text-slate-900">🧩 Course Structure (per Semester)</h3>
+              <p class="text-xs text-slate-500">Set up which subjects and courses each semester has. SEM 1–3 start with the current ones; SEM 4 onwards start empty. Click Save Structure when you're done.</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 mb-3 pb-3 border-b border-slate-100">
+            <label class="text-xs font-medium text-slate-600">Editing Semester</label>
+            <select id="structSemSelect" class="rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs font-medium">
+              <option value="1">SEM 1</option><option value="2">SEM 2</option><option value="3">SEM 3</option>
+              <option value="4">SEM 4</option><option value="5">SEM 5</option><option value="6">SEM 6</option>
+              <option value="7">SEM 7</option><option value="8">SEM 8</option><option value="9">SEM 9</option><option value="10">SEM 10</option>
+            </select>
+            <span id="structOverrideBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200">Not set up yet</span>
+            <span class="flex-1"></span>
+            <label class="text-xs font-medium text-slate-600">Copy from</label>
+            <select id="structCopyFromSelect" class="rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs">
+              <option value="">Shared lists (Setup)</option>
+              <option value="1">SEM 1</option><option value="2">SEM 2</option><option value="3">SEM 3</option>
+              <option value="4">SEM 4</option><option value="5">SEM 5</option><option value="6">SEM 6</option>
+              <option value="7">SEM 7</option><option value="8">SEM 8</option><option value="9">SEM 9</option><option value="10">SEM 10</option>
+            </select>
+            <button id="btnStructCopy" type="button" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Copy In</button>
+          </div>
+          <div id="structSubjectRows" class="space-y-2"></div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-slate-100">
+            <button id="btnStructAddSubject" type="button" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition">+ Add Subject to This Sem</button>
+            <div class="flex items-center gap-2">
+              <button id="btnStructClearSem" type="button" class="text-xs font-medium text-slate-500 hover:text-rose-600 px-2 py-1.5">Reset this sem</button>
+              <button id="btnStructSave" type="button" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">💾 Save Structure</button>
+            </div>
+          </div>
         </div>
 
         <!-- Month-End Daily Notes Merger (Approach B) & Post-Approval Post Announcement -->
@@ -1583,10 +1675,10 @@
           <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
             <div>
               <div class="flex items-center justify-between gap-2 mb-1">
-                <h3 class="text-base font-bold text-slate-900">🔗 Month-End Daily Notes Merger (Approach B)</h3>
-                <span class="text-[11px] font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">Editor Controlled</span>
+                <h3 class="text-base font-bold text-slate-900">🔗 Merge daily notes</h3>
+                <span class="text-[11px] font-semibold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">Editor only</span>
               </div>
-              <p class="text-xs text-slate-500 mb-4">Select approved <code class="bg-slate-100 px-1 rounded">Daily</code> uploads from the same subject &amp; course, uncheck any bad/duplicate snaps, and combine them into one clean monthly file.</p>
+              <p class="text-xs text-slate-500 mb-4">Pick the daily notes from one subject and course, untick any blurry or repeated ones, and combine them into one file for the month.</p>
               <div id="mergeFilterBar">
                 <div>
                   <label for="mergeSubject" class="block text-xs font-medium text-slate-600 mb-1">Subject</label>
@@ -1603,7 +1695,7 @@
             <div class="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
               <input id="mergedMonthTitle" type="text" value="Combined_Daily_SEP" class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs flex-1" placeholder="Merged Base Name" />
               <button id="btnMergeSelectedDaily" type="button" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">
-                🔗 Combine Selected into 1 File
+                🔗 Combine into one file
               </button>
             </div>
           </div>
@@ -1611,16 +1703,16 @@
           <!-- Post Custom Announcement -->
           <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col justify-between">
             <div>
-              <h3 class="text-base font-bold text-slate-900 mb-1">📣 Post In-App Department Notice</h3>
-              <p class="text-xs text-slate-500 mb-4">Need to tell juniors which modules are in the internal exam or request missing notes? Post directly to the in-app feed.</p>
+              <h3 class="text-base font-bold text-slate-900 mb-1">📣 Post a notice</h3>
+              <p class="text-xs text-slate-500 mb-4">Tell everyone what's coming up, like which modules are in the internal exam, or ask for missing notes.</p>
               <div class="space-y-3">
                 <input id="annTitleInput" type="text" placeholder="Headline (e.g. 'Sem 1 CS DSC-B Module 3 Notes Needed')" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
-                <textarea id="annBodyInput" rows="3" placeholder="Details for classmates, juniors, or seniors..." class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"></textarea>
+                <textarea id="annBodyInput" rows="3" placeholder="Details for classmates, juniors or seniors (Ctrl+Enter to post)" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"></textarea>
               </div>
             </div>
             <div class="pt-3 border-t border-slate-100 flex justify-end">
               <button id="btnPostAnnouncement" type="button" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition">
-                Post to In-App Feed
+                Post notice
               </button>
             </div>
           </div>
@@ -1633,20 +1725,20 @@
       <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5">
         <div class="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-4">
           <div>
-            <span class="text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">Safe 0-File Test Drive Rollout</span>
-            <h2 class="text-lg font-bold text-slate-900 mt-2">Initialize Your Brand-New "0-File" Test Google Drive</h2>
+            <span class="text-xs font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">Setup</span>
+            <h2 class="text-lg font-bold text-slate-900 mt-2">Connect the app to a Google Drive</h2>
           </div>
         </div>
 
         <!-- 4-Step Quick Setup Guide -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
           <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="font-bold text-indigo-700 mb-1">Step 1: Create 1 Blank Folder</div>
-            <p class="text-slate-600">In your new test Google Drive, create one empty folder (e.g., <code class="bg-white px-1 rounded">Dept_Archive_Test</code>) and copy its Folder ID from the URL.</p>
+            <div class="font-bold text-indigo-700 mb-1">Step 1: Pick a folder (optional)</div>
+            <p class="text-slate-600">Already have a notes folder? Copy its ID from the address bar. No folder yet? Skip this, and setup makes one called DEPT NOTES ARCHIVE next to your Sheet.</p>
           </div>
           <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="font-bold text-indigo-700 mb-1">Step 2: Paste Folder ID Below</div>
-            <p class="text-slate-600">Paste that Folder ID into Box 1 below and click <strong>Update Script</strong>—it injects directly into <code class="bg-white px-1 rounded">ROOT_FOLDER_ID</code>.</p>
+            <div class="font-bold text-indigo-700 mb-1">Step 2: Paste the folder ID</div>
+            <p class="text-slate-600">Paste it into box 1 below and click <strong>Update Script</strong>. That puts it into the code as <code class="bg-white px-1 rounded">ROOT_FOLDER_ID</code>. Already live? Click <strong>Apply to Everyone</strong> instead to switch the connected script to that folder with no redeploy.</p>
           </div>
           <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
             <div class="font-bold text-indigo-700 mb-1">Step 3: Run <code class="bg-white px-1 rounded">setup()</code> Once</div>
@@ -1660,7 +1752,7 @@
 
         <!-- Sheet-controlled options (new, additive) -->
         <div id="optionsConfigNote" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
-          <div class="font-bold text-indigo-700">⬡ Sheet-controlled options — no code edits needed</div>
+          <div class="font-bold text-indigo-700">⬡ Change the lists from the Sheet, no code needed</div>
           <p class="text-slate-600">In the Sheet's <code class="bg-white px-1 rounded">CONFIG</code> tab, edit the <strong>Value</strong> column to add or remove choices any time: <code class="bg-white px-1 rounded">SUBJECTS</code> (optionally <code class="bg-white px-1 rounded">CS=Computer Science</code>), <code class="bg-white px-1 rounded">COURSES</code>, <code class="bg-white px-1 rounded">NO_COURSE_SUBJECTS</code>, <code class="bg-white px-1 rounded">ECO_COURSES</code>, <code class="bg-white px-1 rounded">ECO_ONLY_COURSES</code>. Every device picks the change up on its next sync (within about 45 seconds). Modules <strong>1–6</strong> and months <strong>JUL–APR</strong> are fixed in the app. Old files stay where they are, and anything outside those lists still shows under “All”.</p>
           <p class="text-slate-600">After pasting the new code below: run <strong>setup()</strong> once (it adds the missing CONFIG rows), then <strong>Deploy → Manage deployments → pencil → New version → Deploy</strong>.</p>
           <p id="optionsLiveReadout" class="font-mono text-slate-700">◈ Waiting for the first sync…</p>
@@ -1669,18 +1761,21 @@
         <!-- Interactive Folder ID Injector & Live Web App Connector -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
           <div>
-            <label for="inputTestFolderId" class="block text-xs font-semibold text-slate-700 mb-1">1. Root Folder ID <span class="font-normal text-slate-500">(only used to edit the code below)</span>:</label>
+            <label for="inputTestFolderId" class="block text-xs font-semibold text-slate-700 mb-1">1. Root Folder ID <span class="font-normal text-slate-500">(Update Script fills in the code below; Apply to Everyone switches the live Drive folder)</span>:</label>
             <div class="flex gap-2">
-              <input id="inputTestFolderId" type="text" value="PASTE_YOUR_NEW_TEST_FOLDER_ID_HERE" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:border-indigo-500 focus:outline-none" />
+              <input id="inputTestFolderId" type="text" value="" class="flex-1 min-w-0 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:border-indigo-500 focus:outline-none" />
               <button id="btnInjectFolderId" type="button" class="px-3 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition whitespace-nowrap">
                 Update Script
+              </button>
+              <button id="btnApplyFolderLive" type="button" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition whitespace-nowrap">
+                Apply to Everyone
               </button>
             </div>
           </div>
           <div>
-            <label for="inputWebAppUrl" class="block text-xs font-semibold text-slate-700 mb-1">2. Deployed Web App URL <span class="font-normal text-slate-500">(decides which script every device connects to — locked; press Change to switch it)</span>:</label>
+            <label for="inputWebAppUrl" class="block text-xs font-semibold text-slate-700 mb-1">2. Deployed Web App URL <span class="font-normal text-slate-500">(the script every device connects to; press Change to switch)</span>:</label>
             <div class="flex gap-2">
-              <input id="inputWebAppUrl" type="url" readonly value="https://script.google.com/macros/s/AKfycbwUVbW6ERtKmEF-rZJD-ssO1IPQmyNcsyF6zzUJJOmLd11ZKohOHOjXW7GHVISU4Nlh/exec" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:border-indigo-500 focus:outline-none" />
+              <input id="inputWebAppUrl" type="url" readonly value="" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono bg-white focus:border-indigo-500 focus:outline-none" />
               <button id="btnConnectLiveUrl" type="button" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition whitespace-nowrap">
                 Change
               </button>
@@ -1689,17 +1784,17 @@
         </div>
 
         <div class="bg-emerald-50/60 border border-emerald-200 rounded-2xl p-4 space-y-3 text-xs">
-          <div class="font-bold text-emerald-900">🌐 Shared Settings (applied to every device)</div>
+          <div class="font-bold text-emerald-900">🌐 Settings for every device</div>
           <p id="liveConfigStatus" class="text-slate-700">Not connected to a live Web App yet — refresh the page to reconnect.</p>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Student Join Link (always uses notesgng.github.io/NOTES — opens straight into this Drive on any device)</label>
+            <label class="block font-semibold text-slate-700 mb-1">Join link for students (opens the app already connected to this Drive)</label>
             <div class="flex gap-2">
               <input id="inputShareLink" type="text" readonly class="flex-1 rounded-xl border border-slate-300 px-3 py-2 font-mono bg-white" />
               <button id="btnCopyShareLink" type="button" class="px-3 py-2 rounded-xl bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition whitespace-nowrap">Copy Link</button>
             </div>
           </div>
           <div class="rounded-xl border-2 border-emerald-300 bg-emerald-50 p-3">
-            <label class="block font-bold text-emerald-900 mb-1">✅ Make it work for EVERYONE</label>
+            <label class="block font-bold text-emerald-900 mb-1">✅ Make it work for everyone</label>
             <div class="flex flex-wrap gap-2">
               <button id="btnDownloadEveryoneFile" type="button" class="px-3 py-2 rounded-xl bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition">⬇ Download everyone-ready index.html</button>
               <button id="btnTestEveryone" type="button" class="px-3 py-2 rounded-xl bg-white border border-emerald-400 text-emerald-900 font-semibold hover:bg-emerald-100 transition">🔍 Test uploads end-to-end</button>
@@ -1707,7 +1802,7 @@
             <p id="everyoneStatus" class="mt-2 text-slate-600"></p>
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Permanent GitHub line (do this once, then the plain GitHub link works for everyone)</label>
+            <label class="block font-semibold text-slate-700 mb-1">One-time line for GitHub (after this, the plain GitHub link works for everyone)</label>
             <div class="flex gap-2">
               <input id="inputPermanentLine" type="text" readonly class="flex-1 rounded-xl border border-slate-300 px-3 py-2 font-mono bg-white" />
               <button id="btnCopyPermanentLine" type="button" class="px-3 py-2 rounded-xl bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition whitespace-nowrap">Copy Line</button>
@@ -1719,7 +1814,7 @@
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 class="text-sm font-bold text-slate-900">Complete <code class="text-indigo-600">Code.gs</code> (Includes <code class="text-emerald-700">setup()</code> + <code class="text-emerald-700">onFormSubmit</code> + <code class="text-emerald-700">onSheetEdit</code> + <code class="text-emerald-700">doGet/doPost</code> Web App API)</h3>
-            <p class="text-xs text-slate-500">Works from 0 files, supports both your Google Form fail-safe AND this Web App simultaneously.</p>
+            <p class="text-xs text-slate-500">Works from an empty Drive, and with both the Google Form and this app at the same time.</p>
           </div>
           <div class="flex items-center gap-2">
             <button id="btnCopyScript" type="button" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">
@@ -1735,6 +1830,32 @@
   </main>
 
   <footer class="hud-footer" aria-hidden="true">⬡ 10.0457° N · 76.3175° E</footer>
+
+  <!-- ==================== MODAL: JOIN CLASS / SET BATCH ====================
+       Soft, convenience-only: this is not a security gate. Its only job is to stamp every
+       upload with the right batch automatically, so nobody has to type a year by hand. -->
+  <div id="batchModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full border border-slate-200 shadow-xl overflow-hidden">
+      <div class="px-5 py-4 bg-slate-50 border-b border-slate-200">
+        <h3 class="font-bold text-base text-slate-900">🎓 Join Your Class</h3>
+        <p class="text-xs text-slate-500 mt-1">Enter your batch's class code once. Every upload from this device is then tagged with it automatically — no more picking a year by hand, no mis-tagged notes.</p>
+      </div>
+      <div class="p-5 space-y-3">
+        <div>
+          <label for="batchCodeInput" class="block text-xs font-semibold text-slate-700 mb-1">Class Code</label>
+          <input id="batchCodeInput" type="text" placeholder="e.g. 2631" class="uppercase w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+          <p id="batchCodeHint" class="text-[11px] text-slate-400 mt-1">Ask your Editor if you don't know it. Any code works — this just keeps your uploads organized, it isn't a lock.</p>
+        </div>
+        <div id="batchKnownList" class="flex flex-wrap gap-1.5"></div>
+      </div>
+      <div class="px-5 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-2">
+        <button id="btnClearBatch" type="button" class="hidden text-xs font-medium text-slate-500 hover:text-rose-600 px-2 py-1.5">Clear saved batch</button>
+        <div class="flex-1"></div>
+        <button id="btnCancelBatch" type="button" class="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">Cancel</button>
+        <button id="btnSaveBatch" type="button" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">Save</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ==================== MODAL: PREVIEW PDF / VIDEO & EDIT PROPERTIES ==================== -->
   <div id="fileModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 hidden items-center justify-center p-4">
@@ -1758,15 +1879,15 @@
 
         <!-- Video-Style Properties Sheet -->
         <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-2 text-xs">
-          <div class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">File Properties (Synced with Google Sheet & Drive Description)</div>
+          <div class="font-bold text-slate-800 uppercase tracking-wider text-[11px]">Details</div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
             <div><span class="text-slate-500">Contributor:</span> <span id="modalContributor" class="font-semibold text-slate-800"></span></div>
-            <div><span class="text-slate-500">Time Period / Month:</span> <span id="modalMonth" class="font-semibold text-slate-800"></span></div>
-            <div><span class="text-slate-500">Likes & Rank:</span> <span id="modalLikes" class="font-semibold text-indigo-700"></span></div>
-            <div><span class="text-slate-500">7-Day Grace Shield:</span> <span id="modalShield" class="font-semibold"></span></div>
+            <div><span class="text-slate-500">Month:</span> <span id="modalMonth" class="font-semibold text-slate-800"></span></div>
+            <div><span class="text-slate-500">Likes:</span> <span id="modalLikes" class="font-semibold text-indigo-700"></span></div>
+            <div><span class="text-slate-500">New-file protection:</span> <span id="modalShield" class="font-semibold"></span></div>
           </div>
           <div class="pt-1 border-t border-slate-200/70">
-            <span class="text-slate-500">Searchable Topics / Tags:</span>
+            <span class="text-slate-500">Topics:</span>
             <p id="modalTopics" class="font-medium text-slate-900 mt-0.5"></p>
           </div>
         </div>
@@ -1774,8 +1895,32 @@
         <!-- Editor Quick-Reorganize / Property Editor inside Modal -->
         <div id="modalEditorBlock" class="hidden bg-indigo-50/60 rounded-xl p-4 border border-indigo-200/80 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-indigo-900">✏️ Editor Quick Reorganize / Edit Properties</span>
-            <span class="text-[11px] text-indigo-700">Updates Drive Folder & Sheet Row Instantly</span>
+            <span class="text-xs font-bold text-indigo-900">✏️ Edit or move this note</span>
+            <span class="text-[11px] text-indigo-700">Moves it in Drive and the Sheet</span>
+          </div>
+          <div class="bg-white/70 rounded-lg p-2.5 border border-indigo-200/60 space-y-2">
+            <p class="text-[11px] text-indigo-700 font-medium">📦 Move this note to a different semester or subject — e.g. a senior's note that actually fits a junior's current sem better.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+              <div>
+                <label class="block text-slate-600 mb-1 font-medium">Move Sem</label>
+                <select id="editModalSem" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5">
+                  <option value="SEM1">SEM 1</option>
+                  <option value="SEM2">SEM 2</option>
+                  <option value="SEM3">SEM 3</option>
+                  <option value="SEM4">SEM 4</option>
+                  <option value="SEM5">SEM 5</option>
+                  <option value="SEM6">SEM 6</option>
+                  <option value="SEM7">SEM 7</option>
+                  <option value="SEM8">SEM 8</option>
+                  <option value="SEM9">SEM 9</option>
+                  <option value="SEM10">SEM 10</option>
+                </select>
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-slate-600 mb-1 font-medium">Move Subject</label>
+                <select id="editModalSubject" class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5"></select>
+              </div>
+            </div>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
             <div>
@@ -1817,12 +1962,12 @@
             </div>
           </div>
           <div>
-            <label class="block text-slate-600 mb-1 text-xs font-medium">Update Searchable Topics / PYQ Year Info</label>
+            <label class="block text-slate-600 mb-1 text-xs font-medium">Topics (add the exam year for question papers)</label>
             <input id="editModalTopics" type="text" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs" />
           </div>
           <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
             <button id="btnDeleteFileModal" type="button" class="px-3 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-semibold transition">
-              🗑️ Move to _Overflow / Delete
+              🗑️ Remove
             </button>
             <button id="btnSaveFilePropsModal" type="button" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition">
               💾 Save & Move in Drive
@@ -1834,10 +1979,21 @@
   </div>
 
   <script>
-    // ==================== STATE & DEMO / 0-FILE DATA ====================
+    // ╔══════════════════════ CONNECTION SETTINGS (search for: CONNECTION SETTINGS) ══════════════════════╗
+    // These three lines are the ONLY place the app's links live. The Setup boxes, the join link, the
+    // GitHub line and the generated Apps Script all read from them, so change a value here and nothing else.
     const SITE_URL = 'https://notesgng.github.io/NOTES/';   // the permanent public address of this app (used for join links and for building the everyone-ready file)
     const DEFAULT_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwUVbW6ERtKmEF-rZJD-ssO1IPQmyNcsyF6zzUJJOmLd11ZKohOHOjXW7GHVISU4Nlh/exec';        // the live Web App every device connects to by default (the Editor can change it from the Setup tab)
+    const DEFAULT_ROOT_FOLDER_ID = '';   // the Drive folder ID (or folder link) written into the generated Apps Script; leave '' to let setup make a DEPT NOTES ARCHIVE folder
+    // ╚═══════════════════════════════════════════════════════════════════════════════════════════════════╝
+    const FOLDER_ID_PLACEHOLDER = 'PASTE_YOUR_NEW_TEST_FOLDER_ID_HERE';
     const SUBJECTS_NO_COURSE = ['ENG', 'FRENCH'];
+    // Bump this by 1 whenever the generated Apps Script code changes. The Setup tab writes it into the
+    // script, the script reports it back on ?action=health, and the Editor tab warns if they don't match.
+    const EXPECTED_SCRIPT_VERSION = 6;
+    // Sems that use the shared SUBJECTS / COURSES lists until the Editor sets them up. Every other sem
+    // (4 to 10) has NO subjects until it's set up in Course Structure. Change this list to change that.
+    const SHARED_LIST_SEMS = ['1', '2', '3'];
     const POINTS_MAP = {
       'NOTES': 1,
       'Q.PAPERS': 2,
@@ -1864,12 +2020,19 @@
       return out;
     }
 
+    // "Does this subject have no course layer in this sem?" Uses the Editor's Course Structure when it's loaded,
+    // otherwise the shared no-course list (ENG, FRENCH…).
+    function noCourseFor(subject, sem) {
+      if (window.DeptOptions && window.DeptOptions.isNoCourse) return window.DeptOptions.isNoCourse(subject, sem);
+      return SUBJECTS_NO_COURSE.includes(subject);
+    }
+
     function canonItem(it) {
       const o = Object.assign({}, it);
       o.name = UP(o.name) || 'ANON';
       o.month = UP(o.month);
       o.subject = UP(o.subject);
-      o.course = SUBJECTS_NO_COURSE.includes(o.subject) ? 'NONE' : (UP(o.course) || 'DSC-B');
+      o.course = UP(o.course) || (SUBJECTS_NO_COURSE.includes(o.subject) ? 'NONE' : 'DSC-B');
       o.contentType = UP(o.contentType) || 'NOTES';
       o.module = UP(o.module) || 'MODULE';
       o.scope = UP(o.scope) === 'DAILY' ? 'DAILY' : 'COMPLETE';
@@ -1878,13 +2041,14 @@
       o.topics = String(o.topics == null ? '' : o.topics);
       o.size = o.size || '';
       o.fileUrl = o.fileUrl || '';
+      o.batch = UP(o.batch || '');
       return o;
     }
 
     const state = {
       activeTab: 'viewBrowse',
       liveWebAppUrl: '',
-      testFolderId: 'PASTE_YOUR_NEW_TEST_FOLDER_ID_HERE',
+      testFolderId: cleanFolderIdOrPlaceholder(DEFAULT_ROOT_FOLDER_ID),
       activeModalFileId: null,
       editorUnlocked: false,
       editorPin: '',
@@ -1892,11 +2056,14 @@
       likedIds: {},
       files: [],
       pending: [],
-      announcements: []
+      announcements: [],
+      batch: null            // { code, label, startYear } — set by "Join Class"; stays null until the student does that once. Never a hard gate: null just means uploads go untagged and every file stays visible.
     };
 
-    // Which Web App a device starts from: #hub= join link > DEFAULT_WEBAPP_URL (set once in this file on GitHub) > last one used on this device.
-    // From that starting point the app follows any "forward" the Editor applied, so a plain GitHub link always ends up on the current Drive.
+    // Which Web App a device starts from: #hub= join link > last one used on this device > DEFAULT_WEBAPP_URL.
+    // If DEFAULT_WEBAPP_URL was edited since this device last loaded the page, the new default wins instead, so editing that
+    // one line still moves everyone. From the starting point the app follows any "forward" the Editor applied, and the
+    // other of saved/default is kept as a backup, so deleting an old deployment never strands a device.
     let savedWebAppUrl = '';
     let fallbackWebAppUrl = '';
     try {
@@ -1904,6 +2071,11 @@
       if (savedLikes) state.likedIds = JSON.parse(savedLikes);
       const savedUrl = localStorage.getItem('deptnotes_live_url');
       if (savedUrl && isValidWebAppUrl(savedUrl)) savedWebAppUrl = savedUrl;
+      const savedBatch = localStorage.getItem('deptnotes_batch');
+      if (savedBatch) {
+        const b = JSON.parse(savedBatch);
+        if (b && b.code) state.batch = { code: String(b.code).toUpperCase(), label: String(b.label || b.code), startYear: Number.isFinite(b.startYear) ? b.startYear : null };
+      }
     } catch (e) {}
 
     try {
@@ -1914,10 +2086,17 @@
         const hu = decodeURIComponent(hashStr.slice(hubIdx + 4).split('&')[0]);
         if (isValidWebAppUrl(hu)) startUrl = hu;
       }
-      if (!startUrl && isValidWebAppUrl(DEFAULT_WEBAPP_URL)) startUrl = DEFAULT_WEBAPP_URL;
+      const defaultOk = isValidWebAppUrl(DEFAULT_WEBAPP_URL);
+      let seenDefault = '';
+      try { seenDefault = localStorage.getItem('deptnotes_default_url') || ''; } catch (e) {}
+      const defaultChanged = defaultOk && seenDefault !== DEFAULT_WEBAPP_URL;
+      if (!startUrl && savedWebAppUrl && !defaultChanged) startUrl = savedWebAppUrl;
+      if (!startUrl && defaultOk) startUrl = DEFAULT_WEBAPP_URL;
       if (!startUrl) startUrl = savedWebAppUrl;
       state.liveWebAppUrl = startUrl;
       if (savedWebAppUrl && savedWebAppUrl !== startUrl) fallbackWebAppUrl = savedWebAppUrl;
+      else if (defaultOk && DEFAULT_WEBAPP_URL !== startUrl) fallbackWebAppUrl = DEFAULT_WEBAPP_URL;
+      try { if (defaultOk) localStorage.setItem('deptnotes_default_url', DEFAULT_WEBAPP_URL); } catch (e) {}
     } catch (e) {}
 
     // ==================== HELPER FUNCTIONS ====================
@@ -1945,7 +2124,7 @@
     function buildDrivePath(item) {
       const yr = semToYearFolder(item.sem);
       const semLabel = item.sem.toUpperCase().replace('SEM', 'SEM ');
-      const noCourse = SUBJECTS_NO_COURSE.includes(item.subject);
+      const noCourse = !item.course || item.course === 'NONE';
       let parts = [yr, semLabel, item.subject];
       if (!noCourse && item.course && item.course !== 'NONE') {
         parts.push(item.course);
@@ -2004,6 +2183,21 @@
     }
 
     // Asks the Web App if uploads can really work, and tells the person plainly if not (instead of files vanishing).
+    // Shows the Editor-tab warning when the deployed script is older than this page expects.
+    // A script from before versioning reports no scriptVersion at all, which counts as out of date.
+    function updateScriptVersionBanner(h) {
+      const banner = document.getElementById('scriptVersionBanner');
+      if (!banner) return;
+      const have = h && Number(h.scriptVersion);
+      if (!h || have >= EXPECTED_SCRIPT_VERSION) { banner.classList.add('hidden'); return false; }
+      document.getElementById('scriptVersionDetail').textContent = (have
+        ? 'The deployed script is version ' + have + '; this app needs version ' + EXPECTED_SCRIPT_VERSION + '.'
+        : 'The deployed script is from before batches and per-semester course structure.') +
+        ' Until you redeploy, Save Structure, batch tags on uploads and moving notes between sems won\'t work. Everything else keeps working.';
+      banner.classList.remove('hidden');
+      return true;
+    }
+
     async function checkUploadHealth() {
       const banner = document.getElementById('uploadHealthBanner');
       if (!banner) return;
@@ -2011,6 +2205,7 @@
       try {
         const res = await fetch(state.liveWebAppUrl + '?action=health', { redirect: 'follow' });
         const h = await res.json();
+        updateScriptVersionBanner(h);
         if (h && h.problems && h.recordIds === true) {
           if (h.ok) { banner.classList.add('hidden'); return; }
           banner.innerHTML = '⚠️ Uploads may not work yet: ' + h.problems.map(escapeHtmlSafe).join(' • ');
@@ -2114,6 +2309,10 @@
       return s;
     }
 
+    function cleanFolderIdOrPlaceholder(raw) {
+      return cleanFolderId(raw) || FOLDER_ID_PLACEHOLDER;
+    }
+
     let setupGateShown = false;
     function applySetupGate() {
       const on = canSeeSetup();
@@ -2124,11 +2323,13 @@
       }
     }
 
+    let liveRootFolderId = ''; // the folder ID the deployed script reports, used to warn before copying a mismatched script
     async function refreshLiveConfig() {
       const el = document.getElementById('liveConfigStatus');
       if (!state.liveWebAppUrl) { el.textContent = 'Not connected to a live Web App yet — refresh the page to reconnect.'; return; }
       const res = await postToLiveDrive({ action: 'getConfig' }, true);
       if (res && res.ok) {
+        liveRootFolderId = String(res.rootFolderId || '');
         el.textContent = 'The connected script uses Root Folder: ' + (res.rootFolderName || '(unknown)') + ' — ID ' + res.rootFolderId + (res.forwardUrl ? ' • it forwards everyone to a newer Web App' : '');
         const box = document.getElementById('inputTestFolderId');
         if (res.rootFolderId && !String(res.rootFolderId).startsWith('PASTE_') && (!box.value.trim() || box.value.startsWith('PASTE_'))) {
@@ -2141,7 +2342,9 @@
       }
     }
 
-    const EDITOR_ACTIONS = ['approve', 'reject', 'editProps', 'delete', 'verifyPin', 'getConfig', 'setForwardUrl', 'postNotice', 'deleteNotice'];
+    // Actions that need the Editor PIN. This ONE list is used by the app (to attach the PIN) AND written into the
+    // generated Apps Script (to check it), so the two can never disagree. Add new editor actions here only.
+    const EDITOR_ACTIONS = ['approve', 'reject', 'editProps', 'delete', 'verifyPin', 'getConfig', 'setForwardUrl', 'setRootFolder', 'postNotice', 'deleteNotice', 'saveStructure'];
 
     function lockEditor() {
       state.editorUnlocked = false;
@@ -2172,6 +2375,10 @@
           lockEditor();
           showToast('Wrong Editor PIN — console locked again.', 'warn');
         }
+        // An older Apps Script doesn't know newer actions. Say what to do instead of a bare "Unknown action".
+        if (out && out.ok === false && out.error === 'Unknown action') {
+          out.error = 'your Apps Script is out of date. Copy the new code from ⚙️ Setup, paste it into Apps Script, run setup, then Deploy → New version.';
+        }
         return out;
       } catch (err) {
         if (!silentError) {
@@ -2191,7 +2398,7 @@
       const month = document.getElementById('filterMonth').value;
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
 
-      const noCourse = SUBJECTS_NO_COURSE.includes(subject);
+      const noCourse = subject !== 'ALL' && noCourseFor(subject, sem);
       document.getElementById('courseFilterWrapper').style.opacity = noCourse ? '0.45' : '1';
 
       const yr = sem === 'ALL' ? 'Years 1–5' : semToYearFolder(sem);
@@ -2207,6 +2414,7 @@
       if (type !== 'ALL') filtered = filtered.filter(f => f.contentType === type);
       if (mod !== 'ALL') filtered = filtered.filter(f => f.module === mod);
       if (month !== 'ALL') filtered = filtered.filter(f => f.month === month);
+      filtered = filtered.filter(matchesBatchFilter);
 
       if (query) {
         filtered = filtered.filter(f =>
@@ -2266,6 +2474,7 @@
                   ${f.sem.toUpperCase()} • ${esc(f.subject)}${f.course !== 'NONE' ? ' (' + f.course + ')' : ''}
                 </span>
                 ${f.scope === 'DAILY' ? '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200">📅 Daily Note</span>' : ''}
+                ${f.batch ? '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-200">🎓 ' + esc(f.batch) + '</span>' : ''}
               </div>
               <span class="text-[11px] font-mono text-slate-400">#${idx + 1}</span>
             </div>
@@ -2279,7 +2488,7 @@
             </div>
 
             <div class="bg-slate-50 rounded-xl p-2.5 border border-slate-100 text-xs space-y-1">
-              <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Properties / Topics Covered:</div>
+              <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Topics covered:</div>
               <p class="text-slate-700 font-medium line-clamp-2">${esc(f.topics)}</p>
             </div>
 
@@ -2347,18 +2556,33 @@
     }
 
     // ==================== UPLOAD FORM LOGIC ====================
+    // True when the chosen sem has no subjects yet (not set up in Course Structure).
+    function semHasNoSubjects(sem) {
+      return !!(window.DeptOptions && window.DeptOptions.get && window.DeptOptions.get() &&
+        !window.DeptOptions.subjectsForSem(sem).codes.length);
+    }
+
     function updateUploadPreview() {
+      const semEmpty = semHasNoSubjects(document.getElementById('upSem').value);
+      const note = document.getElementById('upSemNotSetUp');
+      if (note) {
+        note.textContent = semEmpty ? document.getElementById('upSem').value.replace('SEM', 'SEM ') + ' isn\'t set up yet. Ask your Editor to add its subjects in Course Structure.' : '';
+        note.classList.toggle('hidden', !semEmpty);
+      }
+      if (semEmpty) { const cs = document.getElementById('upCourse'); if (cs.value !== '') cs.value = ''; }
+      const submit = document.getElementById('btnSubmitUpload');
+      if (submit && !submit.textContent.includes('Uploading')) submit.disabled = semEmpty;
       const rawName = UP(document.getElementById('upName').value) || 'ANON';
       const month = document.getElementById('upMonth').value;
       const sem = document.getElementById('upSem').value;
       const subject = document.getElementById('upSubject').value;
-      const noCourse = SUBJECTS_NO_COURSE.includes(subject);
+      const noCourse = noCourseFor(subject, sem);
       document.getElementById('upCourseWrapper').style.opacity = noCourse ? '0.4' : '1';
 
-      const allowedCourses = (window.DeptOptions && window.DeptOptions.allowedCourses) ? window.DeptOptions.allowedCourses(subject) : (subject === 'ECO' ? ['DSC-A', 'DSC-B'] : ['DSC-B', 'DSC-C', 'MDC']);
+      const allowedCourses = (window.DeptOptions && window.DeptOptions.allowedCourses) ? window.DeptOptions.allowedCourses(subject, sem) : (subject === 'ECO' ? ['DSC-A', 'DSC-B'] : ['DSC-B', 'DSC-C', 'MDC']);
       const courseSel = document.getElementById('upCourse');
       Array.from(courseSel.options).forEach(o => { o.disabled = !allowedCourses.includes(o.value); o.hidden = o.disabled; });
-      if (!allowedCourses.includes(courseSel.value)) courseSel.value = allowedCourses[0];
+      if (allowedCourses.length && !allowedCourses.includes(courseSel.value)) courseSel.value = allowedCourses[0];
 
       const course = noCourse ? 'NONE' : document.getElementById('upCourse').value;
       const contentType = document.getElementById('upType').value;
@@ -2476,7 +2700,7 @@
       if (state.pending.length === 0) {
         pList.innerHTML = `
           <div class="p-6 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500">
-            🎉 Pending Review is completely clear! Upload a file in "⬆️ Share Notes" to test 1-tap approval.
+            🎉 Nothing waiting for approval.
           </div>
         `;
       } else {
@@ -2521,7 +2745,7 @@
       dList.innerHTML = '';
 
       if (dailyFiles.length === 0) {
-        dList.innerHTML = `<p class="text-xs text-slate-400 italic p-2">No unmerged Daily notes currently in archive.</p>`;
+        dList.innerHTML = `<p class="text-xs text-slate-400 italic p-2">No daily notes to merge yet.</p>`;
       } else {
         dailyFiles.forEach(df => {
           const item = document.createElement('label');
@@ -2612,7 +2836,10 @@
         `;
       }
 
+      document.getElementById('editModalSem').value = f.sem || 'SEM1';
+      document.getElementById('editModalSubject').value = f.subject || 'CS';
       document.getElementById('editModalCourse').value = f.course || 'DSC-B';
+      if (window.DeptOptions) window.DeptOptions.cascadeEditModal(f.course || 'DSC-B');
       document.getElementById('editModalModule').value = f.module || 'MODULE';
       document.getElementById('editModalMonth').value = f.month || 'SEP';
       document.getElementById('editModalTopics').value = f.topics || '';
@@ -2633,17 +2860,18 @@
 
     // ==================== UPGRADED GOOGLE APPS SCRIPT GENERATOR (ZERO REGEX ESCAPE HAZARDS) ====================
     function generateAppsScriptCode(rootFolderId) {
-      const cleanId = (rootFolderId || 'PASTE_YOUR_NEW_TEST_FOLDER_ID_HERE').trim();
+      const cleanId = (rootFolderId || FOLDER_ID_PLACEHOLDER).trim();
       const lines = [
         '// After pasting new code: Deploy > Manage deployments > pencil icon > Version: New version > Deploy (keeps the SAME URL).',
         'const ROOT_FOLDER_ID = "' + cleanId + '";',
+        'const SCRIPT_VERSION = ' + EXPECTED_SCRIPT_VERSION + '; // the app compares this to warn the Editor when the deployed script is out of date',
         'const PENDING_FOLDER_NAME = "🕓 PENDING REVIEW";',
         'const OVERFLOW_FOLDER_NAME = "_OVERFLOW";',
         'const CONFIG_SHEET_NAME = "CONFIG";',
         '// Two SEPARATE tabs: (1) the upload/form-responses tab and (2) the CONFIG tab (PIN + settings).',
         '// Leave UPLOADS_SHEET_NAME empty to auto-detect the form tab. Only fill it if you have several form tabs, e.g. "Form Responses 1".',
         'const UPLOADS_SHEET_NAME = "";',
-        'const CONFIG_KEYS = ["EDITOR_PIN", "MAX_FILES_PER_MODULE", "NEW_FILE_GRACE_DAYS", "SUBJECTS", "COURSES", "MODULES", "MONTHS", "NO_COURSE_SUBJECTS", "ECO_COURSES", "ECO_ONLY_COURSES"];',
+        'const CONFIG_KEYS = ["EDITOR_PIN", "MAX_FILES_PER_MODULE", "NEW_FILE_GRACE_DAYS", "SUBJECTS", "COURSES", "MODULES", "MONTHS", "NO_COURSE_SUBJECTS", "ECO_COURSES", "ECO_ONLY_COURSES", "BATCHES", "STRUCTURE"];',
         '',
         'const SUBJECTS_NO_COURSE_LAYER = ["ENG", "FRENCH"];',
         'const ECO_COURSES = ["DSC-A", "DSC-B"];',
@@ -2701,7 +2929,8 @@
         '  "Topics",',
         '  "Approved Timestamp",',
         '  "Upload Scope",',
-        '  "Record ID"',
+        '  "Record ID",',
+        '  "Batch"',
         '];',
         '',
         '// Every data row carries a permanent Record ID in its own column. The app and the script find a file by this ID,',
@@ -2710,7 +2939,7 @@
         'const RECORD_ID_HEADER = "Record ID";',
         'const ROW_ACTIONS = ["approve", "reject", "like", "editProps", "delete"];',
         '',
-        'const EDITOR_ACTIONS = ["approve", "reject", "editProps", "delete", "verifyPin", "getConfig", "setForwardUrl", "postNotice", "deleteNotice"];',
+        'const EDITOR_ACTIONS = ' + JSON.stringify(EDITOR_ACTIONS) + '; // written from the app\'s own list so they always match',
         '',
         '// ================= SETUP =================',
         'function setup() {',
@@ -2775,7 +3004,8 @@
         '    ScriptApp.newTrigger("onSheetChange").forSpreadsheet(ss).onChange().create();',
         '  }',
         '',
-        '  try { SpreadsheetApp.getUi().alert("Setup complete! Upload tab and CONFIG tab are now separate, Year 1-5 folders ready, and triggers installed."); } catch (e) {}',
+        '  const folderNote = PropertiesService.getScriptProperties().getProperty("ROOT_FOLDER_NOTE");',
+        '  try { SpreadsheetApp.getUi().alert("Setup complete! Upload tab and CONFIG tab are separate, Year 1-5 folders are ready, and triggers are installed." + (folderNote ? "\\n\\n" + folderNote + "." : "")); } catch (e) {}',
         '}',
         '',
         'function onOpen() {',
@@ -3075,6 +3305,7 @@
         '      contentType: c.contentType,',
         '      module: c.moduleLabel,',
         '      scope: normalizeScope(idx("Upload Scope") > -1 ? row[idx("Upload Scope")] : ""),',
+        '      batch: idx("Batch") > -1 ? clean(row[idx("Batch")]) : "",',
         '      topics: idx("Topics") > -1 ? (clean(row[idx("Topics")]) || "General Notes") : "General Notes",',
         '      likes: idx("Likes") > -1 ? Number(row[idx("Likes")] || 0) : 0,',
         '      daysOld: daysOld,',
@@ -3135,6 +3366,25 @@
         '      return jsonResponse({ ok: true });',
         '    }',
         '',
+        '    // Points this same script (same Web App URL) at a different Drive folder, so every device sees it on its next sync.',
+        '    if (body.action === "setRootFolder") {',
+        '      const newId = clean(body.folderId);',
+        '      let folder;',
+        '      try {',
+        '        folder = DriveApp.getFolderById(newId);',
+        '        folder.getName();',
+        '      } catch (x) {',
+        '        return jsonResponse({ ok: false, error: "This script\'s Google account cannot open that folder" });',
+        '      }',
+        '      const props = PropertiesService.getScriptProperties();',
+        '      props.setProperty("ROOT_FOLDER_ID", newId);',
+        '      const fromCode = clean(ROOT_FOLDER_ID);',
+        '      if (fromCode && fromCode.indexOf("PASTE_") !== 0) props.setProperty("ROOT_FOLDER_ID_IN_CODE", fromCode);',
+        '      props.deleteProperty("ROOT_FOLDER_NOTE");',
+        '      ensureFolderStructure(folder);',
+        '      return jsonResponse({ ok: true, rootFolderId: newId, rootFolderName: folder.getName() });',
+        '    }',
+        '',
         '    if (body.action === "postNotice") {',
         '      const noticeTitle = clean(body.title).substring(0, 100);',
         '      const noticeBody = clean(body.body).substring(0, 300);',
@@ -3149,6 +3399,19 @@
         '',
         '    if (body.action === "deleteNotice") {',
         '      saveNotices(readNotices().filter(function(n) { return n.id !== String(body.id); }));',
+        '      return jsonResponse({ ok: true });',
+        '    }',
+        '',
+        '    if (body.action === "saveStructure") {',
+        '      let parsed;',
+        '      try { parsed = JSON.parse(String(body.structure || "{}")); } catch (parseErr) {',
+        '        return jsonResponse({ ok: false, error: "Structure must be valid JSON" });',
+        '      }',
+        '      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {',
+        '        return jsonResponse({ ok: false, error: "Invalid structure" });',
+        '      }',
+        '      setConfigValue("STRUCTURE", JSON.stringify(parsed));',
+        '      OPTIONS_CACHE = null;',
         '      return jsonResponse({ ok: true });',
         '    }',
         '',
@@ -3191,6 +3454,7 @@
         '      if (idx("Likes") > 0) newRow[idx("Likes") - 1] = 0;',
         '      if (idx("Topics") > 0) newRow[idx("Topics") - 1] = clean(body.topics);',
         '      if (idx("Upload Scope") > 0) newRow[idx("Upload Scope") - 1] = normalizeScope(body.scope);',
+        '      if (idx("Batch") > 0) newRow[idx("Batch") - 1] = up(body.batch);',
         '',
         '      sheet.appendRow(newRow);',
         '      SpreadsheetApp.flush();',
@@ -3225,9 +3489,15 @@
         '    }',
         '',
         '    if (body.action === "editProps" && targetRow >= 2) {',
+        '      // sem / subject let the Editor move a note into a different semester or subject entirely (e.g. a senior\'s note that fits a junior\'s current sem better) - Drive is re-filed to match on the next processApprovedFiles() below.',
+        '      if (body.sem) sheet.getRange(targetRow, COL.SEM + 1).setValue(body.sem);',
+        '      if (body.subject) sheet.getRange(targetRow, COL.SUBJECT + 1).setValue(body.subject);',
         '      if (body.course) sheet.getRange(targetRow, COL.COURSE + 1).setValue(body.course);',
         '      if (body.module) sheet.getRange(targetRow, COL.MODULE + 1).setValue(body.module);',
         '      if (body.month) sheet.getRange(targetRow, COL.MONTH + 1).setValue(body.month);',
+        '      if (body.batch !== undefined && idx("Batch") > 0) {',
+        '        sheet.getRange(targetRow, idx("Batch")).setValue(up(body.batch));',
+        '      }',
         '      if (body.topics !== undefined && idx("Topics") > 0) {',
         '        sheet.getRange(targetRow, idx("Topics")).setValue(clean(body.topics));',
         '      }',
@@ -3280,6 +3550,8 @@
         '  out.configSheet = !!getConfigSheet();',
         '  if (!out.configSheet) out.problems.push("CONFIG tab missing - run setup()");',
         '  out.ok = out.problems.length === 0;',
+        '  out.scriptVersion = SCRIPT_VERSION;',
+        '  out.folderNote = PropertiesService.getScriptProperties().getProperty("ROOT_FOLDER_NOTE") || "";',
         '  return out;',
         '}',
         'function jsonResponse(obj) {',
@@ -3379,7 +3651,9 @@
         '    ecoOnlyCourses: ["DSC-A"],',
         '    noCourseSubjects: SUBJECTS_NO_COURSE_LAYER.slice(),',
         '    modules: ["1", "2", "3", "4"],',
-        '    months: ["AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB", "MAR"]',
+        '    months: ["AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB", "MAR"],',
+        '    batches: [],',
+        '    structure: {}',
         '  };',
         '  try {',
         '    const s = getConfigSheet();',
@@ -3411,6 +3685,8 @@
         '          upList(v).forEach(function(x) { const three = x.substring(0, 3); if (three.length === 3 && mo.indexOf(three) === -1) mo.push(three); });',
         '          if (mo.length) opt.months = mo;',
         '        }',
+        '        if (k === "BATCHES") { opt.batches = parseBatches(v); }',
+        '        if (k === "STRUCTURE") { opt.structure = parseStructure(v); }',
         '      });',
         '    }',
         '  } catch (err) {}',
@@ -3418,14 +3694,58 @@
         '  return opt;',
         '}',
         '',
-        'function hasCourseLayer(subject) {',
+        '// "CODE|Label|StartYear; CODE|Label|StartYear" -> [{code,label,startYear}]. Any malformed entry is skipped rather than breaking the whole list.',
+        'function parseBatches(raw) {',
+        '  const out = [];',
+        '  String(raw == null ? "" : raw).split(";").forEach(function(chunk) {',
+        '    const parts = chunk.split("|").map(function(p) { return clean(p); });',
+        '    const code = up(parts[0]);',
+        '    if (!code) return;',
+        '    const label = parts[1] || code;',
+        '    const startYear = parseInt(parts[2], 10);',
+        '    out.push({ code: code, label: label, startYear: isNaN(startYear) ? null : startYear });',
+        '  });',
+        '  return out;',
+        '}',
+        '',
+        '// The Editor\'s Course Structure panel writes this as JSON: { "<semNum>": { subjects: [...], labels: {...}, noCourseSubjects: [...], courses: { SUBJ: [...] } } }.',
+        '// A missing or unparsable value just means every semester keeps using the flat SUBJECTS / COURSES lists above - nothing breaks.',
+        'function parseStructure(raw) {',
+        '  const s = String(raw == null ? "" : raw).trim();',
+        '  if (!s) return {};',
+        '  try {',
+        '    const parsed = JSON.parse(s);',
+        '    return (parsed && typeof parsed === "object" && !Array.isArray(parsed)) ? parsed : {};',
+        '  } catch (err) {',
+        '    return {};',
+        '  }',
+        '}',
+        '',
+        '// semNum is optional - pass it whenever it\'s known so a per-semester override from the Structure panel is honoured; omit it to fall back to the flat global lists.',
+        '// Same rule as the app: if the Editor set this sem up and it lists this subject, the subject has a course',
+        '// layer only if it has courses there. Otherwise the shared NO_COURSE_SUBJECTS list decides.',
+        'function semSubjectCfg(subject, semNum) {',
+        '  const semCfg = semNum != null ? getOptions().structure[String(semNum)] : null;',
+        '  if (!semCfg || !Array.isArray(semCfg.subjects)) return null;',
+        '  return upList(semCfg.subjects.join(",")).indexOf(subject) > -1 ? semCfg : null;',
+        '}',
+        '',
+        'function hasCourseLayer(subject, semNum) {',
+        '  const semCfg = semSubjectCfg(subject, semNum);',
+        '  if (semCfg) return upList(((semCfg.courses || {})[subject] || []).join(",")).length > 0;',
         '  return getOptions().noCourseSubjects.indexOf(subject) === -1;',
         '}',
         '',
-        'function resolveCourse(subject, courseRaw) {',
-        '  if (!hasCourseLayer(subject)) return "NONE";',
+        'function resolveCourse(subject, courseRaw, semNum) {',
+        '  if (!hasCourseLayer(subject, semNum)) return "NONE";',
         '  const opt = getOptions();',
-        '  let allowed = subject === "ECO" ? opt.ecoCourses : opt.courses.filter(function(c) { return opt.ecoOnlyCourses.indexOf(c) === -1; });',
+        '  const semCfg = semSubjectCfg(subject, semNum);',
+        '  let allowed;',
+        '  if (semCfg) {',
+        '    allowed = upList(((semCfg.courses || {})[subject] || []).join(","));',
+        '  } else {',
+        '    allowed = subject === "ECO" ? opt.ecoCourses : opt.courses.filter(function(c) { return opt.ecoOnlyCourses.indexOf(c) === -1; });',
+        '  }',
         '  if (!allowed.length) allowed = opt.courses.length ? opt.courses : DEFAULT_COURSES;',
         '  const key = normalizeText(courseRaw);',
         '  for (let i = 0; i < allowed.length; i++) {',
@@ -3470,8 +3790,8 @@
         '    sem: "SEM " + semNum,',
         '    year: "YEAR " + yearNum,',
         '    subject: subj,',
-        '    hasCourse: hasCourseLayer(subj),',
-        '    course: resolveCourse(subj, course),',
+        '    hasCourse: hasCourseLayer(subj, semNum),',
+        '    course: resolveCourse(subj, course, semNum),',
         '    contentType: normalizeContentType(contentType),',
         '    modNum: modNum,',
         '    moduleLabel: modNum ? "MODULE " + modNum : "MODULE",',
@@ -3618,6 +3938,19 @@
         '  return CONFIG_KEYS.indexOf(up(row[0])) > -1;',
         '}',
         '',
+        '// Writes one CONFIG row by key - updates it in place if the key already has a row, appends a new row otherwise.',
+        'function setConfigValue(key, value) {',
+        '  const cfg = getConfigSheet() || ensureConfigSheet(getMainSheet());',
+        '  const lastRow = cfg.getLastRow();',
+        '  for (let r = 1; r <= lastRow; r++) {',
+        '    if (up(String(cfg.getRange(r, 1).getValue())) === up(key)) {',
+        '      cfg.getRange(r, 2).setValue(value);',
+        '      return;',
+        '    }',
+        '  }',
+        '  cfg.appendRow([key, value]);',
+        '}',
+        '',
         'function ensureConfigSheet(mainSheet) {',
         '  const ss = SpreadsheetApp.getActiveSpreadsheet();',
         '  let cfg = getConfigSheet();',
@@ -3655,7 +3988,9 @@
         '    ["MONTHS", "AUG, SEP, OCT, NOV, DEC, JAN, FEB, MAR", "Months shown in the app, in this order (3 letters each)."],',
         '    ["NO_COURSE_SUBJECTS", "ENG, FRENCH", "Subjects with no course layer (files go by month, not by module)."],',
         '    ["ECO_COURSES", "DSC-A, DSC-B", "Courses allowed for ECO."],',
-        '    ["ECO_ONLY_COURSES", "DSC-A", "Courses that only ECO may use (hidden for other subjects)."]',
+        '    ["ECO_ONLY_COURSES", "DSC-A", "Courses that only ECO may use (hidden for other subjects)."],',
+        '    ["BATCHES", "2631|2026-31 Batch|2026", "One class code per batch: CODE|Label|Admission Year (4 digits). Semicolon-separated. Add a new row every intake - this is what the Join Class box reads, and the app uses the year to guess the batch\'s current semester."],',
+        '    ["STRUCTURE", "", "Optional per-semester course map (JSON), edited from the Editor tab\'s Course Structure panel. Leave blank to keep one SUBJECTS/COURSES list for every semester."]',
         '  ];',
         '  defaults.forEach(function(pair) {',
         '    if (!existing[pair[0]]) cfg.appendRow(pair);',
@@ -3693,14 +4028,60 @@
         '  return null;',
         '}',
         '',
+        '// The folder ID typed at the top of this script, or (if that is still the placeholder) the last ID that worked.',
+        '// Whichever folder was changed most recently wins: a NEW ID typed into ROOT_FOLDER_ID above wins once,',
+        '// and after that the app\'s "Apply to Everyone" folder button (saved in Script Properties) wins.',
         'function getRootFolderId() {',
-        '  return clean(ROOT_FOLDER_ID);',
+        '  const props = PropertiesService.getScriptProperties();',
+        '  const saved = clean(props.getProperty("ROOT_FOLDER_ID"));',
+        '  const fromCode = clean(ROOT_FOLDER_ID);',
+        '  const codeIsReal = fromCode && fromCode.indexOf("PASTE_") !== 0;',
+        '  if (codeIsReal && clean(props.getProperty("ROOT_FOLDER_ID_IN_CODE")) !== fromCode) return fromCode;',
+        '  return saved || (codeIsReal ? fromCode : "");',
         '}',
         '',
+        '// Opens the main notes folder. Every ID that works is remembered in Script Properties, so pasting new code',
+        '// later with a wrong or placeholder ROOT_FOLDER_ID still finds the folder instead of breaking everything.',
         'function getRootFolder() {',
-        '  const id = getRootFolderId();',
-        '  if (!id || id.indexOf("PASTE_") === 0) throw new Error("ROOT_FOLDER_ID is not set at the top of the script");',
-        '  return DriveApp.getFolderById(id);',
+        '  const props = PropertiesService.getScriptProperties();',
+        '  const saved = clean(props.getProperty("ROOT_FOLDER_ID"));',
+        '  const fromCode = clean(ROOT_FOLDER_ID);',
+        '  const codeIsReal = fromCode && fromCode.indexOf("PASTE_") !== 0;',
+        '  const tries = [];',
+        '  const first = getRootFolderId();',
+        '  if (first) tries.push(first);',
+        '  if (saved && tries.indexOf(saved) === -1) tries.push(saved);',
+        '  if (codeIsReal && tries.indexOf(fromCode) === -1) tries.push(fromCode);',
+        '  for (let i = 0; i < tries.length; i++) {',
+        '    try {',
+        '      const folder = DriveApp.getFolderById(tries[i]);',
+        '      folder.getName(); // fails here if this account cannot open it',
+        '      if (saved !== tries[i]) props.setProperty("ROOT_FOLDER_ID", tries[i]);',
+        '      if (codeIsReal && clean(props.getProperty("ROOT_FOLDER_ID_IN_CODE")) !== fromCode) props.setProperty("ROOT_FOLDER_ID_IN_CODE", fromCode);',
+        '      return folder;',
+        '    } catch (err) {}',
+        '  }',
+        '  // No ID works (or none was given): use the notes folder that sits next to this Sheet, making it if needed.',
+        '  const made = findOrCreateFolderNextToSheet();',
+        '  props.setProperty("ROOT_FOLDER_ID", made.folder.getId());',
+        '  props.setProperty("ROOT_FOLDER_NOTE", (made.created ? "Created" : "Using") + " the folder \'" + AUTO_FOLDER_NAME + "\' next to your Sheet" +',
+        '    (tries.length ? " because the folder ID " + tries[0] + " couldn\'t be opened. Notes already in that old folder stay there." : " because no folder ID was set."));',
+        '  return made.folder;',
+        '}',
+        '',
+        'const AUTO_FOLDER_NAME = "DEPT NOTES ARCHIVE";',
+        '',
+        '// Looks in the same Drive folder as this spreadsheet for AUTO_FOLDER_NAME and makes it if it isn\'t there,',
+        '// so running setup twice never creates two archive folders.',
+        'function findOrCreateFolderNextToSheet() {',
+        '  let parent = DriveApp.getRootFolder();',
+        '  try {',
+        '    const parents = DriveApp.getFileById(SpreadsheetApp.getActiveSpreadsheet().getId()).getParents();',
+        '    if (parents.hasNext()) parent = parents.next();',
+        '  } catch (err) {}',
+        '  const existing = parent.getFoldersByName(AUTO_FOLDER_NAME);',
+        '  if (existing.hasNext()) return { folder: existing.next(), created: false };',
+        '  return { folder: parent.createFolder(AUTO_FOLDER_NAME), created: true };',
         '}',
         '',
         'function readNotices() {',
@@ -3857,6 +4238,10 @@
     function switchTab(targetId) {
       if (targetId === 'viewSetup' && !canSeeSetup()) return;
       state.activeTab = targetId;
+      if (targetId === 'viewUpload' && !state.batch && !batchPromptShown) {
+        batchPromptShown = true;
+        openBatchModal();
+      }
       ['viewBrowse', 'viewUpload', 'viewFeed', 'viewEditor', 'viewSetup'].forEach(id => {
         const sec = document.getElementById(id);
         if (!sec) return;
@@ -3877,9 +4262,568 @@
     }
     window.switchTab = switchTab;
 
+    // ==================== BATCH / "JOIN CLASS" (soft convenience login — never a security gate) ====================
+    // The only job this does: once a student types their batch's class code, every file they upload from this
+    // device is tagged with it automatically, so nobody has to remember to pick a year and notes can't land
+    // under the wrong batch by mistake. Any code is accepted — it is not checked against anything secret.
+    let batchPromptShown = false;
+
+    function knownBatches() {
+      const opt = window.DeptOptions && window.DeptOptions.get ? window.DeptOptions.get() : null;
+      return (opt && Array.isArray(opt.batches)) ? opt.batches : [];
+    }
+
+    // Guesses which semester a batch is currently in from its admission year (new academic year ~ July).
+    // Purely a convenience default for the Upload form's Sem select — students can always change it themselves.
+    function semesterForBatch(startYear) {
+      if (!Number.isFinite(startYear)) return null;
+      const now = new Date();
+      const month = now.getMonth() + 1; // 1-12
+      let yearsIn = now.getFullYear() - startYear;
+      let half = 1;
+      if (month < 7) { yearsIn -= 1; half = 2; }
+      const sem = yearsIn * 2 + half;
+      return Math.min(10, Math.max(1, sem));
+    }
+
+    function updateBatchChip() {
+      const chip = document.getElementById('batchChip');
+      if (chip) {
+        if (state.batch) {
+          chip.textContent = '🎓 ' + state.batch.label;
+          chip.title = 'Uploads are tagged "' + state.batch.code + '" automatically. Click to change.';
+        } else {
+          chip.textContent = '🎓 Set your batch';
+          chip.title = 'Join your class so uploads get tagged with your batch automatically.';
+        }
+      }
+      const readout = document.getElementById('upBatchReadout');
+      const label = document.getElementById('upBatchReadoutLabel');
+      if (readout && label) {
+        if (state.batch) { label.textContent = state.batch.label; readout.classList.remove('hidden'); }
+        else { readout.classList.add('hidden'); }
+      }
+    }
+
+    function saveBatch(code, label, startYear) {
+      const clean = String(code || '').trim().toUpperCase();
+      if (!clean) return;
+      state.batch = { code: clean, label: label || clean, startYear: Number.isFinite(startYear) ? startYear : null };
+      try { localStorage.setItem('deptnotes_batch', JSON.stringify(state.batch)); } catch (e) {}
+      updateBatchChip();
+      applyBatchDefaultSem();
+      // Once a batch is known, default Browse to "My Batch" instead of "All" — the whole point is less picking, not more.
+      const fb = document.getElementById('filterBatch');
+      if (fb && fb.value === 'ALL') { fb.value = 'MINE'; renderBrowse(); }
+    }
+
+    function clearBatchChoice() {
+      state.batch = null;
+      try { localStorage.removeItem('deptnotes_batch'); } catch (e) {}
+      updateBatchChip();
+    }
+
+    function applyBatchDefaultSem() {
+      if (!state.batch || !Number.isFinite(state.batch.startYear)) return;
+      const guess = semesterForBatch(state.batch.startYear);
+      const upSemSel = document.getElementById('upSem');
+      if (guess && upSemSel) {
+        const want = 'SEM' + guess;
+        if (Array.prototype.some.call(upSemSel.options, o => o.value === want)) {
+          upSemSel.value = want;
+          try { updateUploadPreview(); } catch (e) {}
+        }
+      }
+    }
+
+    // Used by renderBrowse(): never hides a file that predates this feature (no batch tag yet) or when nobody has joined a class on this device.
+    function matchesBatchFilter(f) {
+      const modeEl = document.getElementById('filterBatch');
+      const mode = modeEl ? modeEl.value : 'ALL';
+      if (mode === 'ALL') return true;
+      const mine = state.batch && state.batch.code;
+      if (!mine) return true;
+      if (!f.batch) return true;
+      if (mode === 'MINE') return f.batch === mine;
+      if (mode === 'SENIORS') return f.batch !== mine;
+      return true;
+    }
+
+    function renderKnownBatchChips() {
+      const wrap = document.getElementById('batchKnownList');
+      if (!wrap) return;
+      wrap.innerHTML = '';
+      knownBatches().forEach(b => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'text-[11px] font-medium px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-100 text-slate-700 hover:text-indigo-700 border border-slate-200 transition';
+        btn.textContent = b.label;
+        btn.addEventListener('click', () => { document.getElementById('batchCodeInput').value = b.code; });
+        wrap.appendChild(btn);
+      });
+    }
+
+    function openBatchModal() {
+      renderKnownBatchChips();
+      document.getElementById('batchCodeInput').value = state.batch ? state.batch.code : '';
+      document.getElementById('btnClearBatch').classList.toggle('hidden', !state.batch);
+      const modal = document.getElementById('batchModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      try { document.getElementById('batchCodeInput').focus({ preventScroll: true }); } catch (e) {}
+    }
+
+    function closeBatchModal() {
+      const modal = document.getElementById('batchModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // ==================== COURSE STRUCTURE EDITOR (per-semester Subjects / Courses, editable from the Editor Console) ====================
+    // structDraft is a working copy of { "<semNum>": { subjects, labels, noCourseSubjects, courses } } the Editor edits in memory.
+    // It is loaded once (lazily) from the synced STRUCTURE config and only reloaded after an explicit Save, so a background
+    // sync every 45s never wipes out an edit the Editor is in the middle of typing.
+    let structDraft = null;
+
+    // Plays the .anim-out animation on an element, then runs `done` (e.g. re-render or el.remove()).
+    // With reduced motion on, there's no animation, so `done` runs straight away.
+    function animateOut(el, done) {
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!el || reduce) { done(); return; }
+      el.classList.add('anim-out');
+      setTimeout(done, 170);
+    }
+
+    // Today's shared Subjects / Courses lists (from Setup) shaped like one semester's entry:
+    // every subject with the courses it's allowed now. Returns null until the first sync brings the lists in.
+    function sharedListsEntry() {
+      const opt = window.DeptOptions && window.DeptOptions.get ? window.DeptOptions.get() : null;
+      if (!opt || !opt.subjects || !opt.subjects.length) return null;
+      const courses = {};
+      opt.subjects.forEach(s => {
+        if (opt.noCourseSubjects.indexOf(s) > -1) return;
+        const list = window.DeptOptions.allowedCourses(s);
+        if (list && list.length) courses[s] = list.slice();
+      });
+      return { subjects: opt.subjects.slice(), labels: {}, noCourseSubjects: opt.noCourseSubjects.slice(), courses: courses };
+    }
+
+    // The current subjects and courses only apply up to SEM 3 (things change after that), so SEM 1–3
+    // open pre-filled with them, ready to edit. SEM 4–10 start empty for you to set up when you know them.
+    const PREFILL_SEMS = SHARED_LIST_SEMS;
+    const structSeeded = new Set(); // sems showing the pre-filled lists that you haven't changed yet
+
+    function seedEarlySems() {
+      if (!structDraft) return;
+      PREFILL_SEMS.forEach(s => {
+        if (structDraft[s]) return;
+        const e = sharedListsEntry();
+        if (e) { structDraft[s] = e; structSeeded.add(s); }
+      });
+    }
+
+    function ensureStructDraft() {
+      if (!structDraft) {
+        const opt = window.DeptOptions && window.DeptOptions.get ? window.DeptOptions.get() : null;
+        const raw = (opt && opt.structure && typeof opt.structure === 'object') ? opt.structure : {};
+        structSeeded.clear();
+        try { structDraft = JSON.parse(JSON.stringify(raw)); } catch (e) { structDraft = {}; }
+      }
+      seedEarlySems(); // retried every time, in case the shared lists hadn't synced yet the first time
+    }
+
+    function currentStructSem() {
+      const sel = document.getElementById('structSemSelect');
+      return sel ? sel.value : '1';
+    }
+
+    // UI-only state for the editor: which subject has its "+ course" box open, whether the
+    // "+ subject" box is open, which item is waiting for a second tap to confirm removal, and
+    // which item was just added (only that one animates in, so a re-render doesn't replay everything).
+    const structUi = { addingCourseFor: null, addingSubject: false, confirmKey: null, confirmTimer: 0, animKey: null };
+
+    // How many notes (approved or pending) sit under this sem + subject (+ course, if given).
+    function notesUsing(semNum, subject, course) {
+      const want = 'SEM' + semNum;
+      return state.files.concat(state.pending).filter(f =>
+        f.sem === want && f.subject === subject && (!course || f.course === course)).length;
+    }
+
+    function markStructDirty(on) {
+      if (on) structSeeded.delete(currentStructSem());
+      const b = document.getElementById('btnStructSave');
+      if (b) b.textContent = on ? '💾 Save Structure •' : '💾 Save Structure';
+    }
+
+    function noteWord(n) { return n + ' note' + (n === 1 ? '' : 's'); }
+    function usesIt(n) { return noteWord(n) + (n === 1 ? ' uses it' : ' use it'); }
+
+    function renderStructurePanel() {
+      const wrap = document.getElementById('structSubjectRows');
+      if (!wrap) return;
+      ensureStructDraft();
+      const semNum = currentStructSem();
+      const entry = structDraft[semNum];
+
+      const badge = document.getElementById('structOverrideBadge');
+      if (entry && structSeeded.has(semNum)) {
+        badge.textContent = 'Current subjects, not saved yet';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-amber-100 text-amber-800 border-amber-200';
+      } else if (entry && entry.subjects.length) {
+        badge.textContent = 'Custom for SEM ' + semNum;
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-indigo-50 text-indigo-700 border-indigo-200';
+      } else {
+        badge.textContent = 'Not set up yet';
+        badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-slate-100 text-slate-500 border-slate-200';
+      }
+
+      const anim = structUi.animKey;
+      structUi.animKey = null;
+      // Wiping the panel removes any focused input, which fires "focusout". The flag tells
+      // the focusout handler that this is a re-render, not you clicking away.
+      structUi.rendering = true;
+      wrap.innerHTML = '';
+      structUi.rendering = false;
+
+      if ((!entry || !entry.subjects.length) && !structUi.addingSubject) {
+        wrap.innerHTML = '<p class="text-xs text-slate-400 italic py-2 anim-in">SEM ' + esc(semNum) + ' has no subjects set up yet. Add them here when you know them, or Copy In from another sem. ' +
+          (PREFILL_SEMS.indexOf(semNum) > -1 ? 'Until then it uses the shared lists from Setup.' : 'Until then, nobody can pick SEM ' + esc(semNum) + ' when sharing a file.') + '</p>';
+        return;
+      }
+
+      (entry ? entry.subjects : []).forEach(code => {
+        const courses = (entry.courses && entry.courses[code]) || [];
+        const sKey = 'subj:' + code;
+        const confirmingSubj = structUi.confirmKey === sKey;
+
+        const chips = courses.map(c => {
+          const cKey = 'course:' + code + ':' + c;
+          const confirming = structUi.confirmKey === cKey;
+          const look = confirming
+            ? 'bg-rose-100 text-rose-800 border-rose-200'
+            : 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100';
+          const label = confirming
+            ? 'Remove ' + esc(c) + '? ' + usesIt(notesUsing(semNum, code, c))
+            : esc(c) + ' ✕';
+          return '<button type="button" data-rm-course="' + esc(code) + '" data-course="' + esc(c) + '" title="Remove ' + esc(c) +
+            '" class="text-xs font-medium px-2.5 py-1 rounded-full border transition ' + look + (anim === cKey ? ' anim-pop' : '') + '">' + label + '</button>';
+        }).join('');
+
+        const addBox = structUi.addingCourseFor === code
+          ? '<input data-new-course="' + esc(code) + '" placeholder="DSC-A" aria-label="New course for ' + esc(code) +
+            '" class="uppercase w-28 text-xs px-2.5 py-1 rounded-full border border-indigo-200 bg-white focus:border-indigo-500 focus:outline-none anim-pop" />'
+          : '<button type="button" data-add-course="' + esc(code) + '" class="text-xs font-medium px-2.5 py-1 rounded-full border border-dashed border-slate-300 text-slate-500 hover:text-indigo-700 transition">+ course</button>';
+
+        const rmLook = confirmingSubj
+          ? 'bg-rose-100 text-rose-800 border border-rose-200'
+          : 'text-rose-500 hover:text-rose-700';
+        const rmLabel = confirmingSubj
+          ? 'Remove ' + esc(code) + '? ' + usesIt(notesUsing(semNum, code))
+          : '✕';
+
+        const card = document.createElement('div');
+        card.className = 'bg-slate-50 rounded-xl p-3 border border-slate-200' + (anim === sKey ? ' anim-in' : '');
+        card.innerHTML =
+          '<div class="flex items-center justify-between gap-2 mb-2">' +
+            '<span class="font-mono font-bold text-sm text-slate-900">' + esc(code) + '</span>' +
+            '<button type="button" data-rm-subject="' + esc(code) + '" title="Remove ' + esc(code) + ' from SEM ' + esc(semNum) +
+              '" class="text-xs font-semibold px-2 py-0.5 rounded-lg transition ' + rmLook + '">' + rmLabel + '</button>' +
+          '</div>' +
+          '<div class="flex flex-wrap items-center gap-1.5">' +
+            (chips || '<span class="text-[11px] text-slate-400 mr-1">No courses, so files go by month</span>') +
+            addBox +
+          '</div>';
+        wrap.appendChild(card);
+      });
+
+      if (structUi.addingSubject) {
+        const row = document.createElement('div');
+        row.className = 'flex flex-wrap items-center gap-2 bg-slate-50 rounded-xl p-3 border border-dashed border-slate-300 anim-in';
+        row.innerHTML = '<input data-new-subject placeholder="Subject code, e.g. ECO" aria-label="New subject code" class="uppercase w-48 text-xs font-mono px-3 py-1.5 rounded-lg border border-slate-300 bg-white focus:border-indigo-500 focus:outline-none" />' +
+          '<span class="text-[11px] text-slate-400">Enter to add, Esc to cancel</span>';
+        wrap.appendChild(row);
+      }
+
+      const open = wrap.querySelector('input[data-new-course], input[data-new-subject]');
+      if (open) { try { open.focus({ preventScroll: true }); } catch (e) {} }
+    }
+
+    // Two-tap removal: if notes use the item, the first tap turns it red with the count, the second removes it.
+    // The red state clears itself after 4 seconds if you don't tap again.
+    function askOrRemove(key, count, el, doRemove) {
+      if (count > 0 && structUi.confirmKey !== key) {
+        structUi.confirmKey = key;
+        clearTimeout(structUi.confirmTimer);
+        structUi.confirmTimer = setTimeout(() => { structUi.confirmKey = null; renderStructurePanel(); }, 4000);
+        renderStructurePanel();
+        return;
+      }
+      structUi.confirmKey = null;
+      clearTimeout(structUi.confirmTimer);
+      animateOut(el, () => { doRemove(); markStructDirty(true); renderStructurePanel(); });
+    }
+
+    function commitNewCourse(subject, raw) {
+      const v = String(raw || '').trim().replace(/\s+/g, ' ').toUpperCase();
+      if (!v) return false;
+      const entry = structDraft[currentStructSem()];
+      if (!entry) return false;
+      entry.courses = entry.courses || {};
+      const list = entry.courses[subject] || (entry.courses[subject] = []);
+      if (list.indexOf(v) > -1) { showToast(subject + ' already has ' + v + '.', 'warn'); return false; }
+      list.push(v);
+      structUi.animKey = 'course:' + subject + ':' + v;
+      markStructDirty(true);
+      return true;
+    }
+
+    function commitNewSubject(raw) {
+      const v = String(raw || '').trim().replace(/\s+/g, ' ').toUpperCase();
+      if (!v) return false;
+      const semNum = currentStructSem();
+      if (!structDraft[semNum]) structDraft[semNum] = { subjects: [], labels: {}, noCourseSubjects: [], courses: {} };
+      const entry = structDraft[semNum];
+      if (entry.subjects.indexOf(v) > -1) { showToast('SEM ' + semNum + ' already has ' + v + '.', 'warn'); return false; }
+      entry.subjects.push(v);
+      structUi.animKey = 'subj:' + v;
+      markStructDirty(true);
+      return true;
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.nav-tab').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.getAttribute('data-target')));
+      });
+
+      updateBatchChip();
+
+      // ---- Enter key: pressing Enter in a box clicks the button that goes with it ----
+      // To add one: put "inputId: 'buttonId'" in this list. (The upload form already submits on Enter by itself.)
+      const ENTER_PRESSES = {
+        editorPinInput: 'btnUnlockEditor',
+        batchCodeInput: 'btnSaveBatch',
+        inputTestFolderId: 'btnInjectFolderId',
+        inputWebAppUrl: 'btnConnectLiveUrl',
+        mergedMonthTitle: 'btnMergeSelectedDaily',
+        editModalTopics: 'btnSaveFilePropsModal',
+        annTitleInput: 'annBodyInput'          // headline → jump to the details box
+      };
+      Object.keys(ENTER_PRESSES).forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        input.addEventListener('keydown', (e) => {
+          if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
+          if (input.readOnly) return;                       // e.g. the locked Web App URL box
+          const target = document.getElementById(ENTER_PRESSES[inputId]);
+          if (!target || target.disabled) return;
+          e.preventDefault();
+          if (target.tagName === 'BUTTON') target.click(); else target.focus();
+        });
+      });
+      // The notice details box needs Enter for new lines, so Ctrl+Enter (Cmd+Enter on Mac) posts it.
+      document.getElementById('annBodyInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); document.getElementById('btnPostAnnouncement').click(); }
+      });
+      // Search: Enter closes the phone keyboard (results already update as you type).
+      document.getElementById('searchInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+      });
+      // Esc closes whichever popup is open.
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        if (document.getElementById('batchModal').classList.contains('flex')) { closeBatchModal(); return; }
+        if (document.getElementById('fileModal').classList.contains('flex')) closeFileModal();
+      });
+
+      document.getElementById('btnOpenSetupFromBanner').addEventListener('click', () => {
+        if (canSeeSetup()) switchTab('viewSetup');
+        else { showToast('Unlock the console with your Editor PIN first.', 'warn'); try { document.getElementById('editorPinInput').focus(); } catch (e) {} }
+      });
+      document.getElementById('btnRecheckScript').addEventListener('click', async () => {
+        const btn = document.getElementById('btnRecheckScript');
+        btn.textContent = 'Checking…'; btn.disabled = true;
+        await checkUploadHealth();
+        btn.textContent = "I've redeployed, check again"; btn.disabled = false;
+        const stillOld = !document.getElementById('scriptVersionBanner').classList.contains('hidden');
+        showToast(stillOld ? 'Still the old script. Make sure you picked Version: New version when deploying.' : 'Apps Script is up to date.', stillOld ? 'warn' : 'success');
+      });
+      document.getElementById('batchChip').addEventListener('click', openBatchModal);
+      document.getElementById('btnChangeBatchInline').addEventListener('click', openBatchModal);
+      document.getElementById('btnCancelBatch').addEventListener('click', closeBatchModal);
+      document.getElementById('batchModal').addEventListener('click', (e) => {
+        if (e.target.id === 'batchModal') closeBatchModal();
+      });
+      document.getElementById('btnClearBatch').addEventListener('click', () => {
+        clearBatchChoice();
+        closeBatchModal();
+        showToast('Batch cleared — uploads will go untagged until you join again.', 'info');
+      });
+      document.getElementById('btnSaveBatch').addEventListener('click', () => {
+        const raw = document.getElementById('batchCodeInput').value.trim().toUpperCase();
+        if (!raw) { showToast('Type a class code first.', 'warn'); return; }
+        const known = knownBatches().find(b => b.code === raw);
+        saveBatch(raw, known ? known.label : raw, known ? known.startYear : null);
+        closeBatchModal();
+        showToast('Joined ' + (known ? known.label : raw) + ' — your uploads are tagged automatically now.', 'success');
+      });
+
+      document.getElementById('structSemSelect').addEventListener('change', () => {
+        structUi.addingCourseFor = null; structUi.addingSubject = false; structUi.confirmKey = null;
+        renderStructurePanel();
+      });
+
+      const structWrap = document.getElementById('structSubjectRows');
+
+      structWrap.addEventListener('click', (e) => {
+        const semNum = currentStructSem();
+        const entry = structDraft && structDraft[semNum];
+
+        const add = e.target.closest('[data-add-course]');
+        if (add) {
+          structUi.addingCourseFor = add.getAttribute('data-add-course');
+          structUi.addingSubject = false;
+          renderStructurePanel();
+          return;
+        }
+
+        const rmC = e.target.closest('[data-rm-course]');
+        if (rmC && entry) {
+          const subj = rmC.getAttribute('data-rm-course'), c = rmC.getAttribute('data-course');
+          const n = notesUsing(semNum, subj, c);
+          askOrRemove('course:' + subj + ':' + c, n, rmC, () => {
+            const list = (entry.courses[subj] || []).filter(x => x !== c);
+            if (list.length) entry.courses[subj] = list; else delete entry.courses[subj];
+            if (n) showToast('Removed ' + c + '. Its ' + noteWord(n) + ' stay safe under All.', 'info');
+          });
+          return;
+        }
+
+        const rmS = e.target.closest('[data-rm-subject]');
+        if (rmS && entry) {
+          const subj = rmS.getAttribute('data-rm-subject');
+          const n = notesUsing(semNum, subj);
+          askOrRemove('subj:' + subj, n, rmS.closest('.rounded-xl'), () => {
+            entry.subjects = entry.subjects.filter(x => x !== subj);
+            if (entry.courses) delete entry.courses[subj];
+            if (entry.labels) delete entry.labels[subj];
+            // An empty sem isn't saved, so uploads fall back to the shared list for it.
+            if (structUi.addingCourseFor === subj) structUi.addingCourseFor = null;
+            if (n) showToast('Removed ' + subj + '. Its ' + noteWord(n) + ' stay safe under All.', 'info');
+          });
+        }
+      });
+
+      structWrap.addEventListener('keydown', (e) => {
+        const t = e.target;
+        if (t.hasAttribute('data-new-course')) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            commitNewCourse(t.getAttribute('data-new-course'), t.value); // box stays open so you can add the next one
+            t.value = '';
+            renderStructurePanel();
+          } else if (e.key === 'Escape') {
+            structUi.addingCourseFor = null;
+            renderStructurePanel();
+          }
+        } else if (t.hasAttribute('data-new-subject')) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const v = t.value;
+            t.value = '';
+            if (commitNewSubject(v)) {
+              structUi.addingSubject = false;
+              structUi.addingCourseFor = v.trim().replace(/\s+/g, ' ').toUpperCase(); // jump straight to adding its courses
+            }
+            renderStructurePanel();
+          } else if (e.key === 'Escape') {
+            structUi.addingSubject = false;
+            renderStructurePanel();
+          }
+        }
+      });
+
+      // Clicking away from an open box: save what's typed, or just close it if it's empty.
+      structWrap.addEventListener('focusout', (e) => {
+        const t = e.target;
+        if (structUi.rendering || !t.isConnected) return; // removed by a re-render, not a real click-away
+        if (t.hasAttribute('data-new-course')) {
+          const subj = t.getAttribute('data-new-course');
+          if (structUi.addingCourseFor !== subj) return;
+          if (t.value.trim()) commitNewCourse(subj, t.value);
+          structUi.addingCourseFor = null;
+          setTimeout(renderStructurePanel, 0); // let a click on another chip land first
+        } else if (t.hasAttribute('data-new-subject')) {
+          if (!structUi.addingSubject) return;
+          const v = t.value;
+          if (v.trim() && commitNewSubject(v)) structUi.addingCourseFor = v.trim().replace(/\s+/g, ' ').toUpperCase();
+          structUi.addingSubject = false;
+          setTimeout(renderStructurePanel, 0);
+        }
+      });
+
+      document.getElementById('btnStructAddSubject').addEventListener('click', () => {
+        ensureStructDraft();
+        structUi.addingSubject = true;
+        structUi.addingCourseFor = null;
+        renderStructurePanel();
+      });
+
+      document.getElementById('btnStructClearSem').addEventListener('click', () => {
+        ensureStructDraft();
+        const semNum = currentStructSem();
+        delete structDraft[semNum];
+        structUi.addingCourseFor = null; structUi.addingSubject = false; structUi.confirmKey = null;
+        markStructDirty(true);
+        seedEarlySems(); // SEM 1–3 refill with the current lists; later sems stay empty
+        renderStructurePanel();
+        showToast(PREFILL_SEMS.indexOf(semNum) > -1
+          ? 'SEM ' + semNum + ' is back to the current subjects. Save Structure to keep it.'
+          : 'SEM ' + semNum + ' is cleared. Save Structure to keep it.', 'info');
+      });
+
+      document.getElementById('btnStructCopy').addEventListener('click', () => {
+        ensureStructDraft();
+        const semNum = currentStructSem();
+        const fromSem = document.getElementById('structCopyFromSelect').value;
+        let source = null;
+        if (!fromSem) {
+          source = sharedListsEntry();
+        } else if (structDraft[fromSem]) {
+          try { source = JSON.parse(JSON.stringify(structDraft[fromSem])); } catch (e) { source = null; }
+        }
+        if (!source || !source.subjects || !source.subjects.length) { showToast('Nothing to copy from there yet.', 'warn'); return; }
+        structDraft[semNum] = source;
+        structUi.addingCourseFor = null; structUi.addingSubject = false; structUi.confirmKey = null;
+        markStructDirty(true);
+        renderStructurePanel();
+        showToast('Copied into SEM ' + semNum + ' — review it, then Save Structure.', 'success');
+      });
+
+      document.getElementById('btnStructSave').addEventListener('click', async () => {
+        ensureStructDraft();
+        const cleaned = {};
+        Object.keys(structDraft).forEach(k => {
+          const e = structDraft[k];
+          const subs = e && Array.isArray(e.subjects) ? e.subjects.filter(Boolean) : [];
+          if (subs.length) {
+            const courses = e.courses || {};
+            // A subject with no courses has no course layer (its files go by month). Worked out here,
+            // so nobody has to tick a box, and the Apps Script still gets the noCourseSubjects list it reads.
+            const noCourse = subs.filter(s => !(courses[s] || []).length);
+            cleaned[k] = { subjects: subs, labels: e.labels || {}, noCourseSubjects: noCourse, courses: courses };
+          }
+        });
+        const res = await postToLiveDrive({ action: 'saveStructure', structure: JSON.stringify(cleaned) });
+        if (!res || !res.ok) {
+          if (res && res.error && res.error !== 'Wrong editor PIN') showToast('Save failed: ' + res.error, 'warn');
+          return;
+        }
+        showToast('Course structure saved — every device picks it up on its next sync.', 'success');
+        await syncFromLiveDrive(true);
+        structDraft = null;
+        structUi.addingCourseFor = null; structUi.addingSubject = false; structUi.confirmKey = null;
+        markStructDirty(false);
+        renderStructurePanel();
       });
 
       document.getElementById('btnDisconnectLiveQuick').addEventListener('click', () => {
@@ -3889,8 +4833,15 @@
 
       document.getElementById('btnSyncNow').addEventListener('click', () => syncFromLiveDrive(false));
 
-      ['filterSem', 'filterSubject', 'filterCourse', 'filterType', 'filterModule', 'filterMonth'].forEach(id => {
+      ['filterSem', 'filterSubject', 'filterCourse', 'filterType', 'filterModule', 'filterMonth', 'filterBatch'].forEach(id => {
         document.getElementById(id).addEventListener('change', renderBrowse);
+      });
+      // Year & Semester also narrows which Subjects are shown, when the Editor's Course Structure panel has set up a different subject list for that semester.
+      document.getElementById('filterSem').addEventListener('change', () => {
+        if (window.DeptOptions) { window.DeptOptions.cascadeBrowse(); renderBrowse(); }
+      });
+      document.getElementById('filterSubject').addEventListener('change', () => {
+        if (window.DeptOptions) { window.DeptOptions.cascadeBrowse(); renderBrowse(); }
       });
       document.getElementById('searchInput').addEventListener('input', renderBrowse);
 
@@ -3901,14 +4852,21 @@
         document.getElementById('filterType').value = 'ALL';
         document.getElementById('filterModule').value = 'ALL';
         document.getElementById('filterMonth').value = 'ALL';
+        document.getElementById('filterBatch').value = 'ALL';
         document.getElementById('searchInput').value = '';
+        if (window.DeptOptions) window.DeptOptions.cascadeBrowse();
         renderBrowse();
-        showToast('Showing all Years (1–5), Courses & Modules', 'info');
+        showToast('Showing all Years (1–5), Courses, Batches & Modules', 'info');
       });
 
       ['upName', 'upMonth', 'upSem', 'upSubject', 'upCourse', 'upType', 'upModule', 'upScope'].forEach(id => {
         document.getElementById(id).addEventListener('input', updateUploadPreview);
         document.getElementById(id).addEventListener('change', updateUploadPreview);
+      });
+      // Year & Semester narrows which Subjects are offered too, when the Editor's Course Structure panel has set up a different subject list for that semester.
+      document.getElementById('upSem').addEventListener('change', () => {
+        if (window.DeptOptions) window.DeptOptions.applySemFilter('upSubject', document.getElementById('upSem').value);
+        updateUploadPreview();
       });
 
       document.getElementById('btnTriggerFileSelect').addEventListener('click', () => {
@@ -3930,8 +4888,12 @@
         const rawName = UP(document.getElementById('upName').value) || 'ANON';
         const month = document.getElementById('upMonth').value;
         const sem = document.getElementById('upSem').value;
+        if (semHasNoSubjects(sem)) {
+          showToast(sem.replace('SEM', 'SEM ') + ' isn\'t set up yet, so there\'s nowhere to file this. Ask your Editor.', 'warn');
+          return;
+        }
         const subject = document.getElementById('upSubject').value;
-        const noCourse = SUBJECTS_NO_COURSE.includes(subject);
+        const noCourse = noCourseFor(subject, sem);
         const course = noCourse ? 'NONE' : document.getElementById('upCourse').value;
         const contentType = document.getElementById('upType').value;
         const modNum = document.getElementById('upModule').value;
@@ -3980,6 +4942,7 @@
             module,
             scope,
             topics,
+            batch: state.batch ? state.batch.code : '',
             fileName: f.name,
             base64Data: b64,
             mimeType: f.type || 'application/pdf'
@@ -4044,6 +5007,8 @@
           applySetupGate();
           refreshLiveConfig();
           renderFeedAndLeaderboard();
+          structDraft = null;
+          renderStructurePanel();
           showToast('Editor Console unlocked (PIN verified) — Setup & Code tab is now visible', 'success');
         } else if (res.error === 'Wrong editor PIN') {
           lockEditor();
@@ -4092,6 +5057,9 @@
       document.getElementById('fileModal').addEventListener('click', (e) => {
         if (e.target.id === 'fileModal') closeFileModal();
       });
+      ['editModalSem', 'editModalSubject'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+        if (window.DeptOptions) window.DeptOptions.cascadeEditModal();
+      }));
 
       document.getElementById('btnSaveFilePropsModal').addEventListener('click', async () => {
         const f = state.files.find(x => x.id === state.activeModalFileId);
@@ -4099,6 +5067,8 @@
         const res = await postToLiveDrive({
           action: 'editProps',
           recordId: f.id,
+          sem: document.getElementById('editModalSem').value,
+          subject: document.getElementById('editModalSubject').value,
           course: document.getElementById('editModalCourse').value,
           module: document.getElementById('editModalModule').value,
           month: document.getElementById('editModalMonth').value,
@@ -4131,16 +5101,43 @@
       });
 
       const codeBlock = document.getElementById('appsScriptCodeBlock');
+      document.getElementById('inputTestFolderId').value = state.testFolderId;
       applySetupGate();
 
       document.getElementById('btnInjectFolderId').addEventListener('click', () => {
-        const newId = cleanFolderId(document.getElementById('inputTestFolderId').value);
-        state.testFolderId = newId || 'PASTE_YOUR_NEW_TEST_FOLDER_ID_HERE';
+        state.testFolderId = cleanFolderIdOrPlaceholder(document.getElementById('inputTestFolderId').value);
         codeBlock.textContent = generateAppsScriptCode(state.testFolderId);
         showToast('Updated ROOT_FOLDER_ID inside Apps Script code!', 'success');
       });
 
+      // Switches the live script (same Web App URL) to another Drive folder. Every device sees it on its next refresh or sync.
+      document.getElementById('btnApplyFolderLive').addEventListener('click', async () => {
+        const newId = cleanFolderId(document.getElementById('inputTestFolderId').value);
+        if (!newId || newId.indexOf('PASTE_') === 0) { showToast('Paste a Drive folder ID or folder link into box 1 first.', 'warn'); return; }
+        if (!state.liveWebAppUrl) { showToast('Connect a Web App URL first (box 2).', 'warn'); return; }
+        if (!state.editorUnlocked) { showToast('Unlock the Editor console first.', 'warn'); return; }
+        if (newId === liveRootFolderId) { showToast('The live script already uses that folder.', 'info'); return; }
+        const res = await postToLiveDrive({ action: 'setRootFolder', folderId: newId }, true);
+        if (!res || !res.ok) {
+          if (!res || res.error !== 'Wrong editor PIN') showToast('Folder not switched: ' + (res && res.error ? res.error : 'the Web App did not answer.'), 'warn');
+          return;
+        }
+        state.testFolderId = newId;
+        codeBlock.textContent = generateAppsScriptCode(state.testFolderId);
+        showToast('Every device now uses folder "' + (res.rootFolderName || newId) + '" on its next refresh or sync.', 'success');
+        lastSyncSig = '';
+        await syncFromLiveDrive(true);
+        refreshLiveConfig();
+      });
+
       document.getElementById('btnCopyScript').addEventListener('click', () => {
+        const id = String(state.testFolderId || '');
+        if (!id || id.indexOf('PASTE_') === 0) {
+          showToast('No folder ID in box 1, so setup will use (or create) a "DEPT NOTES ARCHIVE" folder next to your Sheet.', 'info');
+        }
+        if (liveRootFolderId && liveRootFolderId.indexOf('PASTE_') !== 0 && liveRootFolderId !== id) {
+          showToast('Heads up: this code uses folder ' + id + ', but your live script uses ' + liveRootFolderId + '. Copied anyway. Double-check box 1.', 'warn');
+        }
         const text = codeBlock.textContent;
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(() => {
@@ -4212,7 +5209,9 @@
           if (!raw) throw new Error('file');
           const marker = /const DEFAULT_WEBAPP_URL = '[^']*';/;
           if (!marker.test(raw)) throw new Error('marker');
-          const out = raw.replace(marker, function () { return "const DEFAULT_WEBAPP_URL = '" + state.liveWebAppUrl + "';"; });
+          let out = raw.replace(marker, function () { return "const DEFAULT_WEBAPP_URL = '" + state.liveWebAppUrl + "';"; });
+          const liveFolder = liveRootFolderId && liveRootFolderId.indexOf('PASTE_') !== 0 ? liveRootFolderId : '';
+          if (liveFolder) out = out.replace(/const DEFAULT_ROOT_FOLDER_ID = '[^']*';/, function () { return "const DEFAULT_ROOT_FOLDER_ID = '" + liveFolder + "';"; });
           const blob = new Blob([out], { type: 'text/html' });
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
@@ -4425,8 +5424,105 @@
     if (o.subjectLabels && typeof o.subjectLabels === 'object') {
       Object.keys(o.subjectLabels).forEach(function (k) { n.labels[String(k).toUpperCase()] = String(o.subjectLabels[k]); });
     }
+    n.batches = Array.isArray(o.batches) ? o.batches.map(function (b) {
+      return { code: String(b.code || '').toUpperCase(), label: String(b.label || b.code || ''), startYear: (b.startYear == null ? null : Number(b.startYear)) };
+    }).filter(function (b) { return b.code; }) : [];
+    n.structure = (o.structure && typeof o.structure === 'object' && !Array.isArray(o.structure)) ? o.structure : {};
     if (!n.subjects.length || !n.courses.length) return null;
     return n;
+  }
+
+  // The lists the page ships with (same as the Apps Script defaults), used until the Sheet's options arrive.
+  function builtinOptions() {
+    var subs = $('filterSubject') ? Array.prototype.map.call($('filterSubject').options, function (o) { return o.value; })
+      .filter(function (v) { return v && v !== 'ALL'; }) : [];
+    return {
+      subjects: subs,
+      courses: ['DSC-A', 'DSC-B', 'DSC-C', 'MDC'],
+      ecoCourses: ['DSC-A', 'DSC-B'],
+      ecoOnlyCourses: ['DSC-A'],
+      noCourseSubjects: typeof SUBJECTS_NO_COURSE !== 'undefined' ? SUBJECTS_NO_COURSE.slice() : ['ENG', 'FRENCH']
+    };
+  }
+
+  function digitsOf(s) {
+    var out = '';
+    String(s == null ? '' : s).split('').forEach(function (ch) { if (ch >= '0' && ch <= '9') out += ch; });
+    return out;
+  }
+
+  /* ---- The rules for "which subjects and courses does a semester have" ----
+     If the Editor set up that semester in Course Structure, its list is the truth: only those subjects,
+     only those courses, and a subject with no courses has no course layer.
+     If not (or for "All" sems), the shared SUBJECTS / COURSES lists from the Sheet are used, like before. */
+  function upAll(list) { return (Array.isArray(list) ? list : []).map(function (c) { return String(c).toUpperCase(); }); }
+  function semCfgOf(sem) {
+    if (!cur || !sem || sem === 'ALL' || !cur.structure) return null;
+    var c = cur.structure[digitsOf(sem)];
+    return c && Array.isArray(c.subjects) && c.subjects.length ? c : null;
+  }
+  function coursesIn(c, subject) { return upAll(c.courses && c.courses[subject]); }
+  function union(lists) {
+    var out = [];
+    lists.forEach(function (l) { l.forEach(function (x) { if (out.indexOf(x) < 0) out.push(x); }); });
+    return out;
+  }
+  function globalCourses(subject) {
+    var a = subject === 'ECO'
+      ? (cur.ecoCourses.length ? cur.ecoCourses : cur.courses)
+      : cur.courses.filter(function (c) { return cur.ecoOnlyCourses.indexOf(c) < 0; });
+    return a.length ? a : cur.courses;
+  }
+  function structureSems() {
+    return cur && cur.structure ? Object.keys(cur.structure).map(function (k) { return semCfgOf('SEM' + k); }).filter(Boolean) : [];
+  }
+
+  // An unset sem uses the shared lists only if it's in SHARED_LIST_SEMS (1–3); any other unset sem is empty.
+  function usesSharedLists(sem) {
+    if (!sem || sem === 'ALL') return true;
+    var shared = typeof SHARED_LIST_SEMS !== 'undefined' ? SHARED_LIST_SEMS : ['1', '2', '3'];
+    return shared.indexOf(digitsOf(sem)) > -1;
+  }
+
+  function subjectsForSem(sem) {
+    var c = semCfgOf(sem);
+    if (!c && !usesSharedLists(sem)) return { codes: [], noCourse: [] };
+    if (!c) return { codes: cur ? cur.subjects : [], noCourse: cur ? cur.noCourseSubjects : [] };
+    var codes = upAll(c.subjects);
+    return { codes: codes, noCourse: codes.filter(function (s) { return !coursesIn(c, s).length; }) };
+  }
+
+  // Courses a subject has in a semester. Can be [] — that means "no course layer" for that subject there.
+  function allowedCourses(subject, sem) {
+    if (!cur) return subject === 'ECO' ? ['DSC-A', 'DSC-B'] : ['DSC-B', 'DSC-C', 'MDC'];
+    var c = semCfgOf(sem);
+    if (c && upAll(c.subjects).indexOf(subject) > -1) return coursesIn(c, subject);
+    if (!c && !usesSharedLists(sem)) return [];
+    return globalCourses(subject);
+  }
+
+  function isNoCourse(subject, sem) {
+    var c = semCfgOf(sem);
+    if (c && upAll(c.subjects).indexOf(subject) > -1) return !coursesIn(c, subject).length;
+    var list = cur ? cur.noCourseSubjects : (typeof SUBJECTS_NO_COURSE !== 'undefined' ? SUBJECTS_NO_COURSE : []);
+    return list.indexOf(subject) > -1;
+  }
+
+  // What the Browse "Course" filter should offer for this subject + sem (it also has to cover "All").
+  function coursesForBrowse(subject, sem) {
+    if (!cur) return [];
+    var c = semCfgOf(sem);
+    if (subject === 'ALL') {
+      if (c) return union(upAll(c.subjects).map(function (s) { return coursesIn(c, s); }));
+      if (sem === 'ALL') return union([cur.courses].concat(structureSems().map(function (x) {
+        return union(upAll(x.subjects).map(function (s) { return coursesIn(x, s); }));
+      })));
+      return usesSharedLists(sem) ? cur.courses.slice() : [];
+    }
+    if (sem === 'ALL') {
+      return union([isNoCourse(subject, 'ALL') ? [] : globalCourses(subject)].concat(structureSems().map(function (x) { return coursesIn(x, subject); })));
+    }
+    return allowedCourses(subject, sem);
   }
 
   function fill(id, items, fallback) {
@@ -4446,22 +5542,24 @@
   }
 
   function rebuild(n) {
+    var structs = Object.keys(n.structure || {}).map(function (k) { return n.structure[k]; })
+      .filter(function (c) { return c && Array.isArray(c.subjects); });
+    var allSubjects = union([n.subjects].concat(structs.map(function (c) { return upAll(c.subjects); })));
+    var allCourses = union([n.courses].concat(structs.map(function (c) {
+      return union(Object.keys(c.courses || {}).map(function (k) { return upAll(c.courses[k]); }));
+    })));
     var labelFor = function (c) { return n.labels[c] || DEFAULT_LABELS[c] || ''; };
     var noC = function (c) { return n.noCourseSubjects.indexOf(c) > -1; };
     var ecoOnly = function (c) { return n.ecoOnlyCourses.indexOf(c) > -1; };
 
-    fill('filterSubject', [{ v: 'ALL', t: 'All Subjects' }].concat(n.subjects.map(function (c) {
-      return { v: c, t: c + (noC(c) ? ' (Common — No Course Layer)' : (labelFor(c) ? ' (' + labelFor(c) + ')' : '')) };
-    })), 'ALL');
-    fill('upSubject', n.subjects.map(function (c) {
-      return { v: c, t: c + (noC(c) ? ' (No Course Layer)' : (labelFor(c) ? ' (' + labelFor(c) + ')' : '')) };
-    }));
+    var subjText = function (c) { return c + (labelFor(c) ? ' (' + labelFor(c) + ')' : ''); };
+    fill('filterSubject', [{ v: 'ALL', t: 'All Subjects' }].concat(allSubjects.map(function (c) { return { v: c, t: subjText(c) }; })), 'ALL');
+    fill('upSubject', allSubjects.map(function (c) { return { v: c, t: subjText(c) }; }));
+    fill('editModalSubject', allSubjects.map(function (c) { return { v: c, t: subjText(c) }; }));
 
-    fill('filterCourse', [{ v: 'ALL', t: 'All Courses (DSC / MDC)' }].concat(n.courses.map(function (c) {
-      return { v: c, t: c + (ecoOnly(c) ? ' (Eco Core)' : '') };
-    })), 'ALL');
-    fill('upCourse', n.courses.map(function (c) { return { v: c, t: c + (ecoOnly(c) ? ' (Eco)' : '') }; }));
-    fill('editModalCourse', n.courses.map(function (c) { return { v: c, t: c }; }).concat([{ v: 'NONE', t: 'NONE (Eng/French)' }]));
+    fill('filterCourse', [{ v: 'ALL', t: 'All Courses' }].concat(allCourses.map(function (c) { return { v: c, t: c }; })), 'ALL');
+    fill('upCourse', allCourses.map(function (c) { return { v: c, t: c }; }));
+    fill('editModalCourse', allCourses.map(function (c) { return { v: c, t: c }; }).concat([{ v: 'NONE', t: 'No course (files go by month)' }]));
 
     var mods = n.modules;
     fill('filterModule', [{ v: 'ALL', t: 'All Modules' }].concat(mods.map(function (m) { return { v: 'MODULE ' + m, t: 'Module ' + m }; }),
@@ -4500,6 +5598,7 @@
       }
     } catch (e) {}
     rebuild(n);
+    try { cascadeAll(); } catch (e) {}
     if (!fromCache) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(raw)); } catch (e) {} }
     readout(true, fromCache);
     refreshAll();
@@ -4507,17 +5606,75 @@
     try { if (typeof renderBrowse === 'function') renderBrowse(); } catch (e) {}
   }
 
-  function allowedCourses(subject) {
-    if (!cur) return subject === 'ECO' ? ['DSC-A', 'DSC-B'] : ['DSC-B', 'DSC-C', 'MDC'];
-    var a = subject === 'ECO'
-      ? (cur.ecoCourses.length ? cur.ecoCourses : cur.courses)
-      : cur.courses.filter(function (c) { return cur.ecoOnlyCourses.indexOf(c) < 0; });
-    return a.length ? a : cur.courses;
+  // Narrows a subject <select> (filterSubject / upSubject) down to the subjects set up for one semester,
+  // leaving every option in place (just disabled/hidden) so nothing about the select's id, value or
+  // listeners changes — the same trick the Upload form already uses to restrict Course by Subject.
+  function applySemFilter(selId, sem) {
+    var sel = $(selId);
+    if (!sel || !cur) return;
+    // "All sems" shows every subject that exists anywhere; one sem shows only that sem's subjects.
+    var allowed = (!sem || sem === 'ALL')
+      ? union([cur.subjects].concat(structureSems().map(function (c) { return upAll(c.subjects); })))
+      : subjectsForSem(sem).codes;
+    Array.prototype.forEach.call(sel.options, function (o) {
+      if (o.value === 'ALL') return;
+      var ok = allowed.indexOf(o.value) > -1;
+      o.disabled = !ok; o.hidden = !ok;
+    });
+    if (sel.value !== 'ALL' && allowed.indexOf(sel.value) === -1) {
+      var hasAll = Array.prototype.some.call(sel.options, function (o) { return o.value === 'ALL'; });
+      if (!allowed.length && !hasAll) { sel.value = ''; return; } // sem not set up: show nothing selected
+      sel.value = allowed[0] || 'ALL';
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
+
+  // Same idea for a Course <select>: only the courses that apply stay visible.
+  // hasAll: the select has an "All" option to fall back to. keep: a value to leave selected even if it no longer
+  // applies (so opening an old note never silently changes its course).
+  function applyCourseFilter(selId, allowed, hasAll, keep) {
+    var sel = $(selId);
+    if (!sel || !cur) return;
+    Array.prototype.forEach.call(sel.options, function (o) {
+      if (o.value === 'ALL' || o.value === 'NONE') { o.disabled = false; o.hidden = false; return; }
+      var ok = allowed.indexOf(o.value) > -1 || o.value === keep;
+      o.disabled = !ok; o.hidden = !ok;
+    });
+    var v = sel.value;
+    if (v === keep || v === 'ALL' || v === 'NONE' || allowed.indexOf(v) > -1) return;
+    sel.value = hasAll ? 'ALL' : (allowed[0] || 'NONE');
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  // Browse filters: Sem → Subject → Course.
+  function cascadeBrowse() {
+    var sem = $('filterSem') ? $('filterSem').value : 'ALL';
+    applySemFilter('filterSubject', sem);
+    var subj = $('filterSubject') ? $('filterSubject').value : 'ALL';
+    applyCourseFilter('filterCourse', coursesForBrowse(subj, sem), true);
+  }
+  // Note details popup (Editor): Sem → Subject → Course, keeping the note's current course visible.
+  function cascadeEditModal(keepCourse) {
+    var sem = $('editModalSem') ? $('editModalSem').value : '';
+    applySemFilter('editModalSubject', sem);
+    var subj = $('editModalSubject') ? $('editModalSubject').value : '';
+    var sel = $('editModalCourse');
+    if (sel && isNoCourse(subj, sem) && keepCourse === undefined) { sel.value = 'NONE'; }
+    applyCourseFilter('editModalCourse', allowedCourses(subj, sem), false, keepCourse);
+  }
+  function cascadeAll() {
+    cascadeBrowse();
+    if ($('upSem')) applySemFilter('upSubject', $('upSem').value);
   }
 
   window.DeptOptions = {
     apply: function (o) { try { apply(o, false); } catch (e) {} },
     allowedCourses: allowedCourses,
+    isNoCourse: isNoCourse,
+    subjectsForSem: subjectsForSem,
+    applySemFilter: function (selId, sem) { try { applySemFilter(selId, sem); } catch (e) {} },
+    cascadeBrowse: function () { try { cascadeBrowse(); } catch (e) {} },
+    cascadeEditModal: function (keep) { try { cascadeEditModal(keep); } catch (e) {} },
     get: function () { return cur; }
   };
 
@@ -4526,7 +5683,7 @@
      Each native <select> stays in the page (hidden) as the source of truth, so every existing
      id, .value read and change/input listener keeps working. We only draw a nicer control on top.
      ============================================================================================ */
-  var DROPDOWNS = ['filterSem', 'filterSubject', 'filterCourse', 'filterModule', 'filterMonth', 'upSem', 'upSubject', 'upCourse', 'editModalCourse', 'editModalModule', 'editModalMonth', 'mergeSubject', 'mergeCourse'];
+  var DROPDOWNS = ['filterSem', 'filterSubject', 'filterCourse', 'filterModule', 'filterMonth', 'filterBatch', 'upSem', 'upSubject', 'upCourse', 'editModalCourse', 'editModalModule', 'editModalMonth', 'editModalSem', 'editModalSubject', 'mergeSubject', 'mergeCourse'];
   var CHIPS = ['filterType', 'upType', 'upScope', 'upMonth', 'upModule'];
   var COMPACT = ['filterType', 'upMonth', 'upModule'];
   var TITLES = { filterMonth: 'Month Filter' };
@@ -4690,6 +5847,7 @@
       btn.innerHTML = '<span class="tsel-glyph" aria-hidden="true">⬡</span><span class="tsel-val"></span><span class="tsel-caret" aria-hidden="true">▾</span>';
       host.appendChild(btn);
       if (id === 'filterMonth') host.style.minWidth = '150px';
+      if (id === 'filterBatch') host.style.minWidth = '170px';
       ctl.btn = btn;
       ctl.render = function () {
         var o = selectedOption(sel);
@@ -4766,6 +5924,13 @@
       var raw = localStorage.getItem(CACHE_KEY);
       if (raw) apply(JSON.parse(raw), true);
     } catch (e) {}
+    // No sync yet (offline, old script, first visit): run the per-sem rules on the built-in lists, so
+    // SEM 4–10 stay empty instead of showing SEM 1–3's subjects. The first real sync replaces this.
+    if (!cur) {
+      cur = normalise(builtinOptions());
+      try { cascadeAll(); } catch (e) {}
+      try { if (typeof updateUploadPreview === 'function') updateUploadPreview(); } catch (e) {}
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
