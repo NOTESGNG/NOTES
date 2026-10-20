@@ -1159,6 +1159,34 @@
       margin: 0 0 12px; font: 500 10.5px/1.55 var(--font-mono); letter-spacing: 0.05em; color: var(--text-dim);
     }
     html[data-theme] #mergeGroupNote b { color: var(--eyebrow); font-weight: 700; }
+
+    /* ---- leftover colours from newer panels, mapped onto the tokens ---- */
+    html[data-theme] .border-rose-200 { border-color: var(--bad-line); }
+    html[data-theme] .text-rose-500 { color: var(--bad-text); }
+    html[data-theme] .bg-white\/70 { background-color: var(--surface-2); }
+    html[data-theme] .border-indigo-200\/60 { border-color: var(--primary-line); }
+    html[data-theme] .bg-purple-600 { background-color: var(--accent-3); }
+    html[data-theme] :is(.hover\:text-rose-600, .hover\:text-rose-700):hover { color: var(--bad-text); }
+    html[data-theme] :is(.hover\:text-indigo-600, .hover\:text-indigo-700):hover { color: var(--link); }
+
+    /* ---- Course Structure editor: dropdown row + course chips ---- */
+    html[data-theme] #structSemSelect ~ .tsel, html[data-theme] #structCopyFromSelect ~ .tsel { flex: 0 1 auto; }
+    html[data-theme] #structOverrideBadge { font-family: var(--font-mono); letter-spacing: 0.06em; border-radius: var(--r-pill); }
+    html[data-theme] #structSubjectRows > div { border-radius: var(--r-tile); }
+    html[data-theme] #structSubjectRows :is([data-rm-course], [data-add-course], input[data-new-course]) {
+      font-family: var(--font-mono); letter-spacing: 0.05em; min-height: 32px;
+    }
+    html[data-theme] #structSubjectRows [data-add-course] { border-color: var(--text-faint); color: var(--text-dim); }
+    html[data-theme="matinee"] #structSubjectRows :is([data-rm-course], [data-add-course]) { box-shadow: 2px 2px 0 #111315; }
+
+    /* ---- Join Class: known batch codes as chips ---- */
+    html[data-theme] #batchKnownList > button {
+      min-height: 36px; padding: 6px 12px; border-radius: 12px;
+      background-color: var(--field); color: var(--text); border: var(--border-w) solid var(--border-color);
+      font: 600 11.5px/1.15 var(--font-mono); letter-spacing: 0.05em;
+    }
+    html[data-theme] #batchKnownList > button:hover { border-color: var(--primary-line); filter: none; }
+    html[data-theme="matinee"] #batchKnownList > button { box-shadow: 2px 2px 0 #111315; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
@@ -1642,7 +1670,7 @@
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2 mb-3 pb-3 border-b border-slate-100">
-            <label class="text-xs font-medium text-slate-600">Editing Semester</label>
+            <label for="structSemSelect" class="text-xs font-medium text-slate-600">Editing Semester</label>
             <select id="structSemSelect" class="rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs font-medium">
               <option value="1">SEM 1</option><option value="2">SEM 2</option><option value="3">SEM 3</option>
               <option value="4">SEM 4</option><option value="5">SEM 5</option><option value="6">SEM 6</option>
@@ -1650,7 +1678,7 @@
             </select>
             <span id="structOverrideBadge" class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 border border-slate-200">Not set up yet</span>
             <span class="flex-1"></span>
-            <label class="text-xs font-medium text-slate-600">Copy from</label>
+            <label for="structCopyFromSelect" class="text-xs font-medium text-slate-600">Copy from</label>
             <select id="structCopyFromSelect" class="rounded-lg border border-slate-300 bg-slate-50 px-2.5 py-1.5 text-xs">
               <option value="">Shared lists (Setup)</option>
               <option value="1">SEM 1</option><option value="2">SEM 2</option><option value="3">SEM 3</option>
@@ -2344,7 +2372,7 @@
 
     // Actions that need the Editor PIN. This ONE list is used by the app (to attach the PIN) AND written into the
     // generated Apps Script (to check it), so the two can never disagree. Add new editor actions here only.
-    const EDITOR_ACTIONS = ['approve', 'reject', 'editProps', 'delete', 'verifyPin', 'getConfig', 'setForwardUrl', 'setRootFolder', 'postNotice', 'deleteNotice', 'saveStructure'];
+    const EDITOR_ACTIONS = ['approve', 'reject', 'editProps', 'delete', 'verifyPin', 'getConfig', 'setForwardUrl', 'setRootFolder', 'postNotice', 'deleteNotice', 'saveStructure', 'getFileData'];
 
     function lockEditor() {
       state.editorUnlocked = false;
@@ -2937,7 +2965,7 @@
         '// never by its row number, so sorting, filtering, inserting or deleting rows in the Sheet can no longer',
         '// make an approve / delete / like land on the wrong file.',
         'const RECORD_ID_HEADER = "Record ID";',
-        'const ROW_ACTIONS = ["approve", "reject", "like", "editProps", "delete"];',
+        'const ROW_ACTIONS = ["approve", "reject", "like", "editProps", "delete", "getFileData"];',
         '',
         'const EDITOR_ACTIONS = ' + JSON.stringify(EDITOR_ACTIONS) + '; // written from the app\'s own list so they always match',
         '',
@@ -3417,6 +3445,17 @@
         '',
         '    if (ROW_ACTIONS.indexOf(body.action) > -1 && targetRow < 2) {',
         '      return jsonResponse({ ok: false, error: "That file was not found (it may have been removed, or this page is out of date) - refresh and try again" });',
+        '    }',
+        '',
+        '    // Hands one note\'s bytes to the Editor\'s browser so the month-end merger can stitch daily notes into one PDF.',
+        '    // (Google Docs/Slides come back already converted to PDF by getBlob.)',
+        '    if (body.action === "getFileData" && targetRow >= 2) {',
+        '      const link = (idx("File Link") > 0 ? sheet.getRange(targetRow, idx("File Link")).getValue() : "") || sheet.getRange(targetRow, COL.FILE + 1).getValue();',
+        '      if (!clean(link)) return jsonResponse({ ok: false, error: "This note has no file attached" });',
+        '      const srcFile = getFileFromFormUpload(link);',
+        '      if (srcFile.getSize() > 20 * 1024 * 1024) return jsonResponse({ ok: false, error: "File is over 20 MB" });',
+        '      const srcBlob = srcFile.getBlob();',
+        '      return jsonResponse({ ok: true, name: srcFile.getName(), mimeType: srcBlob.getContentType(), base64Data: Utilities.base64Encode(srcBlob.getBytes()) });',
         '    }',
         '',
         '    if (body.action === "upload") {',
@@ -5030,8 +5069,159 @@
         if (state.liveWebAppUrl) await syncFromLiveDrive(true);
       });
 
-      document.getElementById('btnMergeSelectedDaily').addEventListener('click', () => {
-        showToast('Combining daily notes into one PDF is not available yet — the Web App cannot merge PDFs inside Drive.', 'warn');
+      // ---- Month-end merger: the browser pulls each ticked daily note from Drive ONE AT A TIME (so a big month never piles
+      // up in memory), stitches them into one PDF with pdf-lib, then files it through the normal upload + approve.
+      // The original daily notes are left untouched.
+      const MERGE_MAX_BYTES = 35 * 1024 * 1024;   // Apps Script rejects much bigger POST bodies once base64-encoded
+      let pdfLibPromise = null;
+      function loadPdfLib() {
+        if (window.PDFLib) return Promise.resolve(window.PDFLib);
+        if (!pdfLibPromise) {
+          pdfLibPromise = new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js';
+            s.onload = () => window.PDFLib ? resolve(window.PDFLib) : reject(new Error('the PDF tool did not load'));
+            s.onerror = () => { pdfLibPromise = null; reject(new Error('could not load the PDF tool — check your internet')); };
+            document.head.appendChild(s);
+          });
+        }
+        return pdfLibPromise;
+      }
+      function base64ToBytes(b64) {
+        const bin = atob(b64);
+        const out = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+        return out;
+      }
+      function mostCommon(list) {
+        const n = {};
+        let best = list[0];
+        list.forEach(v => { n[v] = (n[v] || 0) + 1; if (n[v] > n[best]) best = v; });
+        return best;
+      }
+      // Any other image the browser can open (webp, gif, bmp...) is redrawn as a JPEG so pdf-lib can embed it.
+      async function imageToJpegBytes(bytes, mime) {
+        const bmp = await createImageBitmap(new Blob([bytes], { type: mime || 'image/*' }));
+        const scale = Math.min(1, 3000 / Math.max(bmp.width, bmp.height));
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(bmp.width * scale));
+        c.height = Math.max(1, Math.round(bmp.height * scale));
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(bmp, 0, 0, c.width, c.height);
+        if (bmp.close) bmp.close();
+        const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.85));
+        c.width = c.height = 0;
+        if (!blob) throw new Error('image could not be converted');
+        return new Uint8Array(await blob.arrayBuffer());
+      }
+      // Adds one note to the merged PDF: PDFs keep their pages, photos become one A4 page each (fitted, centred).
+      async function appendToMergedPdf(out, bytes, mime, PDFLib) {
+        const isPdf = bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46;   // %PDF
+        if (isPdf) {
+          const src = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+          const pages = await out.copyPages(src, src.getPageIndices());
+          pages.forEach(p => out.addPage(p));
+          return;
+        }
+        const isJpg = bytes[0] === 0xFF && bytes[1] === 0xD8;
+        const isPng = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47;
+        const img = isPng ? await out.embedPng(bytes) : await out.embedJpg(isJpg ? bytes : await imageToJpegBytes(bytes, mime));
+        const W = 595.28, H = 841.89, M = 18;
+        const s = Math.min((W - 2 * M) / img.width, (H - 2 * M) / img.height);
+        const w = img.width * s, h = img.height * s;
+        out.addPage([W, H]).drawImage(img, { x: (W - w) / 2, y: (H - h) / 2, width: w, height: h });
+      }
+
+      document.getElementById('btnMergeSelectedDaily').addEventListener('click', async () => {
+        const btn = document.getElementById('btnMergeSelectedDaily');
+        if (btn.disabled) return;
+        if (!state.liveWebAppUrl) { showToast('Not connected to a Drive.', 'warn'); return; }
+        if (!state.editorUnlocked) { showToast('Unlock the Editor Console first.', 'warn'); return; }
+
+        const ids = Array.from(document.querySelectorAll('#dailyMergeList .daily-merge-check:checked')).map(cb => cb.value);
+        const picked = ids.map(id => state.files.find(f => f.id === id && f.approved && f.scope === 'DAILY')).filter(Boolean);
+        if (picked.length < 2) { showToast('Tick at least two daily notes to combine.', 'warn'); return; }
+        const subject = picked[0].subject, course = picked[0].course;
+        if (picked.some(f => f.subject !== subject || f.course !== course)) {
+          showToast('Only daily notes from the same subject + course can be combined.', 'warn');
+          return;
+        }
+        const month = mostCommon(picked.map(f => f.month));
+        const titleBox = document.getElementById('mergedMonthTitle');
+        const title = UP(titleBox.value) || ('COMBINED_DAILY_' + month);
+
+        const idleText = btn.textContent;
+        btn.disabled = true;
+        const skipped = [];
+        try {
+          btn.textContent = 'Loading PDF tool...';
+          const PDFLib = await loadPdfLib();
+          const out = await PDFLib.PDFDocument.create();
+          for (let i = 0; i < picked.length; i++) {
+            const f = picked[i];
+            btn.textContent = 'Merging ' + (i + 1) + ' of ' + picked.length + '...';
+            const res = await postToLiveDrive({ action: 'getFileData', recordId: f.id }, true);
+            if (res && res.error === 'Wrong editor PIN') return;
+            if (res && res.ok === false && String(res.error).indexOf('out of date') > -1) throw new Error(res.error);
+            if (!res || !res.ok || !res.base64Data) {
+              skipped.push(f.displayName + (res && res.error ? ' (' + res.error + ')' : ' (no answer from Drive)'));
+              continue;
+            }
+            try {
+              let bytes = base64ToBytes(res.base64Data);
+              res.base64Data = '';
+              await appendToMergedPdf(out, bytes, res.mimeType, PDFLib);
+              bytes = null;
+            } catch (err) {
+              skipped.push(f.displayName + ' (file type could not be read)');
+            }
+          }
+          if (out.getPageCount() === 0) {
+            showToast('Nothing could be combined: ' + skipped.join(', '), 'warn');
+            return;
+          }
+
+          btn.textContent = 'Saving to Drive...';
+          out.setTitle(title);
+          const pdfBytes = await out.save();
+          if (pdfBytes.length > MERGE_MAX_BYTES) {
+            showToast('The combined PDF is ' + (pdfBytes.length / 1048576).toFixed(1) + ' MB — too big to save. Untick some notes and combine in two parts.', 'warn');
+            return;
+          }
+          const b64 = await fileToBase64(new Blob([pdfBytes], { type: 'application/pdf' }));
+          const saved = await postToLiveDrive({
+            action: 'upload',
+            name: title,
+            month,
+            sem: mostCommon(picked.map(f => f.sem)),
+            subject,
+            course,
+            contentType: mostCommon(picked.map(f => f.contentType)),
+            module: mostCommon(picked.map(f => f.module)),
+            scope: 'COMPLETE',
+            topics: ('Combined daily notes: ' + Array.from(new Set(picked.map(f => f.topics).filter(Boolean))).join('; ')).slice(0, 300),
+            batch: mostCommon(picked.map(f => f.batch || '')),
+            fileName: title + '.pdf',
+            base64Data: b64,
+            mimeType: 'application/pdf'
+          }, true);
+          if (!saved || !saved.ok) {
+            showToast('Could not save the combined PDF: ' + ((saved && saved.error) || 'no answer from the Drive script'), 'warn');
+            return;
+          }
+          const ap = await postToLiveDrive({ action: 'approve', recordId: saved.recordId });
+          await syncFromLiveDrive(true);
+          const extra = skipped.length ? ' Skipped: ' + skipped.join(', ') + '.' : '';
+          if (ap && ap.ok) showToast('✅ Combined ' + (picked.length - skipped.length) + ' daily notes into "' + title + '" — live in Browse.' + extra, skipped.length ? 'warn' : 'success');
+          else showToast('Combined PDF saved, but it is waiting in Pending — approve it there.' + extra, 'warn');
+        } catch (err) {
+          showToast('Merge failed: ' + (err && err.message ? err.message : err), 'warn');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = idleText;
+        }
       });
 
       document.getElementById('btnPostAnnouncement').addEventListener('click', async () => {
@@ -5683,7 +5873,7 @@
      Each native <select> stays in the page (hidden) as the source of truth, so every existing
      id, .value read and change/input listener keeps working. We only draw a nicer control on top.
      ============================================================================================ */
-  var DROPDOWNS = ['filterSem', 'filterSubject', 'filterCourse', 'filterModule', 'filterMonth', 'filterBatch', 'upSem', 'upSubject', 'upCourse', 'editModalCourse', 'editModalModule', 'editModalMonth', 'editModalSem', 'editModalSubject', 'mergeSubject', 'mergeCourse'];
+  var DROPDOWNS = ['filterSem', 'filterSubject', 'filterCourse', 'filterModule', 'filterMonth', 'filterBatch', 'upSem', 'upSubject', 'upCourse', 'editModalCourse', 'editModalModule', 'editModalMonth', 'editModalSem', 'editModalSubject', 'mergeSubject', 'mergeCourse', 'structSemSelect', 'structCopyFromSelect'];
   var CHIPS = ['filterType', 'upType', 'upScope', 'upMonth', 'upModule'];
   var COMPACT = ['filterType', 'upMonth', 'upModule'];
   var TITLES = { filterMonth: 'Month Filter' };
@@ -5848,6 +6038,8 @@
       host.appendChild(btn);
       if (id === 'filterMonth') host.style.minWidth = '150px';
       if (id === 'filterBatch') host.style.minWidth = '170px';
+      if (id === 'structSemSelect') host.style.minWidth = '130px';
+      if (id === 'structCopyFromSelect') host.style.minWidth = '190px';
       ctl.btn = btn;
       ctl.render = function () {
         var o = selectedOption(sel);
