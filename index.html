@@ -1115,12 +1115,26 @@
     html[data-theme="midnight"] #pvModal .pv-no { box-shadow: 0 0 18px -6px rgba(244, 63, 94, 0.7); }
     #pvModal .pv-btn:hover { transform: translateY(-1px); }
     #pvModal .pv-ok:active, #pvModal .pv-no:active { transform: scale(0.94) skewX(-5deg); transition-duration: 70ms; }
+    #pvModal .pv-btn[hidden] { display: none; }
+
+    /* Full screen: the viewer fills the whole screen (real Fullscreen API where the browser allows it,
+       this class everywhere, so phones that block it - iPhone - still get the same full-screen view). */
+    #pvModal.pv-max, #pvModal:fullscreen {
+      inset: 0; width: 100vw; height: 100vh; height: 100dvh; max-width: none; margin: 0;
+      border: 0; border-radius: 0; box-shadow: none;
+    }
+    #pvModal.pv-max .pv-meta { display: none; }
+    #pvModal.pv-max .pv-head { padding-top: calc(10px + env(safe-area-inset-top, 0px)); padding-bottom: 10px; }
+    #pvModal.pv-max .pv-eyebrow, #pvModal.pv-max .pv-path { display: none; }
+    #pvModal.pv-max .pv-actions { padding-top: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
 
     @media (max-width: 639px) {
       #pvModal { inset: auto 0 0 0; width: 100%; height: 94vh; height: 94dvh; border-radius: 22px 22px 0 0; margin: 0; }
       #pvModal.on { animation-name: pvSheet; }
       #pvModal .pv-actions .pv-btn { flex: 1 1 calc(50% - 10px); }
       #pvModal .pv-actions .pv-open { flex-basis: 100%; margin-right: 0; order: -1; }
+      #pvModal.pv-max .pv-actions .pv-open { display: none; }   /* full screen: just Download + Exit, more room for the file */
+      #pvModal.pv-max { border-radius: 0; }
     }
     @keyframes pvSheet { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: none; } }
     @media (prefers-reduced-motion: reduce) {
@@ -2174,6 +2188,12 @@
     // ---- Auto-CAPS layer: everything except Topics is normalised so typing style never matters ----
     function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
     function safeUrl(u) { return String(u || '').toLowerCase().indexOf('https://') === 0 ? String(u) : ''; }
+    // Direct-download link for a Google Drive file link ('' if it isn't one).
+    function driveDownloadUrl(u) {
+      const s = safeUrl(u);
+      const m = /\/d\/([A-Za-z0-9_-]{10,})/.exec(s) || /[?&]id=([A-Za-z0-9_-]{10,})/.exec(s);
+      return m ? 'https://drive.google.com/uc?export=download&id=' + m[1] : '';
+    }
     function UP(s) { return String(s == null ? '' : s).trim().replace(/\s+/g, ' ').toUpperCase(); }
     function extractDigits(s) {
       let out = '';
@@ -2999,12 +3019,21 @@
 
       const previewBox = document.getElementById('modalPreviewBox');
       if (safeUrl(f.fileUrl)) {
+        const dl = driveDownloadUrl(f.fileUrl);
         previewBox.innerHTML = `
-          <p class="font-bold text-sm mb-2">Live Google Drive File (${esc(f.displayName)})</p>
-          <a href="${esc(safeUrl(f.fileUrl))}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
-            🔗 Open File Directly in Google Drive
-          </a>
+          <p class="font-bold text-sm mb-3">Live Google Drive File (${esc(f.displayName)})</p>
+          <div class="flex flex-wrap items-center justify-center gap-2">
+            <button type="button" data-view-file="${esc(f.id)}" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">
+              ${f.contentType === 'CLASS VIDEOS' ? '▶️ Watch here' : '👁 View here'}
+            </button>
+            ${dl ? `<a href="${esc(dl)}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-white text-slate-900 text-xs font-semibold transition">⬇️ Download</a>` : ''}
+            <a href="${esc(safeUrl(f.fileUrl))}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold transition">
+              🔗 Open in Drive
+            </a>
+          </div>
         `;
+        const viewBtn = previewBox.querySelector('[data-view-file]');
+        viewBtn.addEventListener('click', () => { if (window.DeptViewer) window.DeptViewer.open(f.id, viewBtn); });
       } else if (f.contentType === 'CLASS VIDEOS') {
         previewBox.innerHTML = `
           <div class="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-xl mb-2">▶️</div>
@@ -6457,9 +6486,18 @@
   }
 
   /* =====================================================================
-     PART 1  Pending-review file viewer
+     PART 1  In-app file viewer
+     Two modes: 'pending' (Editor tab: Approve / Reject) and 'file' (Browse: any approved note).
+     Both get Download and Full screen. Going back: "Exit full screen", ✕, Esc, or the phone/browser Back button
+     (Back closes the viewer and returns to what was underneath).
      ===================================================================== */
-  var pv = null, curId = null, lastTrigger = null, slowT = null;
+  var pv = null, curId = null, curMode = 'pending', lastTrigger = null, slowT = null;
+  // Back button: opening the viewer adds ONE history entry ({ pvViewer: 1 }) during the tap itself, so the phone/browser
+  // Back button closes the viewer (and its full screen) and returns to the page underneath instead of leaving the app.
+  // Entries are only ever added during a tap: Chrome skips entries added any other way, which would make Back leave the app.
+  // (On Android in real full screen, the system Back first leaves full screen by itself; fullscreenchange keeps us in step.)
+  // backPending: we called history.back() ourselves (✕ / Esc / Approve) and its popstate hasn't arrived yet.
+  var backPending = false;
 
   function build() {
     if (pv) return pv;
@@ -6468,7 +6506,7 @@
     box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true'); box.setAttribute('aria-labelledby', 'pvTitle');
     box.innerHTML =
       '<div class="pv-head">' +
-        '<div style="min-width:0"><span class="pv-eyebrow">◈ Pending Review · File Check</span>' +
+        '<div style="min-width:0"><span class="pv-eyebrow" id="pvEyebrow">◈ Pending Review · File Check</span>' +
         '<h3 class="pv-title" id="pvTitle"></h3><p class="pv-path" id="pvPath"></p></div>' +
         '<button type="button" class="pv-x" aria-label="Close viewer">✕</button>' +
       '</div>' +
@@ -6481,19 +6519,32 @@
       '<div class="pv-meta" id="pvMeta"></div>' +
       '<div class="pv-actions">' +
         '<a class="pv-btn pv-open" id="pvOpen" target="_blank" rel="noopener noreferrer">🔗 Open in Drive</a>' +
+        '<a class="pv-btn" id="pvDownload" target="_blank" rel="noopener noreferrer">⬇️ Download</a>' +
+        '<button type="button" class="pv-btn" id="pvFull">⛶ Full screen</button>' +
         '<button type="button" class="pv-btn pv-no" id="pvReject">✕ Reject</button>' +
         '<button type="button" class="pv-btn pv-ok" id="pvApprove">✅ Approve</button>' +
       '</div>';
     document.body.appendChild(scrim); document.body.appendChild(box);
     pv = { scrim: scrim, box: box, frame: $('pvFrame'), stage: $('pvStage'), loading: $('pvLoading'), msg: $('pvMsg') };
 
-    scrim.addEventListener('click', closeViewer);
-    box.querySelector('.pv-x').addEventListener('click', closeViewer);
+    scrim.addEventListener('click', function () { closeViewer(); });
+    box.querySelector('.pv-x').addEventListener('click', function () { closeViewer(); });
     $('pvApprove').addEventListener('click', function () { act('approve'); });
     $('pvReject').addEventListener('click', function () { act('reject'); });
+    $('pvFull').addEventListener('click', function () { setFull(!isFull()); });
     pv.frame.addEventListener('load', function () { if (pv.frame.getAttribute('src')) setLoading(false); });
+    ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+      document.addEventListener(ev, function () {
+        // The browser left real full screen (its own Esc / gesture): drop back to the normal viewer too.
+        if (!fullscreenEl() && pv.box.classList.contains('pv-max') && pv.realFull) setFull(false);
+      });
+    });
     box.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') { e.preventDefault(); closeViewer(); return; }
+      if (e.key === 'Escape') {
+        e.preventDefault(); e.stopPropagation();   // don't let the page's Esc also close the note details behind
+        if (isFull()) setFull(false); else closeViewer();
+        return;
+      }
       if (e.key !== 'Tab') return;
       var f = Array.prototype.filter.call(box.querySelectorAll('button, a[href]'), function (n) { return n.getAttribute('aria-disabled') !== 'true' && !n.disabled; });
       if (!f.length) return;
@@ -6507,34 +6558,87 @@
   function setLoading(on) { if (pv) pv.loading.classList.toggle('on', !!on); if (!on) clearTimeout(slowT); }
   function showMsg(html) { pv.msg.innerHTML = html; pv.msg.classList.add('on'); }
 
-  function openViewer(id, trigger) {
+  function setLink(el, href) {
+    if (href) { el.setAttribute('href', href); el.removeAttribute('aria-disabled'); }
+    else { el.removeAttribute('href'); el.setAttribute('aria-disabled', 'true'); }
+  }
+
+  // ---- full screen ----
+  function fullscreenEl() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
+  function isFull() { return !!pv && pv.box.classList.contains('pv-max'); }
+  function updateFullBtn() {
+    var on = isFull();
+    $('pvFull').textContent = on ? '⤡ Exit full screen' : '⛶ Full screen';
+    $('pvFull').setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  function setFull(on) {
+    if (!pv || on === isFull()) return;
+    if (on) {
+      pv.box.classList.add('pv-max');   // works everywhere, even where the browser refuses real full screen (iPhone)
+      pv.realFull = false;
+      var req = pv.box.requestFullscreen || pv.box.webkitRequestFullscreen;
+      if (req) {
+        try {
+          var r = req.call(pv.box);
+          if (r && r.then) r.then(function () { pv.realFull = true; }, function () {});
+          else pv.realFull = true;
+        } catch (e) {}
+      }
+    } else {
+      pv.box.classList.remove('pv-max');
+      pv.realFull = false;
+      if (fullscreenEl()) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }
+    }
+    updateFullBtn();
+  }
+
+  // ---- Back button ----
+  function viewerOpen() { return !!pv && pv.box.classList.contains('on'); }
+  function ownsEntry() { return !!(history.state && history.state.pvViewer); }
+  window.addEventListener('popstate', function () {
+    if (backPending) { backPending = false; return; }   // the history.back() we asked for has landed
+    if (viewerOpen() && !ownsEntry()) closeViewer(true);
+  });
+
+  function findItem(id, mode) {
     var s = appState();
-    var p = s && s.pending ? s.pending.filter(function (x) { return x.id === id; })[0] : null;
+    var list = s ? (mode === 'file' ? s.files : s.pending) : null;
+    return list ? list.filter(function (x) { return x.id === id; })[0] || null : null;
+  }
+
+  function openViewer(id, trigger, mode) {
+    mode = mode === 'file' ? 'file' : 'pending';
+    var p = findItem(id, mode);
     if (!p) return;
     build();
-    curId = id; lastTrigger = trigger || null;
+    curId = id; curMode = mode; lastTrigger = trigger || null;
+    var isFile = mode === 'file';
 
     var path = '';
     try { if (typeof buildDrivePath === 'function') path = buildDrivePath(p); } catch (e) {}
+    $('pvEyebrow').textContent = isFile ? '◈ Archive · View File' : '◈ Pending Review · File Check';
     $('pvTitle').textContent = p.displayName || '';
-    $('pvPath').textContent = path ? 'Target Path: ' + path : '';
+    $('pvPath').textContent = path ? (isFile ? 'Folder: ' : 'Target Path: ') + path : '';
+    $('pvApprove').hidden = isFile;
+    $('pvReject').hidden = isFile;
 
     var chips = '<div class="pv-chips">' +
       '<span class="pv-chip pv-type">' + esc(p.contentType) + '</span>' +
-      '<span class="pv-chip">' + esc(p.scope) + '</span>' +
+      (isFile ? '' : '<span class="pv-chip">' + esc(p.scope) + '</span>') +
       '<span class="pv-chip">' + esc(p.sem) + ' · ' + esc(p.subject) + (p.course && p.course !== 'NONE' ? ' · ' + esc(p.course) : '') + '</span>' +
       '<span class="pv-chip">' + esc(p.module) + '</span>' +
       (p.size ? '<span class="pv-chip">' + esc(p.size) + '</span>' : '') +
+      (isFile ? '<span class="pv-chip">👍 ' + esc(p.likes) + '</span>' : '') +
       '<span class="pv-chip">by ' + esc(p.name) + '</span></div>';
     $('pvMeta').innerHTML = chips +
       '<p class="pv-topics"><b>Topics</b>' + esc(p.topics) + '</p>' +
       (p.note ? '<p class="pv-note">⚠ ' + esc(p.note) + '</p>' : '') +
-      '<p class="pv-hint">◈ Preview blank or blocked? Some in-app browsers refuse embedded Drive — use “Open in Drive”.</p>';
+      '<p class="pv-hint">◈ Preview blank or blocked? Some in-app browsers refuse embedded Drive — use “Open in Drive” or “Download”.</p>';
 
     var url = httpsUrl(p.fileUrl), did = driveId(url);
-    var open = $('pvOpen');
-    if (url) { open.setAttribute('href', url); open.removeAttribute('aria-disabled'); }
-    else { open.removeAttribute('href'); open.setAttribute('aria-disabled', 'true'); }
+    setLink($('pvOpen'), url);
+    setLink($('pvDownload'), did ? 'https://drive.google.com/uc?export=download&id=' + did : '');
+    pv.box.classList.remove('pv-max'); pv.realFull = false; updateFullBtn();
 
     pv.msg.classList.remove('on'); pv.msg.innerHTML = '';
     pv.frame.removeAttribute('src');
@@ -6553,11 +6657,18 @@
 
     pv.scrim.classList.add('on'); pv.box.classList.add('on');
     document.documentElement.classList.add('pv-lock');
+    if (!backPending && !ownsEntry()) { try { history.pushState({ pvViewer: 1 }, ''); } catch (e) {} }
     try { pv.box.querySelector('.pv-x').focus({ preventScroll: true }); } catch (e) {}
   }
 
-  function closeViewer() {
-    if (!pv) return;
+  // fromBack: closed by the Back button (its history entry is already gone).
+  function closeViewer(fromBack) {
+    if (!pv || !pv.box.classList.contains('on')) return;
+    if (isFull()) {
+      pv.box.classList.remove('pv-max'); pv.realFull = false;
+      if (fullscreenEl()) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }
+    }
+    if (fromBack !== true && ownsEntry() && !backPending) { backPending = true; history.back(); }
     pv.scrim.classList.remove('on'); pv.box.classList.remove('on');
     document.documentElement.classList.remove('pv-lock');
     pv.frame.removeAttribute('src');            // stops any video / audio immediately
@@ -6657,6 +6768,9 @@
     note.innerHTML = '◈ <b>' + shown + '</b> of ' + fs.length + ' daily notes · <b>' + esc(mg.subj) + ' · ' + esc(mg.course) +
       '</b> — only notes from the same subject + course can be combined';
   }
+
+  // Browse → note details → "View here" opens an approved note in this same viewer.
+  window.DeptViewer = { open: function (id, trigger) { openViewer(id, trigger, 'file'); } };
 
   /* ---- wiring ---- */
   function init() {
