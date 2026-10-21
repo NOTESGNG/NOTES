@@ -1697,6 +1697,21 @@
           </div>
         </div>
 
+        <!-- Batches: the class codes students pick in "Join Your Class". Saved straight to the Sheet's CONFIG tab (BATCHES). -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+          <div class="mb-3">
+            <h3 class="text-base font-bold text-slate-900">🎓 Batches (class codes)</h3>
+            <p class="text-xs text-slate-500">Students join with one of these codes and their uploads get tagged with it. Add a new batch every intake. The admission year lets the app guess which semester a batch is in. Removing a batch never touches its notes.</p>
+          </div>
+          <div id="batchAdminList" class="flex flex-wrap gap-1.5 mb-3"></div>
+          <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
+            <input id="batchAdminCode" type="text" placeholder="Code, e.g. 2732" aria-label="New batch code" class="uppercase w-32 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none" />
+            <input id="batchAdminLabel" type="text" placeholder="Label, e.g. 2027-32 Batch" aria-label="New batch label" class="flex-1 min-w-[140px] rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none" />
+            <input id="batchAdminYear" type="text" inputmode="numeric" maxlength="4" placeholder="Year, e.g. 2027" aria-label="Admission year" class="w-28 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs focus:border-indigo-500 focus:outline-none" />
+            <button id="btnBatchAdminAdd" type="button" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">+ Add Batch</button>
+          </div>
+        </div>
+
         <!-- Month-End Daily Notes Merger (Approach B) & Post-Approval Post Announcement -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- Month-End Daily Notes Merger -->
@@ -1872,7 +1887,7 @@
         <div>
           <label for="batchCodeInput" class="block text-xs font-semibold text-slate-700 mb-1">Class Code</label>
           <input id="batchCodeInput" type="text" placeholder="e.g. 2631" class="uppercase w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
-          <p id="batchCodeHint" class="text-[11px] text-slate-400 mt-1">Ask your Editor if you don't know it. Any code works — this just keeps your uploads organized, it isn't a lock.</p>
+          <p id="batchCodeHint" class="text-[11px] text-slate-400 mt-1">Ask your Editor if you don't know it. This just keeps your uploads organized, it isn't a lock.</p>
         </div>
         <div id="batchKnownList" class="flex flex-wrap gap-1.5"></div>
       </div>
@@ -2018,7 +2033,7 @@
     const SUBJECTS_NO_COURSE = ['ENG', 'FRENCH'];
     // Bump this by 1 whenever the generated Apps Script code changes. The Setup tab writes it into the
     // script, the script reports it back on ?action=health, and the Editor tab warns if they don't match.
-    const EXPECTED_SCRIPT_VERSION = 6;
+    const EXPECTED_SCRIPT_VERSION = 7;   // 7: Editor-only pending links, rejected files deleted, shield from NEW_FILE_GRACE_DAYS, saveBatches
     // Sems that use the shared SUBJECTS / COURSES lists until the Editor sets them up. Every other sem
     // (4 to 10) has NO subjects until it's set up in Course Structure. Change this list to change that.
     const SHARED_LIST_SEMS = ['1', '2', '3'];
@@ -2149,6 +2164,13 @@
       return `YEAR ${Math.min(Math.max(yearNum, 1), 5)}`;
     }
 
+    // Days of Top-5 protection a note has left. The script works this out from the Sheet's NEW_FILE_GRACE_DAYS,
+    // so the badge always matches what the pruning really does. A script from before that falls back to 7 days.
+    function shieldDaysLeft(f) {
+      if (typeof f.shieldDaysLeft === 'number') return f.shieldDaysLeft;
+      return Math.max(0, 7 - f.daysOld);
+    }
+
     function buildDrivePath(item) {
       const yr = semToYearFolder(item.sem);
       const semLabel = item.sem.toUpperCase().replace('SEM', 'SEM ');
@@ -2221,7 +2243,9 @@
       document.getElementById('scriptVersionDetail').textContent = (have
         ? 'The deployed script is version ' + have + '; this app needs version ' + EXPECTED_SCRIPT_VERSION + '.'
         : 'The deployed script is from before batches and per-semester course structure.') +
-        ' Until you redeploy, Save Structure, batch tags on uploads and moving notes between sems won\'t work. Everything else keeps working.';
+        (have
+          ? ' Until you redeploy, adding batches won\'t work, rejected files aren\'t deleted from Drive, and pending files\' links stay public. Everything else keeps working.'
+          : ' Until you redeploy, Save Structure, batch tags on uploads and moving notes between sems won\'t work. Everything else keeps working.');
       banner.classList.remove('hidden');
       return true;
     }
@@ -2255,7 +2279,9 @@
       if (!state.liveWebAppUrl) return;
       try {
         if (!quiet) showToast('Syncing with your Google Drive & Sheet...', 'info');
-        const res = await fetch(state.liveWebAppUrl + '?action=listAll', { redirect: 'follow' });
+        // Drive links of files still waiting for approval only come back for the Editor, so the PIN goes along once unlocked.
+        const pinPart = state.editorUnlocked && state.editorPin ? '&pin=' + encodeURIComponent(state.editorPin) : '';
+        const res = await fetch(state.liveWebAppUrl + '?action=listAll' + pinPart, { redirect: 'follow' });
         const data = await res.json();
         if (data && data.ok) {
           if (data.forwardUrl && data.forwardUrl !== state.liveWebAppUrl && isValidWebAppUrl(data.forwardUrl) && hubHops < 8) {
@@ -2372,11 +2398,13 @@
 
     // Actions that need the Editor PIN. This ONE list is used by the app (to attach the PIN) AND written into the
     // generated Apps Script (to check it), so the two can never disagree. Add new editor actions here only.
-    const EDITOR_ACTIONS = ['approve', 'reject', 'editProps', 'delete', 'verifyPin', 'getConfig', 'setForwardUrl', 'setRootFolder', 'postNotice', 'deleteNotice', 'saveStructure', 'getFileData'];
+    const EDITOR_ACTIONS = ['approve', 'reject', 'editProps', 'delete', 'verifyPin', 'getConfig', 'setForwardUrl', 'setRootFolder', 'postNotice', 'deleteNotice', 'saveStructure', 'getFileData', 'saveBatches'];
 
     function lockEditor() {
       state.editorUnlocked = false;
       state.editorPin = '';
+      state.pending.forEach(p => { p.fileUrl = ''; }); // pending Drive links are Editor-only
+      lastSyncSig = '';
       document.getElementById('editorMainContent').classList.add('hidden');
       document.getElementById('modalEditorBlock').classList.add('hidden');
       document.getElementById('editorPinInput').value = '';
@@ -2478,7 +2506,8 @@
       }
 
       filtered.forEach((f, idx) => {
-        const isShielded = f.daysOld <= 7;
+        const shieldDays = shieldDaysLeft(f);
+        const isShielded = shieldDays > 0;
         const isLiked = !!state.likedIds[f.id];
         const isVideo = f.contentType === 'CLASS VIDEOS';
         const isPYQ = f.contentType === 'Q.PAPERS';
@@ -2496,10 +2525,10 @@
             <div class="flex items-start justify-between gap-2">
               <div class="flex flex-wrap items-center gap-1.5">
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border ${badgeColor}">
-                  ${isVideo ? '🎬 VIDEO' : f.contentType}
+                  ${isVideo ? '🎬 VIDEO' : esc(f.contentType)}
                 </span>
                 <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
-                  ${f.sem.toUpperCase()} • ${esc(f.subject)}${f.course !== 'NONE' ? ' (' + f.course + ')' : ''}
+                  ${esc(f.sem.toUpperCase())} • ${esc(f.subject)}${f.course !== 'NONE' ? ' (' + esc(f.course) + ')' : ''}
                 </span>
                 ${f.scope === 'DAILY' ? '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200">📅 Daily Note</span>' : ''}
                 ${f.batch ? '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 border border-purple-200">🎓 ' + esc(f.batch) + '</span>' : ''}
@@ -2507,10 +2536,10 @@
               <span class="text-[11px] font-mono text-slate-400">#${idx + 1}</span>
             </div>
 
-            <div class="flex items-center justify-between gap-2">
-              <h3 class="font-bold text-base text-slate-900 font-mono">${esc(f.displayName)}</h3>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="font-bold text-base text-slate-900 font-mono min-w-0" style="overflow-wrap:anywhere">${esc(f.displayName)}</h3>
               ${isShielded
-                ? `<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" title="Uploaded ${f.daysOld}d ago — protected from Top-5 pruning for ${7 - f.daysOld} more days">🛡️ 🆕 ${7 - f.daysOld}d Shield</span>`
+                ? `<span class="shrink-0 whitespace-nowrap text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" title="Uploaded ${f.daysOld}d ago — protected from Top-5 pruning for ${shieldDays} more day${shieldDays === 1 ? '' : 's'}">🛡️ 🆕 ${shieldDays}d Shield</span>`
                 : `<span class="text-[10px] text-slate-400">${f.daysOld}d ago</span>`
               }
             </div>
@@ -2746,7 +2775,7 @@
               </div>
               <p class="text-xs text-slate-700 font-medium">Topics: ${esc(p.topics)}</p>
               ${p.note ? `<p class="text-[11px] text-rose-600 font-medium">⚠ ${esc(p.note)}</p>` : ''}
-              <p class="text-[11px] font-mono text-slate-500">Target Path: ${destPath}</p>
+              <p class="text-[11px] font-mono text-slate-500">Target Path: ${esc(destPath)}</p>
             </div>
             <div class="flex items-center gap-2 self-end md:self-center">
               <button type="button" data-approve-id="${esc(p.id)}" class="btn-approve-item px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-xs transition">
@@ -2767,6 +2796,8 @@
           btn.addEventListener('click', () => rejectPendingItem(btn.getAttribute('data-reject-id')));
         });
       }
+
+      renderBatchAdmin();
 
       const dailyFiles = state.files.filter(f => f.approved && f.scope === 'DAILY');
       const dList = document.getElementById('dailyMergeList');
@@ -2821,7 +2852,7 @@
         return;
       }
       state.pending.splice(idx, 1);
-      showToast(`Rejected & removed ${target.displayName} from Pending Review`, 'warn');
+      showToast(`Rejected & deleted ${target.displayName} — its file no longer takes Drive space`, 'warn');
       renderEditor();
     }
 
@@ -2830,6 +2861,7 @@
       const f = state.files.find(x => x.id === fileId);
       if (!f) return;
       state.activeModalFileId = fileId;
+      resetDeleteButton();
 
       document.getElementById('modalFileTypeBadge').textContent = f.contentType;
       document.getElementById('modalFileName').textContent = f.displayName;
@@ -2837,8 +2869,9 @@
       document.getElementById('modalContributor').textContent = `${f.name} (+${POINTS_MAP[f.contentType] || 1} pts)`;
       document.getElementById('modalMonth').textContent = `.${f.month} (${f.sem.toUpperCase()})`;
       document.getElementById('modalLikes').textContent = `👍 ${f.likes} Likes`;
-      document.getElementById('modalShield').textContent = f.daysOld <= 7
-        ? `🛡️ Active (${7 - f.daysOld} days remaining)`
+      const shieldDays = shieldDaysLeft(f);
+      document.getElementById('modalShield').textContent = shieldDays > 0
+        ? `🛡️ Active (${shieldDays} day${shieldDays === 1 ? '' : 's'} remaining)`
         : `Standard Pool (${f.daysOld} days old)`;
       document.getElementById('modalTopics').textContent = f.topics;
 
@@ -2884,6 +2917,16 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       state.activeModalFileId = null;
+      resetDeleteButton();
+    }
+
+    let deleteConfirmTimer = 0;
+    function resetDeleteButton() {
+      clearTimeout(deleteConfirmTimer);
+      const b = document.getElementById('btnDeleteFileModal');
+      if (!b) return;
+      delete b.dataset.confirm;
+      b.textContent = '🗑️ Remove';
     }
 
     // ==================== UPGRADED GOOGLE APPS SCRIPT GENERATOR (ZERO REGEX ESCAPE HAZARDS) ====================
@@ -3020,6 +3063,7 @@
         '  ensureConfigSheet(sheet);',
         '  ss.setActiveSheet(sheet);',
         '  ensureRecordIds(sheet);',
+        '  purgeRejectedRows(sheet);',
         '',
         '  const triggers = ScriptApp.getProjectTriggers();',
         '  if (!triggers.some(function(t) { return t.getHandlerFunction() === "onFormSubmit"; })) {',
@@ -3041,6 +3085,7 @@
         '    .createMenu("Archive Tools")',
         '    .addItem("Process Approved Files", "processApprovedFilesMenu")',
         '    .addItem("Repair Sheets (separate CONFIG tab)", "repairSheets")',
+        '    .addItem("Delete Rejected Uploads", "purgeRejectedMenu")',
         '    .addToUi();',
         '}',
         '',
@@ -3185,7 +3230,10 @@
         '      }',
         '      moveFileTo(file, destFolder);',
         '',
-        '      const nowIso = new Date().toISOString();',
+        '      // A note that was approved before (and is only being re-filed after an edit) keeps its first approval date,',
+        '      // so editing it never restarts its 7-day shield or shows it in the Feed as a new upload again.',
+        '      const firstApprovedTs = approvedTsCol > -1 ? rowData[approvedTsCol] : "";',
+        '      const nowIso = firstApprovedTs || new Date().toISOString();',
         '      const fullPath = getFullPath(destFolder);',
         '',
         '      writeCanonToRow(sheet, r + 1, c);',
@@ -3194,7 +3242,7 @@
         '      sheet.getRange(r + 1, statusCol + 1).setValue("Moved to Public");',
         '      if (pointsCol > -1) sheet.getRange(r + 1, pointsCol + 1).setValue(getPoints(c.contentType));',
         '      if (likesCol > -1 && rowData[likesCol] === "") sheet.getRange(r + 1, likesCol + 1).setValue(0);',
-        '      if (approvedTsCol > -1) sheet.getRange(r + 1, approvedTsCol + 1).setValue(nowIso);',
+        '      if (approvedTsCol > -1 && !firstApprovedTs) sheet.getRange(r + 1, approvedTsCol + 1).setValue(nowIso);',
         '',
         '      data[r][processedCol] = "YES";',
         '      data[r][publicPathCol] = fullPath;',
@@ -3301,6 +3349,11 @@
         '  const files = [];',
         '  const pending = [];',
         '  const nowMs = new Date().getTime();',
+        '  const cfg = getConfig();',
+        '  const graceMs = cfg.NEW_FILE_GRACE_DAYS * 86400000;',
+        '  // Drive links of files still waiting for approval go only to the Editor (the app sends the PIN once unlocked).',
+        '  const pinGiven = clean(e && e.parameter ? e.parameter.pin : "");',
+        '  const showPendingLinks = pinGiven !== "" && pinGiven === clean(cfg.EDITOR_PIN);',
         '',
         '  for (let r = 1; r < data.length; r++) {',
         '    const row = data[r];',
@@ -3320,6 +3373,9 @@
         '    const approvedRaw = idx("Approved Timestamp") > -1 ? row[idx("Approved Timestamp")] : "";',
         '    const approvedMs = approvedRaw ? new Date(approvedRaw).getTime() : nowMs;',
         '    const daysOld = Math.max(0, Math.floor((nowMs - approvedMs) / 86400000));',
+        '    // Same rule as enforceTopFiveInFolder(), so the app\'s shield badge always matches what pruning really does.',
+        '    const ageMs = nowMs - approvedMs;',
+        '    const shieldDaysLeft = approvedRaw && ageMs <= graceMs ? Math.max(1, Math.ceil((graceMs - ageMs) / 86400000)) : 0;',
         '',
         '    const item = {',
         '      id: recordId,',
@@ -3337,6 +3393,7 @@
         '      topics: idx("Topics") > -1 ? (clean(row[idx("Topics")]) || "General Notes") : "General Notes",',
         '      likes: idx("Likes") > -1 ? Number(row[idx("Likes")] || 0) : 0,',
         '      daysOld: daysOld,',
+        '      shieldDaysLeft: shieldDaysLeft,',
         '      points: Number(row[idx("Points")] || getPoints(c.contentType)),',
         '      publicPath: String(row[idx("Public Path")] || ""),',
         '      fileUrl: String(row[idx("File Link")] || row[COL.FILE] || "")',
@@ -3349,6 +3406,7 @@
         '      item.approved = false;',
         '      const statusText = idx("Status") > -1 ? clean(row[idx("Status")]) : "";',
         '      if (up(statusText).indexOf("ERROR") === 0) item.note = statusText;',
+        '      if (!showPendingLinks) item.fileUrl = "";',
         '      pending.push(item);',
         '    }',
         '  }',
@@ -3443,6 +3501,23 @@
         '      return jsonResponse({ ok: true });',
         '    }',
         '',
+        '    // The Editor tab\'s Batches panel sends the whole list: [{ code, label, startYear }]. Written to CONFIG → BATCHES.',
+        '    if (body.action === "saveBatches") {',
+        '      const seen = {};',
+        '      const entries = [];',
+        '      (Array.isArray(body.batches) ? body.batches : []).forEach(function(b) {',
+        '        const code = up(b && b.code).split("|").join("").split(";").join("");',
+        '        if (!code || seen[code]) return;',
+        '        seen[code] = true;',
+        '        const label = clean(b.label).split("|").join("/").split(";").join(",") || code;',
+        '        const year = parseInt(onlyDigits(b.startYear), 10);',
+        '        entries.push(code + "|" + label + "|" + (year >= 1900 && year <= 2200 ? year : ""));',
+        '      });',
+        '      setConfigValue("BATCHES", entries.join("; "));',
+        '      OPTIONS_CACHE = null;',
+        '      return jsonResponse({ ok: true, batches: parseBatches(entries.join("; ")) });',
+        '    }',
+        '',
         '    if (ROW_ACTIONS.indexOf(body.action) > -1 && targetRow < 2) {',
         '      return jsonResponse({ ok: false, error: "That file was not found (it may have been removed, or this page is out of date) - refresh and try again" });',
         '    }',
@@ -3513,9 +3588,10 @@
         '      return jsonResponse({ ok: true });',
         '    }',
         '',
+        '    // A rejected upload is removed for good: its file is deleted (so it stops using Drive space) and so is its row.',
         '    if (body.action === "reject" && targetRow >= 2) {',
-        '      sheet.getRange(targetRow, idx("Status")).setValue("Rejected by Editor");',
-        '      sheet.getRange(targetRow, idx("Processed")).setValue("REJECTED");',
+        '      deleteDriveFileForGood((idx("File Link") > 0 ? sheet.getRange(targetRow, idx("File Link")).getValue() : "") || sheet.getRange(targetRow, COL.FILE + 1).getValue());',
+        '      sheet.deleteRow(targetRow);',
         '      return jsonResponse({ ok: true });',
         '    }',
         '',
@@ -3550,7 +3626,8 @@
         '      if (link) {',
         '        const root = getRootFolder();',
         '        const overflow = getOrCreateFolder(root, OVERFLOW_FOLDER_NAME);',
-        '        moveFileTo(getFileFromFormUpload(link), overflow);',
+        '        // A file that is already gone from Drive must not stop its row from being removed.',
+        '        try { moveFileTo(getFileFromFormUpload(link), overflow); } catch (moveErr) {}',
         '      }',
         '      sheet.getRange(targetRow, idx("Processed")).setValue("OVERFLOW");',
         '      sheet.getRange(targetRow, idx("Status")).setValue("Moved to _Overflow (Deleted by Editor)");',
@@ -4017,14 +4094,18 @@
         '      mainSheet.deleteRow(r + 1);',
         '    }',
         '  }',
+        '  // MODULES and MONTHS rows used to live here, but the app uses fixed lists (modules 1-6, months JUL-APR) and',
+        '  // never read them, so they are removed instead of looking like settings that do something.',
+        '  for (let r = cfg.getLastRow(); r >= 1; r--) {',
+        '    const key = up(cfg.getRange(r, 1).getValue());',
+        '    if (key === "MODULES" || key === "MONTHS") cfg.deleteRow(r);',
+        '  }',
         '  const defaults = [',
         '    ["EDITOR_PIN", "2026"],',
         '    ["MAX_FILES_PER_MODULE", "5"],',
         '    ["NEW_FILE_GRACE_DAYS", "7"],',
         '    ["SUBJECTS", ALL_SUBJECTS.join(", ")],',
         '    ["COURSES", "DSC-A, DSC-B, DSC-C, MDC", "Course streams. Add or remove any time."],',
-        '    ["MODULES", "1, 2, 3, 4", "Module numbers shown in the app. A range works too, e.g. 1-6. Add or remove any time."],',
-        '    ["MONTHS", "AUG, SEP, OCT, NOV, DEC, JAN, FEB, MAR", "Months shown in the app, in this order (3 letters each)."],',
         '    ["NO_COURSE_SUBJECTS", "ENG, FRENCH", "Subjects with no course layer (files go by month, not by module)."],',
         '    ["ECO_COURSES", "DSC-A, DSC-B", "Courses allowed for ECO."],',
         '    ["ECO_ONLY_COURSES", "DSC-A", "Courses that only ECO may use (hidden for other subjects)."],',
@@ -4255,6 +4336,41 @@
         '  return DriveApp.getFileById(extractDriveId(fileUrlOrId));',
         '}',
         '',
+        '// Deletes a file for good so it stops using Drive space. With the Drive API service switched on',
+        '// (Apps Script → Services → + → Drive API) it is removed at once; without it, it goes to the Drive trash,',
+        '// which Google empties by itself after 30 days.',
+        'function deleteDriveFileForGood(fileUrlOrId) {',
+        '  const id = extractDriveId(fileUrlOrId);',
+        '  if (!id) return;',
+        '  try {',
+        '    if (typeof Drive !== "undefined" && Drive.Files) { Drive.Files.remove(id); return; }',
+        '  } catch (err) {}',
+        '  try { DriveApp.getFileById(id).setTrashed(true); } catch (err2) {}',
+        '}',
+        '',
+        '// Clears out uploads rejected before rejecting deleted them: deletes each one\'s file and row (bottom-up so row numbers stay valid).',
+        'function purgeRejectedRows(sheet) {',
+        '  sheet = sheet || getMainSheet();',
+        '  if (sheet.getLastRow() < 2) return 0;',
+        '  const data = sheet.getDataRange().getValues();',
+        '  const processedIdx = findCol(data[0], "Processed");',
+        '  const linkIdx = findCol(data[0], "File Link");',
+        '  if (processedIdx === -1) return 0;',
+        '  let removed = 0;',
+        '  for (let r = data.length - 1; r >= 1; r--) {',
+        '    if (up(data[r][processedIdx]) !== "REJECTED") continue;',
+        '    deleteDriveFileForGood((linkIdx > -1 && data[r][linkIdx]) || data[r][COL.FILE]);',
+        '    sheet.deleteRow(r + 1);',
+        '    removed++;',
+        '  }',
+        '  return removed;',
+        '}',
+        '',
+        'function purgeRejectedMenu() {',
+        '  const n = withLock(function() { return purgeRejectedRows(getMainSheet()); });',
+        '  try { SpreadsheetApp.getUi().alert(n + " rejected upload(s) deleted."); } catch (e) {}',
+        '}',
+        '',
         'function moveFileTo(file, dest) {',
         '  try {',
         '    file.moveTo(dest);',
@@ -4304,7 +4420,7 @@
     // ==================== BATCH / "JOIN CLASS" (soft convenience login — never a security gate) ====================
     // The only job this does: once a student types their batch's class code, every file they upload from this
     // device is tagged with it automatically, so nobody has to remember to pick a year and notes can't land
-    // under the wrong batch by mistake. Any code is accepted — it is not checked against anything secret.
+    // under the wrong batch by mistake. The code must be one the Editor added (Editor tab → Batches); it isn't secret.
     let batchPromptShown = false;
 
     function knownBatches() {
@@ -4400,6 +4516,32 @@
         btn.addEventListener('click', () => { document.getElementById('batchCodeInput').value = b.code; });
         wrap.appendChild(btn);
       });
+    }
+
+    // Editor tab → Batches: one chip per class code, tap ✕ to remove it.
+    function renderBatchAdmin() {
+      const wrap = document.getElementById('batchAdminList');
+      if (!wrap) return;
+      const list = knownBatches();
+      if (!list.length) {
+        wrap.innerHTML = '<p class="text-xs text-slate-400 italic">No batches yet, so students can join with any code. Add one below.</p>';
+        return;
+      }
+      wrap.innerHTML = list.map(b =>
+        '<button type="button" data-rm-batch="' + esc(b.code) + '" title="Remove ' + esc(b.code) + '" class="text-xs font-medium px-2.5 py-1 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 transition">' +
+          esc(b.label) + ' <span class="opacity-70">(' + esc(b.code) + (b.startYear ? ' · ' + esc(b.startYear) : '') + ')</span> ✕</button>'
+      ).join('');
+    }
+
+    async function saveBatchList(list, okMsg) {
+      const res = await postToLiveDrive({ action: 'saveBatches', batches: list });
+      if (!res || !res.ok) {
+        if (res && res.error && res.error !== 'Wrong editor PIN') showToast('Could not save batches: ' + res.error, 'warn');
+        return false;
+      }
+      showToast(okMsg, 'success');
+      await syncFromLiveDrive(true);
+      return true;
     }
 
     function openBatchModal() {
@@ -4645,6 +4787,9 @@
         inputWebAppUrl: 'btnConnectLiveUrl',
         mergedMonthTitle: 'btnMergeSelectedDaily',
         editModalTopics: 'btnSaveFilePropsModal',
+        batchAdminCode: 'btnBatchAdminAdd',
+        batchAdminLabel: 'btnBatchAdminAdd',
+        batchAdminYear: 'btnBatchAdminAdd',
         annTitleInput: 'annBodyInput'          // headline → jump to the details box
       };
       Object.keys(ENTER_PRESSES).forEach(inputId => {
@@ -4700,10 +4845,40 @@
       document.getElementById('btnSaveBatch').addEventListener('click', () => {
         const raw = document.getElementById('batchCodeInput').value.trim().toUpperCase();
         if (!raw) { showToast('Type a class code first.', 'warn'); return; }
-        const known = knownBatches().find(b => b.code === raw);
+        const list = knownBatches();
+        const known = list.find(b => b.code === raw);
+        // Only codes the Editor has added count, so a typo can't tag every future upload with a batch that doesn't exist.
+        // (If no batches are set up at all, any code is still accepted.)
+        if (!known && list.length) {
+          showToast('"' + raw + '" isn\'t one of this department\'s class codes. Tap yours below, or ask your Editor to add it.', 'warn');
+          return;
+        }
         saveBatch(raw, known ? known.label : raw, known ? known.startYear : null);
         closeBatchModal();
         showToast('Joined ' + (known ? known.label : raw) + ' — your uploads are tagged automatically now.', 'success');
+      });
+
+      document.getElementById('btnBatchAdminAdd').addEventListener('click', async () => {
+        const codeBox = document.getElementById('batchAdminCode');
+        const labelBox = document.getElementById('batchAdminLabel');
+        const yearBox = document.getElementById('batchAdminYear');
+        const code = UP(codeBox.value).replace(/[|;]/g, '');
+        const yearRaw = yearBox.value.trim();
+        if (!code) { showToast('Type the batch code first.', 'warn'); codeBox.focus(); return; }
+        if (yearRaw && !/^\d{4}$/.test(yearRaw)) { showToast('Admission year must be 4 digits, e.g. 2027.', 'warn'); yearBox.focus(); return; }
+        const list = knownBatches().map(b => ({ code: b.code, label: b.label, startYear: b.startYear }));
+        if (list.some(b => b.code === code)) { showToast('Batch ' + code + ' is already there.', 'warn'); return; }
+        list.push({ code, label: labelBox.value.trim() || code, startYear: yearRaw ? Number(yearRaw) : null });
+        if (await saveBatchList(list, 'Added batch ' + code + ' — students can join with it now.')) {
+          codeBox.value = ''; labelBox.value = ''; yearBox.value = '';
+        }
+      });
+      document.getElementById('batchAdminList').addEventListener('click', async (e) => {
+        const btn = e.target.closest('[data-rm-batch]');
+        if (!btn) return;
+        const code = btn.getAttribute('data-rm-batch');
+        const list = knownBatches().filter(b => b.code !== code).map(b => ({ code: b.code, label: b.label, startYear: b.startYear }));
+        await saveBatchList(list, 'Removed batch ' + code + '. Its notes keep their tag.');
       });
 
       document.getElementById('structSemSelect').addEventListener('change', () => {
@@ -5048,6 +5223,8 @@
           renderFeedAndLeaderboard();
           structDraft = null;
           renderStructurePanel();
+          lastSyncSig = '';
+          syncFromLiveDrive(true); // fetches the pending files' Drive links, which only the Editor gets
           showToast('Editor Console unlocked (PIN verified) — Setup & Code tab is now visible', 'success');
         } else if (res.error === 'Wrong editor PIN') {
           lockEditor();
@@ -5064,6 +5241,7 @@
         }
         const ids = state.pending.map(p => p.id);
         for (const id of ids) {
+          if (!state.editorUnlocked) break; // a wrong/changed PIN locked the console: stop instead of failing every file
           await approvePendingItem(id, true);
         }
         if (state.liveWebAppUrl) await syncFromLiveDrive(true);
@@ -5276,6 +5454,16 @@
       document.getElementById('btnDeleteFileModal').addEventListener('click', async () => {
         const idx = state.files.findIndex(x => x.id === state.activeModalFileId);
         if (idx === -1) return;
+        // Two taps, like removing a subject in Course Structure: the first asks, the second (within 4 s) removes.
+        const delBtn = document.getElementById('btnDeleteFileModal');
+        if (!delBtn.dataset.confirm) {
+          delBtn.dataset.confirm = '1';
+          delBtn.textContent = 'Tap again to remove';
+          clearTimeout(deleteConfirmTimer);
+          deleteConfirmTimer = setTimeout(resetDeleteButton, 4000);
+          return;
+        }
+        resetDeleteButton();
         const target = state.files[idx];
         const res = await postToLiveDrive({ action: 'delete', recordId: target.id });
         if (!res || !res.ok) {
