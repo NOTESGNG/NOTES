@@ -1,0 +1,120 @@
+    /* =====================================================================
+       RESPONSIVE LAYER (additive, CSS only + the small script at the end of <body>)
+       Phone (< 640px): app-style bottom tab bar, folding filter panel, bottom-sheet popups,
+       toasts above the tab bar, full-width Submit.
+       Desktop (>= 1024px): wider Upload form, Course Structure in columns, sticky leaderboard.
+       Tablet keeps the existing layout.
+       ===================================================================== */
+
+    /* ---- both: hints in the Name box read normally (the box itself still types in CAPS) ---- */
+    #upName::placeholder { text-transform: none; }
+    #btnFiltersToggle { display: none; }
+
+    /* ---------- PHONE ---------- */
+    @media (max-width: 639.98px) {
+      /* header scrolls away; the tabs live in a fixed bar at the bottom (thumb reach).
+         backdrop-filter would trap a position:fixed child inside the header, so it's off here. */
+      html[data-theme] header {
+        position: static;
+        -webkit-backdrop-filter: none; backdrop-filter: none;
+        background-color: var(--surface-solid);
+      }
+      html[data-theme] header nav.bg-slate-100 {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 35;
+        display: flex; gap: 2px; max-width: none;
+        padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+        border-radius: 18px 18px 0 0; border-width: 1px 0 0; overflow: visible;
+        background-color: var(--surface-solid);
+        box-shadow: 0 -10px 28px -14px rgba(0, 0, 0, 0.45);
+      }
+      html[data-theme="matinee"] header nav.bg-slate-100 { border-top: 2px solid #111315; }
+      html[data-theme] .nav-tab {
+        position: relative; flex: 1 1 0; min-width: 0; min-height: 54px;
+        flex-direction: column; justify-content: center; gap: 0;
+        padding: 6px 2px; font-size: 0; line-height: 0;   /* the long label text collapses to nothing */
+      }
+      html[data-theme] .nav-tab::before { content: attr(data-ico); font-size: 19px; line-height: 1; }
+      html[data-theme] .nav-tab::after {
+        content: attr(data-short); margin-top: 5px;
+        font: 600 12px/1 var(--font-display); letter-spacing: 0.03em; white-space: nowrap;
+      }
+      html[data-theme] .nav-tab > span:not([id]) { display: none; }
+      html[data-theme] #feedCountBadge, html[data-theme] #pendingCountBadge {
+        position: absolute; top: 2px; left: calc(50% + 6px);
+        padding: 1px 5px; font-size: 9px; line-height: 1.3;
+      }
+      html[data-theme="matinee"] .nav-tab.bg-white { box-shadow: 2px 2px 0 #111315; }
+      body { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+
+      /* toasts: full width, just above the tab bar, never over the middle of the page */
+      html[data-theme] #toastContainer {
+        left: 12px; right: 12px; width: auto; max-width: none; padding: 0;
+        bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+      }
+
+      /* Browse: filters fold away behind one button; the search box stays */
+      #filterCard:not(.fx-open) > .grid { display: none; }
+      #filterCard:not(.fx-open) > div:last-child { margin-top: 0; padding-top: 0; border-top: 0; }
+      #filterCard:not(.fx-open) > div:last-child > div:not(:first-child) { display: none; }
+      #filterCard > div:first-child { margin-bottom: 10px; padding-bottom: 10px; }
+      #filterCard.fx-open > div:first-child { margin-bottom: 12px; padding-bottom: 12px; }
+      #filterCard > div:first-child span.uppercase { display: none; }
+      #btnFiltersToggle {
+        display: inline-flex; align-items: center; gap: 8px;
+        min-height: 36px; padding: 0 12px; border-radius: 10px;
+        background-color: var(--primary-soft); color: var(--link);
+        border: 1px solid var(--primary-line);
+        font: 700 11px/1 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase;
+      }
+      #btnFiltersToggle .fx-count {
+        padding: 2px 6px; border-radius: var(--r-pill);
+        background-color: var(--surface-solid); color: var(--text); letter-spacing: 0.04em;
+      }
+      #btnFiltersToggle .fx-count:empty { display: none; }
+      html[data-theme="matinee"] #btnFiltersToggle { border: 2px solid #111315; box-shadow: 2px 2px 0 #111315; }
+      #btnSyncNow, #btnResetFilters { font-size: 0 !important; min-height: 36px; }
+      #btnSyncNow::after { content: '🔄 Sync'; font-size: 12px; }
+      #btnResetFilters::after { content: 'Show all'; font-size: 12px; }
+      html[data-theme] #viewBrowse > .bg-indigo-950 { padding: 10px 12px; }
+
+      /* popups open as bottom sheets */
+      #fileModal.flex, #batchModal.flex { align-items: flex-end; padding: 0; }
+      html[data-theme] #fileModal > div, html[data-theme] #batchModal > div, #fileModal > div, #batchModal > div {
+        max-width: none; width: 100%;
+        border-radius: 22px 22px 0 0;
+        max-height: 92vh; max-height: 92dvh;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      #fileModal > div > div:first-child { position: relative; }
+      #fileModal > div > div:first-child::before {
+        content: ''; position: absolute; top: 6px; left: 50%; width: 40px; height: 4px; margin-left: -20px;
+        border-radius: 4px; background-color: var(--text-faint); opacity: 0.6;
+      }
+
+      /* Upload: roomier padding, big full-width Submit */
+      html[data-theme] #viewUpload > .bg-white { padding: 16px; }
+      #uploadForm > div.flex:last-child { flex-direction: column-reverse; align-items: stretch; gap: 10px; }
+      #btnSubmitUpload { width: 100%; min-height: 50px; font-size: 15px; }
+
+      /* Editor: action buttons are thumb-sized */
+      #pendingQueueList button, #btnApproveAllPending, #btnUnlockEditor { min-height: 40px; }
+      #editorPinInput { flex: 1 1 140px; min-height: 40px; }
+    }
+
+    /* ---------- DESKTOP ---------- */
+    @media (min-width: 1024px) {
+      /* Upload: wide enough that the 3-up rows don't clip "CS (Computer Science)" */
+      #viewUpload { max-width: 60rem; }
+      html[data-theme] #viewUpload > .bg-white { padding: 28px 32px; }
+
+      /* Course Structure: subjects in columns instead of one long list */
+      #structSubjectRows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: start; }
+      #structSubjectRows > * { margin: 0 !important; }
+      #structSubjectRows > p, #structSubjectRows > .border-dashed { grid-column: 1 / -1; }
+
+      /* Feed: the leaderboard stays in view while the feed scrolls */
+      #viewFeed .lg\:col-span-2 + div > div { position: sticky; top: calc(var(--hdr-h, 120px) + 16px); }
+    }
+    @media (min-width: 1280px) {
+      #structSubjectRows { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
